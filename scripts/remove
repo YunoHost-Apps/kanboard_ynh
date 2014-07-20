@@ -1,0 +1,13 @@
+#!/bin/bash
+
+db_user=kanboard
+db_name=kanboard
+root_pwd=$(sudo cat /etc/yunohost/mysql)
+domain=$(sudo yunohost app setting kanboard domain)
+
+mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localhost ;"
+sudo rm -rf /var/www/kanboard
+sudo rm -f /etc/nginx/conf.d/$domain.d/kanboard.conf
+
+sudo service nginx reload
+sudo yunohost app ssowatconf

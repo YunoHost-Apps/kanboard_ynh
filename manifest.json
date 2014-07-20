@@ -1,34 +1,34 @@
 {
-    name Kanboard,
-    id kanboard,
-    description {
-        en Kanboard is a simple visual task board web application,
-        fr Kanboard est une application web de management de tâches simples
+    "name": "Kanboard",
+    "id": "kanboard",
+    "description": {
+        "en": "Kanboard is a simple visual task board web application",
+        "fr": "Kanboard est une application web de management de tâches simples" 
     },
-    developer {
-        name mbugeia,
-        email ,
-        url 
+    "developer": {
+        "name": "mbugeia",
+        "email": "",
+        "url": "http://kanboard.net/"
     },
-    multi_instance true,
-    arguments {
-        install  [
+    "multi_instance": "true",
+    "arguments": {
+        "install" : [
             {
-                name domain,
-                ask {
-                    en Choose a domain for Kanboard,
-                    fr Choisissez un domaine pour Kanboard
+                "name": "domain",
+                "ask": {
+                    "en": "Choose a domain for Kanboard",
+                    "fr": "Choisissez un domaine pour Kanboard"
                 },
-                example domain.org
+                "example": "domain.org"
             },
             {
-                name path,
-                ask {
-                    en Choose a path for Kanboard,
-                    fr Choisissez un chemin pour Kanboard
+                "name": "path",
+                "ask": {
+                    "en": "Choose a path for Kanboard",
+                    "fr": "Choisissez un chemin pour Kanboard"
                 },
-                example kanboard,
-                default kanboard
+                "example": "/kanboard",
+                "default": "/kanboard"
             }
         ]
     }
