@@ -3,6 +3,7 @@
 # Retrieve arguments
 domain=$1
 path=$2
+admin=$3
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a kanboard
@@ -19,6 +20,7 @@ db_user=kanboard
 # Initialize database and store mysql password for upgrade
 sudo yunohost app initdb $db_user -p $db_pwd
 sudo yunohost app setting kanboard mysqlpwd -v $db_pwd
+sudo yunohost app setting kanboard adminusername -v $admin
 
 
 final_path=/var/www/kanboard
@@ -28,6 +30,10 @@ sudo cp -a ../sources/* $final_path
 sudo cp ../conf/config.php $final_path
 sudo sed -i "s/yunopdw/$db_pwd/g" $final_path/config.php
 sudo sed -i "s/yunouser/$db_user/g" $final_path/config.php
+
+# Ajout de l'utilisateur admin
+sudo cp ../conf/Mysql.php $final_path/app/Schema
+sudo sed -i "s/yunoadmin/$admin/g" $final_path/app/Schema/Mysql.php
 
 # Set permissions to data directory
 sudo chown -R www-data:www-data $final_path/data

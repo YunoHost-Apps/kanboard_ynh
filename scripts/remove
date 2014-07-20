@@ -9,5 +9,10 @@ mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localh
 sudo rm -rf /var/www/kanboard
 sudo rm -f /etc/nginx/conf.d/$domain.d/kanboard.conf
 
+sudo yunohost app setting kanboard mysqlpwd -d
+sudo yunohost app setting kanboard adminusername -d
+sudo yunohost app setting kanboard domain -d
+sudo yunohost app setting kanboard path -d
+
 sudo service nginx reload
 sudo yunohost app ssowatconf

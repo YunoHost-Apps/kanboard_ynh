@@ -7,7 +7,7 @@
     },
     "developer": {
         "name": "mbugeia",
-        "email": "",
+        "email": "maxime.bugeia@gmail.com",
         "url": "http://kanboard.net/"
     },
     "multi_instance": "true",
@@ -29,6 +29,14 @@
                 },
                 "example": "/kanboard",
                 "default": "/kanboard"
+            },
+			{
+			   "name": "admin",
+                "ask": {
+                    "en": "Choose the admin user for Kanboard",
+                    "fr": "Choisissez l'administrateur de Kanboard"
+                },
+                "example": "johndoe"
             }
         ]
     }

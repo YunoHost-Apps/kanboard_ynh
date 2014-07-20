@@ -49,7 +49,7 @@ define('LDAP_ACCOUNT_BASE', 'ou=users,dc=yunohost,dc=org');
 define('LDAP_USER_PATTERN', 'uid=%s');
 
 // Name of an attribute of the user account object which should be used as the full name of the user.
-define('LDAP_ACCOUNT_FULLNAME', 'displayName');
+define('LDAP_ACCOUNT_FULLNAME', 'cn');
 
 // Name of an attribute of the user account object which should be used as the email of the user.
 define('LDAP_ACCOUNT_EMAIL', 'mail');
