@@ -46,7 +46,7 @@ define('LDAP_ACCOUNT_BASE', 'ou=users,dc=yunohost,dc=org');
 // LDAP query pattern to use when searching for a user account
 // Example for ActiveDirectory: '(&(objectClass=user)(sAMAccountName=%s))'
 // Example for OpenLDAP: 'uid=%s'
-define('LDAP_USER_PATTERN', 'objectClass=uid=%s');
+define('LDAP_USER_PATTERN', 'uid=%s');
 
 // Name of an attribute of the user account object which should be used as the full name of the user.
 define('LDAP_ACCOUNT_FULLNAME', 'displayName');
