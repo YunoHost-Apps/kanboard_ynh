@@ -1,15 +1,35 @@
 #!/bin/bash
 
-# Retrieve arguments
+# Retrieve settings
 domain=$(sudo yunohost app setting kanboard domain)
 path=$(sudo yunohost app setting kanboard path)
 admin=$(sudo yunohost app setting kanboard adminusername)
+email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
+db_pwd=$(sudo yunohost app setting kanboard mysqlpwd)
+
+# Use 'kanboard' as database name and user
+db_user=kanboard
+
 
 final_path=/var/www/kanboard
 sudo cp -a ../sources/* $final_path
+
+# Copy and edit config.php
+sudo cp ../conf/config.php $final_path
+sudo sed -i "s/yuno_dbpdw/$db_pwd/g" $final_path/config.php
+sudo sed -i "s/yuno_dbuser/$db_user/g" $final_path/config.php
+sudo sed -i "s/yuno_admin/$admin/g" $final_path/config.php
+sudo sed -i "s/yuno_email/$email/g" $final_path/config.php
+sudo sed -i "s/yuno_url/$domain$path/g" $final_path/config.php
+sudo sed -i "s/yuno_domain/$domain/g" $final_path/config.php
+
 # Set permissions to data directory
 sudo chown -R www-data:www-data $final_path/data
 
+# Modify Nginx configuration file and copy it to Nginx conf directory
+sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf*
+sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf*
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/kanboard.conf
 
 # Reload Nginx and regenerate SSOwat conf
 sudo service nginx reload

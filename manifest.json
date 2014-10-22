@@ -5,12 +5,13 @@
         "en": "Kanboard is a simple visual task board web application",
         "fr": "Kanboard est une application web de management de tâches simples" 
     },
+	"license": "AGPL 3.0",
     "developer": {
         "name": "mbugeia",
         "email": "maxime.bugeia@gmail.com",
         "url": "http://kanboard.net/"
     },
-    "multi_instance": "true",
+    "multi_instance": "false",
     "arguments": {
         "install" : [
             {
