@@ -2,11 +2,13 @@
 
 namespace JsonRPC;
 
+use BadFunctionCallException;
+
 /**
  * JsonRPC client class
  *
  * @package JsonRPC
- * @author Frderic Guillot
+ * @author Frederic Guillot
  * @license Unlicense http://unlicense.org/
  */
 class Client
@@ -28,14 +30,6 @@ class Client
     private $timeout;
 
     /**
-     * Debug flag
-     *
-     * @access private
-     * @var bool
-     */
-    private $debug;
-
-    /**
      * Username for authentication
      *
      * @access private
@@ -50,6 +44,14 @@ class Client
      * @var string
      */
     private $password;
+
+    /**
+     * Enable debug output to the php error log
+     *
+     * @access public
+     * @var boolean
+     */
+    public $debug = false;
 
     /**
      * Default HTTP headers to send to the server
@@ -69,14 +71,12 @@ class Client
      * @access public
      * @param  string    $url         Server URL
      * @param  integer   $timeout     Server URL
-     * @param  bool      $debug       Debug flag
      * @param  array     $headers     Custom HTTP headers
      */
-    public function __construct($url, $timeout = 5, $debug = false, $headers = array())
+    public function __construct($url, $timeout = 5, $headers = array())
     {
         $this->url = $url;
         $this->timeout = $timeout;
-        $this->debug = $debug;
         $this->headers = array_merge($this->headers, $headers);
     }
 
@@ -110,6 +110,7 @@ class Client
      * Execute
      *
      * @access public
+     * @throws BadFunctionCallException  Exception thrown when a bad request is made (missing argument/procedure)
      * @param  string   $procedure   Procedure name
      * @param  array    $params      Procedure arguments
      * @return mixed
@@ -133,11 +134,8 @@ class Client
         if (isset($result['id']) && $result['id'] == $id && array_key_exists('result', $result)) {
             return $result['result'];
         }
-        else if ($this->debug && isset($result['error'])) {
-            print_r($result['error']);
-        }
 
-        return null;
+        throw new BadFunctionCallException('Bad Request');
     }
 
     /**
@@ -166,6 +164,11 @@ class Client
 
         $result = curl_exec($ch);
         $response = json_decode($result, true);
+
+        if ($this->debug) {
+            error_log('==> Request: '.PHP_EOL.json_encode($payload, JSON_PRETTY_PRINT));
+            error_log('==> Response: '.PHP_EOL.json_encode($response, JSON_PRETTY_PRINT));
+        }
 
         curl_close($ch);
 

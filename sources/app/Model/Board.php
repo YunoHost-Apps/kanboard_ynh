@@ -21,28 +21,14 @@ class Board extends Base
     const TABLE = 'columns';
 
     /**
-     * Save task positions for each column
+     * Get Kanboard default columns
      *
      * @access public
-     * @param  array  $values    [['task_id' => X, 'column_id' => X, 'position' => X], ...]
-     * @return boolean
+     * @return array
      */
-    public function saveTasksPosition(array $values)
+    public function getDefaultColumns()
     {
-        $taskModel = new Task($this->db, $this->event);
-
-        $this->db->startTransaction();
-
-        foreach ($values as $value) {
-            if (! $taskModel->move($value['task_id'], $value['column_id'], $value['position'])) {
-                $this->db->cancelTransaction();
-                return false;
-            }
-        }
-
-        $this->db->closeTransaction();
-
-        return true;
+        return array(t('Backlog'), t('Ready'), t('Work in progress'), t('Done'));
     }
 
     /**
@@ -50,19 +36,20 @@ class Board extends Base
      *
      * @access public
      * @param  integer  $project_id   Project id
-     * @param  array    $columns      List of columns title ['column1', 'column2', ...]
+     * @param  array    $columns      Column parameters [ 'title' => 'boo', 'task_limit' => 2 ... ]
      * @return boolean
      */
     public function create($project_id, array $columns)
     {
         $position = 0;
 
-        foreach ($columns as $title) {
+        foreach ($columns as $column) {
 
             $values = array(
-                'title' => $title,
+                'title' => $column['title'],
                 'position' => ++$position,
                 'project_id' => $project_id,
+                'task_limit' => $column['task_limit'],
             );
 
             if (! $this->db->table(self::TABLE)->save($values)) {
@@ -74,16 +61,41 @@ class Board extends Base
     }
 
     /**
+     * Copy board columns from a project to another one
+     *
+     * @author Antonio Rabelo
+     * @param  integer    $project_from      Project Template
+     * @return integer    $project_to        Project that receives the copy
+     * @return boolean
+     */
+    public function duplicate($project_from, $project_to)
+    {
+        $columns = $this->db->table(Board::TABLE)
+                            ->columns('title', 'task_limit')
+                            ->eq('project_id', $project_from)
+                            ->asc('position')
+                            ->findAll();
+
+        return $this->board->create($project_to, $columns);
+    }
+
+    /**
      * Add a new column to the board
      *
      * @access public
-     * @param  array    $values   ['title' => X, 'project_id' => X]
+     * @param  integer   $project_id    Project id
+     * @param  string    $title         Column title
+     * @param  integer   $task_limit    Task limit
      * @return boolean
      */
-    public function add(array $values)
+    public function addColumn($project_id, $title, $task_limit = 0)
     {
-        $values['position'] = $this->getLastColumnPosition($values['project_id']) + 1;
-        return $this->db->table(self::TABLE)->save($values);
+        return $this->db->table(self::TABLE)->save(array(
+            'project_id' => $project_id,
+            'title' => $title,
+            'task_limit' => $task_limit,
+            'position' => $this->getLastColumnPosition($project_id) + 1,
+        ));
     }
 
     /**
@@ -95,17 +107,18 @@ class Board extends Base
      */
     public function update(array $values)
     {
-        $this->db->startTransaction();
+        $columns = array();
 
         foreach (array('title', 'task_limit') as $field) {
-            foreach ($values[$field] as $column_id => $field_value) {
-
-                if ($field === 'task_limit' && empty($field_value)) {
-                    $field_value = 0;
-                }
-
-                $this->updateColumn($column_id, array($field => $field_value));
+            foreach ($values[$field] as $column_id => $value) {
+                $columns[$column_id][$field] = $value;
             }
+        }
+
+        $this->db->startTransaction();
+
+        foreach ($columns as $column_id => $values) {
+            $this->updateColumn($column_id, $values['title'], (int) $values['task_limit']);
         }
 
         $this->db->closeTransaction();
@@ -117,13 +130,17 @@ class Board extends Base
      * Update a column
      *
      * @access public
-     * @param  integer  $column_id  Column id
-     * @param  array    $values     Form values
+     * @param  integer   $column_id     Column id
+     * @param  string    $title         Column title
+     * @param  integer   $task_limit    Task limit
      * @return boolean
      */
-    public function updateColumn($column_id, array $values)
+    public function updateColumn($column_id, $title, $task_limit = 0)
     {
-        return $this->db->table(self::TABLE)->eq('id', $column_id)->update($values);
+        return $this->db->table(self::TABLE)->eq('id', $column_id)->update(array(
+            'title' => $title,
+            'task_limit' => $task_limit,
+        ));
     }
 
     /**
@@ -189,7 +206,7 @@ class Board extends Base
      *
      * @access public
      * @param  integer $project_id Project id
-     * @param array $filters
+     * @param  array $filters
      * @return array
      */
     public function get($project_id, array $filters = array())
@@ -201,8 +218,7 @@ class Board extends Base
         $filters[] = array('column' => 'project_id', 'operator' => 'eq', 'value' => $project_id);
         $filters[] = array('column' => 'is_active', 'operator' => 'eq', 'value' => Task::STATUS_OPEN);
 
-        $taskModel = new Task($this->db, $this->event);
-        $tasks = $taskModel->find($filters);
+        $tasks = $this->task->find($filters);
 
         foreach ($columns as &$column) {
 

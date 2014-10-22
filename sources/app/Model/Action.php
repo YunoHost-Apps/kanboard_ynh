@@ -41,6 +41,7 @@ class Action extends Base
             'TaskAssignSpecificUser' => t('Assign the task to a specific user'),
             'TaskAssignCurrentUser' => t('Assign the task to the person who does the action'),
             'TaskDuplicateAnotherProject' => t('Duplicate the task to another project'),
+            'TaskMoveAnotherProject' => t('Move the task to another project'),
             'TaskAssignColorUser' => t('Assign a color to a specific user'),
             'TaskAssignColorCategory' => t('Assign automatically a color based on a category'),
             'TaskAssignCategoryColor' => t('Assign automatically a category based on a color'),
@@ -63,6 +64,7 @@ class Action extends Base
             Task::EVENT_OPEN => t('Open a closed task'),
             Task::EVENT_CLOSE => t('Closing a task'),
             Task::EVENT_CREATE_UPDATE => t('Task creation or modification'),
+            Task::EVENT_ASSIGNEE_CHANGE => t('Task assignee change'),
         );
     }
 
@@ -217,34 +219,81 @@ class Action extends Base
      * @param  integer $project_id Project id
      * @throws \LogicException
      * @return \Core\Listener       Action Instance
-     * @throw  LogicException
      */
     public function load($name, $project_id)
     {
-        switch ($name) {
-            case 'TaskClose':
-                $className = '\Action\TaskClose';
-                return new $className($project_id, new Task($this->db, $this->event));
-            case 'TaskAssignCurrentUser':
-                $className = '\Action\TaskAssignCurrentUser';
-                return new $className($project_id, new Task($this->db, $this->event), new Acl($this->db, $this->event));
-            case 'TaskAssignSpecificUser':
-                $className = '\Action\TaskAssignSpecificUser';
-                return new $className($project_id, new Task($this->db, $this->event));
-            case 'TaskDuplicateAnotherProject':
-                $className = '\Action\TaskDuplicateAnotherProject';
-                return new $className($project_id, new Task($this->db, $this->event));
-            case 'TaskAssignColorUser':
-                $className = '\Action\TaskAssignColorUser';
-                return new $className($project_id, new Task($this->db, $this->event));
-            case 'TaskAssignColorCategory':
-                $className = '\Action\TaskAssignColorCategory';
-                return new $className($project_id, new Task($this->db, $this->event));
-            case 'TaskAssignCategoryColor':
-                $className = '\Action\TaskAssignCategoryColor';
-                return new $className($project_id, new Task($this->db, $this->event));
+        $className = '\Action\\'.$name;
+
+        if ($name === 'TaskAssignCurrentUser') {
+            return new $className($project_id, new Task($this->registry), new Acl($this->registry));
+        }
+        else {
+            return new $className($project_id, new Task($this->registry));
+        }
+    }
+
+    /**
+     * Copy Actions and related Actions Parameters from a project to another one
+     *
+     * @author Antonio Rabelo
+     * @param  integer    $project_from      Project Template
+     * @return integer    $project_to        Project that receives the copy
+     * @return boolean
+     */
+    public function duplicate($project_from, $project_to)
+    {
+        $actionTemplate = $this->action->getAllByProject($project_from);
+
+        foreach ($actionTemplate as $action) {
+
+            unset($action['id']);
+            $action['project_id'] = $project_to;
+            $actionParams = $action['params'];
+            unset($action['params']);
+
+            if (! $this->db->table(self::TABLE)->save($action)) {
+                return false;
+            }
+
+            $action_clone_id = $this->db->getConnection()->getLastId();
+
+            foreach ($actionParams as $param) {
+                unset($param['id']);
+                $param['value'] = $this->resolveDuplicatedParameters($param, $project_to);
+                $param['action_id'] = $action_clone_id;
+
+                if (! $this->db->table(self::TABLE_PARAMS)->save($param)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Resolve type of action value from a project to the respective value in another project
+     *
+     * @author Antonio Rabelo
+     * @param  integer    $param             An action parameter
+     * @return integer    $project_to        Project to find the corresponding values
+     * @return mixed                         The corresponding values from $project_to
+     */
+    private function resolveDuplicatedParameters($param, $project_to)
+    {
+        switch($param['name']) {
+            case 'project_id':
+                return $project_to;
+            case 'category_id':
+                $categoryTemplate = $this->category->getById($param['value']);
+                $categoryFromNewProject = $this->db->table(Category::TABLE)->eq('project_id', $project_to)->eq('name', $categoryTemplate['name'])->findOne();
+                return $categoryFromNewProject['id'];
+            case 'column_id':
+                $boardTemplate = $this->board->getColumn($param['value']);
+                $boardFromNewProject = $this->db->table(Board::TABLE)->eq('project_id', $project_to)->eq('title', $boardTemplate['title'])->findOne();
+                return $boardFromNewProject['id'];
             default:
-                throw new LogicException('Action not found: '.$name);
+                return $param['value'];
         }
     }
 

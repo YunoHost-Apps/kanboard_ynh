@@ -35,9 +35,15 @@ function is_admin()
     return $_SESSION['user']['is_admin'] == 1;
 }
 
-function get_username()
+function get_username($user = false)
 {
-    return $_SESSION['user']['username'];
+    return $user ? ($user['name'] ?: $user['username'])
+                : ($_SESSION['user']['name'] ?: $_SESSION['user']['username']);
+}
+
+function get_user_id()
+{
+    return $_SESSION['user']['id'];
 }
 
 function parse($text)
@@ -60,7 +66,7 @@ function markdown($text)
 
 function get_current_base_url()
 {
-    $url = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
+    $url = \Core\Tool::isHTTPS() ? 'https://' : 'http://';
     $url .= $_SERVER['SERVER_NAME'];
     $url .= $_SERVER['SERVER_PORT'] == 80 || $_SERVER['SERVER_PORT'] == 443 ? '' : ':'.$_SERVER['SERVER_PORT'];
     $url .= dirname($_SERVER['PHP_SELF']) !== '/' ? dirname($_SERVER['PHP_SELF']).'/' : '/';
@@ -110,15 +116,12 @@ function get_host_from_url($url)
     return escape(parse_url($url, PHP_URL_HOST)) ?: $url;
 }
 
-function summary($value, $min_length = 5, $max_length = 120, $end = '[...]')
+function summary($value, $max_length = 85, $end = '[...]')
 {
     $length = strlen($value);
 
     if ($length > $max_length) {
-        return substr($value, 0, strpos($value, ' ', $max_length)).' '.$end;
-    }
-    else if ($length < $min_length) {
-        return '';
+        return substr($value, 0, $max_length).' '.$end;
     }
 
     return $value;

@@ -7,13 +7,19 @@ Each automatic action is defined like that:
 
 - An event to listen
 - An action linked to this event
-- Eventually there is some parameters to define according to the chosen action
+- Eventually there is some parameters to define
 
 Each project can have a different set of automatic actions, the configuration panel is located on the project listing page, just click on the link "Automatic actions".
 
+![Automatic action creation (step 1)](http://kanboard.net/screenshots/documentation/project-automatic-action-step1.png)
+
 To add a new automatic action, choose the event with an action and click on the button "Next Step", then specify action parameters and finish the process by clicking on the button "Save this action".
 
+![Automatic action creation (step 2)](http://kanboard.net/screenshots/documentation/project-automatic-action-step2.png)
+
 Each time an event occurs, the corresponding actions are executed.
+
+![Automatic actions](http://kanboard.net/screenshots/documentation/project-automatic-actions.png)
 
 List of available events
 ------------------------
@@ -25,6 +31,7 @@ List of available events
 - Open a closed task
 - Closing a task
 - Task creation or modification
+- Task assignee change
 
 List of available actions
 -------------------------
@@ -33,6 +40,7 @@ List of available actions
 - Assign the task to a specific user
 - Assign the task to the person who does the action
 - Duplicate the task to another project
+- Move the task to another project
 - Assign a color to a specific user
 - Assign automatically a color based on a category
 - Assign automatically a category based on a color
@@ -68,9 +76,17 @@ Let's say we have two projects "Customer orders" and "Production", once the orde
 - Choose the action: **Duplicate the task to another project**
 - Define the action parameters: **Column = Validated** and **Project = Production**
 
+### When a task is moved to the last column, move the exact same task to another project
+
+Let's say we have two projects "Ideas" and "Development", once the idea is validated, swap it to the "Development" project.
+
+- Choose the event: **Move a task to another column**
+- Choose the action: **Move the task to another project**
+- Define the action parameters: **Column = Validated** and **Project = Development**
+
 ### I want to assign automatically a color to the user Bob
 
-- Choose the event: **Task creation**
+- Choose the event: **Task assignee change**
 - Choose the action: **Assign a color to a specific user**
 - Define the action parameters: **Color = Green** and **Assignee = Bob**
 

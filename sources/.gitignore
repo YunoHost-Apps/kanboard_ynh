@@ -32,6 +32,8 @@
 ######################
 .buildpath
 .project
+/.settings/
+.idea
 
 # OS generated files #
 ######################
@@ -51,5 +53,5 @@ Thumbs.db
 
 # App specific #
 ################
-config.php
-data/files
+#config.php
+#data/files

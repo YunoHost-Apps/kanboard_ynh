@@ -2,6 +2,7 @@
 
 namespace Controller;
 
+use Core\Tool;
 use Core\Registry;
 use Core\Security;
 use Core\Translator;
@@ -12,22 +13,25 @@ use Model\LastLogin;
  *
  * @package  controller
  * @author   Frederic Guillot
- * @property \Model\Acl         $acl
- * @property \Model\Action      $action
- * @property \Model\Board       $board
- * @property \Model\Category    $category
- * @property \Model\Comment     $comment
- * @property \Model\Config      $config
- * @property \Model\File        $file
- * @property \Model\Google      $google
- * @property \Model\GitHub      $gitHub
- * @property \Model\LastLogin   $lastLogin
- * @property \Model\Ldap        $ldap
- * @property \Model\Project     $project
- * @property \Model\RememberMe  $rememberMe
- * @property \Model\SubTask     $subTask
- * @property \Model\Task        $task
- * @property \Model\User        $user
+ *
+ * @property \Model\Acl                $acl
+ * @property \Model\Authentication     $authentication
+ * @property \Model\Action             $action
+ * @property \Model\Board              $board
+ * @property \Model\Category           $category
+ * @property \Model\Comment            $comment
+ * @property \Model\Config             $config
+ * @property \Model\File               $file
+ * @property \Model\LastLogin          $lastLogin
+ * @property \Model\Notification       $notification
+ * @property \Model\Project            $project
+ * @property \Model\SubTask            $subTask
+ * @property \Model\Task               $task
+ * @property \Model\TaskHistory        $taskHistory
+ * @property \Model\CommentHistory     $commentHistory
+ * @property \Model\SubtaskHistory     $subtaskHistory
+ * @property \Model\User               $user
+ * @property \Model\Webhook            $webhook
  */
 abstract class Base
 {
@@ -91,9 +95,7 @@ abstract class Base
      */
     public function __get($name)
     {
-        $class = '\Model\\'.ucfirst($name);
-        $this->registry->$name = new $class($this->registry->shared('db'), $this->registry->shared('event'));
-        return $this->registry->shared($name);
+        return Tool::loadModel($this->registry, $name);
     }
 
     /**
@@ -121,26 +123,8 @@ abstract class Base
         date_default_timezone_set($this->config->get('timezone', 'UTC'));
 
         // Authentication
-        if (! $this->acl->isLogged() && ! $this->acl->isPublicAction($controller, $action)) {
-
-            // Try the remember me authentication first
-            if (! $this->rememberMe->authenticate()) {
-
-                // Redirect to the login form if not authenticated
-                $this->response->redirect('?controller=user&action=login');
-            }
-            else {
-
-                $this->lastLogin->create(
-                    LastLogin::AUTH_REMEMBER_ME,
-                    $this->acl->getUserId(),
-                    $this->user->getIpAddress(),
-                    $this->user->getUserAgent()
-                );
-            }
-        }
-        else if ($this->rememberMe->hasCookie()) {
-            $this->rememberMe->refresh();
+        if (! $this->authentication->isAuthenticated($controller, $action)) {
+            $this->response->redirect('?controller=user&action=login');
         }
 
         // Check if the user is allowed to see this page
@@ -149,28 +133,57 @@ abstract class Base
         }
 
         // Attach events
-        $this->action->attachEvents();
-        $this->project->attachEvents();
+        $this->attachEvents();
+    }
+
+    /**
+     * Attach events
+     *
+     * @access private
+     */
+    private function attachEvents()
+    {
+        $models = array(
+            'action',
+            'project',
+            'webhook',
+            'notification',
+            'taskHistory',
+            'commentHistory',
+            'subtaskHistory',
+        );
+
+        foreach ($models as $model) {
+            $this->$model->attachEvents();
+        }
     }
 
     /**
      * Application not found page (404 error)
      *
      * @access public
+     * @param  boolean   $no_layout   Display the layout or not
      */
-    public function notfound()
+    public function notfound($no_layout = false)
     {
-        $this->response->html($this->template->layout('app_notfound', array('title' => t('Page not found'))));
+        $this->response->html($this->template->layout('app_notfound', array(
+            'title' => t('Page not found'),
+            'no_layout' => $no_layout,
+        )));
     }
 
     /**
      * Application forbidden page
      *
      * @access public
+     * @param  boolean   $no_layout   Display the layout or not
      */
-    public function forbidden()
+    public function forbidden($no_layout = false)
     {
-        $this->response->html($this->template->layout('app_forbidden', array('title' => t('Access Forbidden'))));
+        $this->response->html($this->template->layout('app_forbidden', array(
+            'title' => t('Access Forbidden'),
+            'no_layout' => $no_layout,
+        )));
     }
 
     /**
@@ -229,6 +242,22 @@ abstract class Base
     }
 
     /**
+     * Common layout for project views
+     *
+     * @access protected
+     * @param  string    $template   Template name
+     * @param  array     $params     Template parameters
+     * @return string
+     */
+    protected function projectLayout($template, array $params)
+    {
+        $content = $this->template->load($template, $params);
+        $params['project_content_for_layout'] = $content;
+
+        return $this->template->layout('project_layout', $params);
+    }
+
+    /**
      * Common method to get a task for task views
      *
      * @access protected
@@ -245,5 +274,27 @@ abstract class Base
         $this->checkProjectPermissions($task['project_id']);
 
         return $task;
+    }
+
+    /**
+     * Common method to get a project
+     *
+     * @access protected
+     * @param  integer      $project_id    Default project id
+     * @return array
+     */
+    protected function getProject($project_id = 0)
+    {
+        $project_id = $this->request->getIntegerParam('project_id', $project_id);
+        $project = $this->project->getById($project_id);
+
+        if (! $project) {
+            $this->session->flashError(t('Project not found.'));
+            $this->response->redirect('?controller=project');
+        }
+
+        $this->checkProjectPermissions($project['id']);
+
+        return $project;
     }
 }

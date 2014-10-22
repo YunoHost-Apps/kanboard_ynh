@@ -18,8 +18,9 @@ class Acl extends Base
      */
     private $public_actions = array(
         'user' => array('login', 'check', 'google', 'github'),
-        'task' => array('add'),
+        'task' => array('add', 'readonly'),
         'board' => array('readonly'),
+        'project' => array('feed'),
     );
 
     /**
@@ -30,29 +31,13 @@ class Acl extends Base
      */
     private $user_actions = array(
         'app' => array('index'),
-        'board' => array('index', 'show', 'assign', 'assigntask', 'save', 'check'),
-        'project' => array('tasks', 'index', 'forbidden', 'search'),
-        'user' => array('index', 'edit', 'update', 'forbidden', 'logout', 'index', 'unlinkgoogle', 'unlinkgithub'),
-        'config' => array('index', 'removeremembermetoken'),
+        'board' => array('index', 'show', 'save', 'check', 'changeassignee', 'updateassignee', 'changecategory', 'updatecategory'),
+        'project' => array('tasks', 'index', 'forbidden', 'search', 'export', 'show', 'activity'),
+        'user' => array('index', 'edit', 'forbidden', 'logout', 'index', 'show', 'external', 'unlinkgoogle', 'unlinkgithub', 'sessions', 'removesession', 'last', 'notifications', 'password'),
         'comment' => array('create', 'save', 'confirm', 'remove', 'update', 'edit', 'forbidden'),
         'file' => array('create', 'save', 'download', 'confirm', 'remove', 'open', 'image'),
         'subtask' => array('create', 'save', 'edit', 'update', 'confirm', 'remove'),
-        'task' => array(
-            'show',
-            'create',
-            'save',
-            'edit',
-            'update',
-            'close',
-            'confirmclose',
-            'open',
-            'confirmopen',
-            'duplicate',
-            'remove',
-            'confirmremove',
-            'editdescription',
-            'savedescription',
-        ),
+        'task' => array('show', 'create', 'save', 'edit', 'update', 'close', 'open', 'duplicate', 'remove', 'description', 'move', 'copy'),
     );
 
     /**

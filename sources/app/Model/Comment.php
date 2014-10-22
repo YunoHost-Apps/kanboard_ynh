@@ -21,6 +21,14 @@ class Comment extends Base
     const TABLE = 'comments';
 
     /**
+     * Events
+     *
+     * @var string
+     */
+    const EVENT_UPDATE = 'comment.update';
+    const EVENT_CREATE = 'comment.create';
+
+    /**
      * Get all comments for a given task
      *
      * @access public
@@ -37,7 +45,8 @@ class Comment extends Base
                 self::TABLE.'.task_id',
                 self::TABLE.'.user_id',
                 self::TABLE.'.comment',
-                User::TABLE.'.username'
+                User::TABLE.'.username',
+                User::TABLE.'.name'
             )
             ->join(User::TABLE, 'id', 'user_id')
             ->orderBy(self::TABLE.'.date', 'ASC')
@@ -62,7 +71,8 @@ class Comment extends Base
                 self::TABLE.'.user_id',
                 self::TABLE.'.date',
                 self::TABLE.'.comment',
-                User::TABLE.'.username'
+                User::TABLE.'.username',
+                User::TABLE.'.name'
             )
             ->join(User::TABLE, 'id', 'user_id')
             ->eq(self::TABLE.'.id', $comment_id)
@@ -95,7 +105,14 @@ class Comment extends Base
     {
         $values['date'] = time();
 
-        return $this->db->table(self::TABLE)->save($values);
+        if ($this->db->table(self::TABLE)->save($values)) {
+
+            $values['id'] = $this->db->getConnection()->getLastId();
+            $this->event->trigger(self::EVENT_CREATE, $values);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -107,10 +124,14 @@ class Comment extends Base
      */
     public function update(array $values)
     {
-        return $this->db
+        $result = $this->db
                     ->table(self::TABLE)
                     ->eq('id', $values['id'])
                     ->update(array('comment' => $values['comment']));
+
+        $this->event->trigger(self::EVENT_UPDATE, $values);
+
+        return $result;
     }
 
     /**
@@ -134,13 +155,12 @@ class Comment extends Base
      */
     public function validateCreation(array $values)
     {
-        $v = new Validator($values, array(
-            new Validators\Required('task_id', t('This value is required')),
-            new Validators\Integer('task_id', t('This value must be an integer')),
+        $rules = array(
             new Validators\Required('user_id', t('This value is required')),
-            new Validators\Integer('user_id', t('This value must be an integer')),
-            new Validators\Required('comment', t('Comment is required'))
-        ));
+            new Validators\Required('task_id', t('This value is required')),
+        );
+
+        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
 
         return array(
             $v->execute(),
@@ -157,15 +177,31 @@ class Comment extends Base
      */
     public function validateModification(array $values)
     {
-        $v = new Validator($values, array(
+        $rules = array(
             new Validators\Required('id', t('This value is required')),
-            new Validators\Integer('id', t('This value must be an integer')),
-            new Validators\Required('comment', t('Comment is required'))
-        ));
+        );
+
+        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
 
         return array(
             $v->execute(),
             $v->getErrors()
+        );
+    }
+
+    /**
+     * Common validation rules
+     *
+     * @access private
+     * @return array
+     */
+    private function commonValidationRules()
+    {
+        return array(
+            new Validators\Integer('id', t('This value must be an integer')),
+            new Validators\Integer('task_id', t('This value must be an integer')),
+            new Validators\Integer('user_id', t('This value must be an integer')),
+            new Validators\Required('comment', t('Comment is required'))
         );
     }
 }

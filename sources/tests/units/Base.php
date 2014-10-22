@@ -1,57 +1,48 @@
 <?php
 
+require __DIR__.'/../../app/Core/Loader.php';
+require __DIR__.'/../../app/helpers.php';
+require __DIR__.'/../../app/functions.php';
+require __DIR__.'/../../app/constants.php';
+
+use Core\Loader;
+use Core\Registry;
+
 if (version_compare(PHP_VERSION, '5.5.0', '<')) {
     require __DIR__.'/../../vendor/password.php';
 }
 
-require_once __DIR__.'/../../app/Core/Security.php';
+date_default_timezone_set('UTC');
 
-require_once __DIR__.'/../../vendor/PicoDb/Database.php';
-require_once __DIR__.'/../../app/Schema/Sqlite.php';
-
-require_once __DIR__.'/../../app/Core/Listener.php';
-require_once __DIR__.'/../../app/Core/Event.php';
-require_once __DIR__.'/../../app/Core/Translator.php';
-require_once __DIR__.'/../../app/translator.php';
-
-require_once __DIR__.'/../../app/Model/Base.php';
-require_once __DIR__.'/../../app/Model/Task.php';
-require_once __DIR__.'/../../app/Model/Acl.php';
-require_once __DIR__.'/../../app/Model/Comment.php';
-require_once __DIR__.'/../../app/Model/Project.php';
-require_once __DIR__.'/../../app/Model/User.php';
-require_once __DIR__.'/../../app/Model/Board.php';
-require_once __DIR__.'/../../app/Model/Action.php';
-require_once __DIR__.'/../../app/Model/Category.php';
-
-require_once __DIR__.'/../../app/Action/Base.php';
-require_once __DIR__.'/../../app/Action/TaskClose.php';
-require_once __DIR__.'/../../app/Action/TaskAssignSpecificUser.php';
-require_once __DIR__.'/../../app/Action/TaskAssignColorUser.php';
-require_once __DIR__.'/../../app/Action/TaskAssignColorCategory.php';
-require_once __DIR__.'/../../app/Action/TaskAssignCurrentUser.php';
-require_once __DIR__.'/../../app/Action/TaskDuplicateAnotherProject.php';
+$loader = new Loader;
+$loader->setPath('app');
+$loader->setPath('vendor');
+$loader->execute();
 
 abstract class Base extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->db = $this->getDbConnection();
-        $this->event = new \Core\Event;
+        $this->registry = new Registry;
+        $this->registry->db = function() { return setup_db(); };
+        $this->registry->event = function() { return setup_events(); };
+
+        if (DB_DRIVER === 'mysql') {
+            $pdo = new PDO('mysql:host='.DB_HOSTNAME, DB_USERNAME, DB_PASSWORD);
+            $pdo->exec('DROP DATABASE '.DB_NAME);
+            $pdo->exec('CREATE DATABASE '.DB_NAME);
+            $pdo = null;
+        }
+        else if (DB_DRIVER === 'postgres') {
+            $pdo = new PDO('pgsql:host='.DB_HOSTNAME, DB_USERNAME, DB_PASSWORD);
+            $pdo->exec('DROP DATABASE '.DB_NAME);
+            $pdo->exec('CREATE DATABASE '.DB_NAME.' WITH OWNER '.DB_USERNAME);
+            $pdo = null;
+        }
     }
 
-    public function getDbConnection()
+    public function tearDown()
     {
-        $db = new \PicoDb\Database(array(
-            'driver' => 'sqlite',
-            'filename' => ':memory:'
-        ));
-
-        if ($db->schema()->check(\Schema\VERSION)) {
-            return $db;
-        }
-        else {
-            die('Unable to migrate database schema!');
-        }
+        $this->registry->shared('db')->closeConnection();
     }
 }

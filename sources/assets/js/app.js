@@ -9,27 +9,35 @@ var Kanboard = (function() {
             e.preventDefault();
             e.stopPropagation();
 
-            $.get(e.target.getAttribute("href"), function(content) {
+            var link = e.target.getAttribute("href");
 
-                $("body").append('<div id="popover-container"><div id="popover-content">' + content + '</div></div>');
+            if (! link) {
+                link = e.target.getAttribute("data-href");
+            }
 
-                $("#popover-container").click(function() {
-                    $(this).remove();
+            if (link) {
+                $.get(link, function(content) {
+
+                    $("body").append('<div id="popover-container"><div id="popover-content">' + content + '</div></div>');
+
+                    $("#popover-container").click(function() {
+                        $(this).remove();
+                    });
+
+                    $("#popover-content").click(function(e) {
+                        e.stopPropagation();
+                    });
+
+                    if (callback) {
+                        callback();
+                    }
                 });
-
-                $("#popover-content").click(function(e) {
-                    e.stopPropagation();
-                });
-
-                if (callback) {
-                    callback();
-                }
-            });
+            }
         },
 
         // Return true if the page is visible
-        IsVisible: function()
-        {
+        IsVisible: function() {
+
             var property = "";
 
             if (typeof document.hidden !== "undefined") {
@@ -47,6 +55,17 @@ var Kanboard = (function() {
             }
 
             return true;
+        },
+
+        // Common init
+        Before: function() {
+
+            // Datepicker
+            $(".form-date").datepicker({
+                showOtherMonths: true,
+                selectOtherMonths: true,
+                dateFormat: 'yy-mm-dd'
+            });
         }
     };
 
@@ -63,20 +82,32 @@ Kanboard.Board = (function() {
     {
         // Drag and drop
         $(".column").sortable({
+            delay: 300,
+            distance: 5,
             connectWith: ".column",
             placeholder: "draggable-placeholder",
             stop: function(event, ui) {
-                board_save();
+                board_save(
+                    ui.item.attr('data-task-id'),
+                    ui.item.parent().attr("data-column-id"),
+                    ui.item.index() + 1
+                );
             }
         });
 
         // Assignee change
         $(".assignee-popover").click(Kanboard.Popover);
 
+        // Category change
+        $(".category-popover").click(Kanboard.Popover);
+
         // Task edit popover
         $(".task-edit-popover").click(function(e) {
             Kanboard.Popover(e, Kanboard.Task.Init);
         });
+
+        // Description popover
+        $(".task-description-popover").click(Kanboard.Popover);
 
         // Redirect to the task details page
         $("[data-task-id]").each(function() {
@@ -101,30 +132,22 @@ Kanboard.Board = (function() {
     }
 
     // Save and refresh the board
-    function board_save()
+    function board_save(taskId, columnId, position)
     {
-        var data = [];
         var boardSelector = $("#board");
         var projectId = boardSelector.attr("data-project-id");
 
         board_unload_events();
 
-        $(".column").each(function() {
-            var columnId = $(this).attr("data-column-id");
-
-            $("#column-" + columnId + " .task-board").each(function(index) {
-                data.push({
-                    "task_id": parseInt($(this).attr("data-task-id")),
-                    "position": index + 1,
-                    "column_id": parseInt(columnId)
-                });
-            });
-        });
-
         $.ajax({
             cache: false,
             url: "?controller=board&action=save&project_id=" + projectId,
-            data: {"positions": data, "csrf_token": boardSelector.attr("data-csrf-token")},
+            data: {
+                "task_id": taskId,
+                "column_id": columnId,
+                "position": position,
+                "csrf_token": boardSelector.attr("data-csrf-token"),
+            },
             type: "POST",
             success: function(data) {
                 $("#board").remove();
@@ -228,12 +251,7 @@ Kanboard.Task = (function() {
     return {
         Init: function() {
 
-            // Datepicker for the due date
-            $("#form-date_due").datepicker({
-                showOtherMonths: true,
-                selectOtherMonths: true,
-                dateFormat: 'yy-mm-dd'
-            });
+            Kanboard.Before();
 
             // Image preview for attachments
             $(".file-popover").click(Kanboard.Popover);
@@ -243,13 +261,28 @@ Kanboard.Task = (function() {
 })();
 
 
+// Project related functions
+Kanboard.Project = (function() {
+
+    return {
+        Init: function() {
+            Kanboard.Before();
+        }
+    };
+
+})();
+
+
 // Initialization
 $(function() {
-
+//alert($(window).width());
     if ($("#board").length) {
         Kanboard.Board.Init();
     }
-    else {
+    else if ($("#task-section").length) {
         Kanboard.Task.Init();
+    }
+    else if ($("#project-section").length) {
+        Kanboard.Project.Init();
     }
 });

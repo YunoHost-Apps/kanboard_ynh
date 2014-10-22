@@ -32,7 +32,7 @@ class Translator
      * $translator->translate('I have %d kids', 5);
      *
      * @access public
-     * @param $identifier
+     * @param  string   $identifier       Default string
      * @return string
      */
     public function translate($identifier)
@@ -45,6 +45,28 @@ class Translator
         foreach ($args as &$arg) {
             $arg = htmlspecialchars($arg, ENT_QUOTES, 'UTF-8', false);
         }
+
+        return call_user_func_array(
+            'sprintf',
+            $args
+        );
+    }
+
+    /**
+     * Get a translation with no HTML escaping
+     *
+     * $translator->translateNoEscaping('I have %d kids', 5);
+     *
+     * @access public
+     * @param  string   $identifier       Default string
+     * @return string
+     */
+    public function translateNoEscaping($identifier)
+    {
+        $args = func_get_args();
+
+        array_shift($args);
+        array_unshift($args, $this->get($identifier, $identifier));
 
         return call_user_func_array(
             'sprintf',
@@ -119,7 +141,6 @@ class Translator
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $format = str_replace('%e', '%d', $format);
-            $format = str_replace('%G', '%Y', $format);
             $format = str_replace('%k', '%H', $format);
         }
 

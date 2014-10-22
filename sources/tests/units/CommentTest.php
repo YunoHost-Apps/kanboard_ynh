@@ -10,9 +10,9 @@ class CommentTest extends Base
 {
     public function testCreate()
     {
-        $c = new Comment($this->db, $this->event);
-        $t = new Task($this->db, $this->event);
-        $p = new Project($this->db, $this->event);
+        $c = new Comment($this->registry);
+        $t = new Task($this->registry);
+        $p = new Project($this->registry);
 
         $this->assertEquals(1, $p->create(array('name' => 'test1')));
         $this->assertEquals(1, $t->create(array('title' => 'test', 'project_id' => 1, 'column_id' => 3, 'owner_id' => 1)));
@@ -30,9 +30,9 @@ class CommentTest extends Base
 
     public function testGetAll()
     {
-        $c = new Comment($this->db, $this->event);
-        $t = new Task($this->db, $this->event);
-        $p = new Project($this->db, $this->event);
+        $c = new Comment($this->registry);
+        $t = new Task($this->registry);
+        $p = new Project($this->registry);
 
         $this->assertEquals(1, $p->create(array('name' => 'test1')));
         $this->assertEquals(1, $t->create(array('title' => 'test', 'project_id' => 1, 'column_id' => 3, 'owner_id' => 1)));
@@ -47,13 +47,15 @@ class CommentTest extends Base
         $this->assertEquals(1, $comments[0]['id']);
         $this->assertEquals(2, $comments[1]['id']);
         $this->assertEquals(3, $comments[2]['id']);
+
+        $this->assertEquals(3, $c->count(1));
     }
 
     public function testUpdate()
     {
-        $c = new Comment($this->db, $this->event);
-        $t = new Task($this->db, $this->event);
-        $p = new Project($this->db, $this->event);
+        $c = new Comment($this->registry);
+        $t = new Task($this->registry);
+        $p = new Project($this->registry);
 
         $this->assertEquals(1, $p->create(array('name' => 'test1')));
         $this->assertEquals(1, $t->create(array('title' => 'test', 'project_id' => 1, 'column_id' => 3, 'owner_id' => 1)));
@@ -65,9 +67,24 @@ class CommentTest extends Base
         $this->assertEquals('bla', $comment['comment']);
     }
 
+    public function validateRemove()
+    {
+        $c = new Comment($this->registry);
+        $t = new Task($this->registry);
+        $p = new Project($this->registry);
+
+        $this->assertEquals(1, $p->create(array('name' => 'test1')));
+        $this->assertEquals(1, $t->create(array('title' => 'test', 'project_id' => 1, 'column_id' => 3, 'owner_id' => 1)));
+        $this->assertTrue($c->create(array('task_id' => 1, 'comment' => 'c1', 'user_id' => 1)));
+
+        $this->assertTrue($c->remove(1));
+        $this->assertFalse($c->remove(1));
+        $this->assertFalse($c->remove(1111));
+    }
+
     public function testValidateCreation()
     {
-        $c = new Comment($this->db, $this->event);
+        $c = new Comment($this->registry);
 
         $result = $c->validateCreation(array('user_id' => 1, 'task_id' => 1, 'comment' => 'bla'));
         $this->assertTrue($result[0]);
@@ -96,7 +113,7 @@ class CommentTest extends Base
 
     public function testValidateModification()
     {
-        $c = new Comment($this->db, $this->event);
+        $c = new Comment($this->registry);
 
         $result = $c->validateModification(array('id' => 1, 'comment' => 'bla'));
         $this->assertTrue($result[0]);

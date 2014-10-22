@@ -4,7 +4,95 @@ namespace Schema;
 
 use Core\Security;
 
-const VERSION = 21;
+const VERSION = 27;
+
+function version_27($pdo)
+{
+    $pdo->exec('CREATE UNIQUE INDEX users_username_idx ON users(username)');
+}
+
+function version_26($pdo)
+{
+    $pdo->exec("ALTER TABLE config ADD COLUMN default_columns TEXT DEFAULT ''");
+}
+
+function version_25($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE task_has_events (
+            id INTEGER PRIMARY KEY,
+            date_creation INTEGER NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INTEGER,
+            project_id INTEGER,
+            task_id INTEGER,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+    ");
+
+    $pdo->exec("
+        CREATE TABLE subtask_has_events (
+            id INTEGER PRIMARY KEY,
+            date_creation INTEGER NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INTEGER,
+            project_id INTEGER,
+            subtask_id INTEGER,
+            task_id INTEGER,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(subtask_id) REFERENCES task_has_subtasks(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+    ");
+
+    $pdo->exec("
+        CREATE TABLE comment_has_events (
+            id INTEGER PRIMARY KEY,
+            date_creation INTEGER NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INTEGER,
+            project_id INTEGER,
+            comment_id INTEGER,
+            task_id INTEGER,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+    ");
+}
+
+function version_24($pdo)
+{
+    $pdo->exec('ALTER TABLE projects ADD COLUMN is_public INTEGER DEFAULT "0"');
+}
+
+function version_23($pdo)
+{
+    $pdo->exec("ALTER TABLE users ADD COLUMN notifications_enabled INTEGER DEFAULT '0'");
+
+    $pdo->exec("
+        CREATE TABLE user_has_notifications (
+            user_id INTEGER,
+            project_id INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            UNIQUE(project_id, user_id)
+        );
+    ");
+}
+
+function version_22($pdo)
+{
+    $pdo->exec("ALTER TABLE config ADD COLUMN webhooks_url_task_modification TEXT");
+    $pdo->exec("ALTER TABLE config ADD COLUMN webhooks_url_task_creation TEXT");
+}
 
 function version_21($pdo)
 {
@@ -19,7 +107,8 @@ function version_20($pdo)
 
 function version_19($pdo)
 {
-    $pdo->exec("ALTER TABLE config ADD COLUMN api_token TEXT DEFAULT '".Security::generateToken()."'");
+    $pdo->exec("ALTER TABLE config ADD COLUMN api_token TEXT DEFAULT ''");
+    $pdo->exec("UPDATE config SET api_token='".Security::generateToken()."'");
 }
 
 function version_18($pdo)
@@ -31,7 +120,7 @@ function version_18($pdo)
             status INTEGER DEFAULT 0,
             time_estimated INTEGER DEFAULT 0,
             time_spent INTEGER DEFAULT 0,
-            task_id INTEGER,
+            task_id INTEGER NOT NULL,
             user_id INTEGER,
             FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
         )"
@@ -217,19 +306,6 @@ function version_4($pdo)
 function version_3($pdo)
 {
     $pdo->exec('ALTER TABLE projects ADD COLUMN token TEXT');
-
-    // For each existing project, assign a different token
-    $rq = $pdo->prepare("SELECT id FROM projects WHERE token IS NULL");
-    $rq->execute();
-    $results = $rq->fetchAll(\PDO::FETCH_ASSOC);
-
-    if ($results !== false) {
-
-        foreach ($results as &$result) {
-            $rq = $pdo->prepare('UPDATE projects SET token=? WHERE id=?');
-            $rq->execute(array(Security::generateToken(), $result['id']));
-        }
-    }
 }
 
 function version_2($pdo)
@@ -242,8 +318,8 @@ function version_1($pdo)
 {
     $pdo->exec("
         CREATE TABLE config (
-            language TEXT,
-            webhooks_token TEXT
+            language TEXT DEFAULT 'en_US',
+            webhooks_token TEXT DEFAULT ''
         )
     ");
 
@@ -301,7 +377,7 @@ function version_1($pdo)
 
     $pdo->exec("
         INSERT INTO config
-        (language, webhooks_token)
-        VALUES ('en_US', '".Security::generateToken()."')
+        (webhooks_token)
+        VALUES ('".Security::generateToken()."')
     ");
 }

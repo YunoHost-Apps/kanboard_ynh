@@ -2,15 +2,21 @@
 <html>
     <head>
         <meta charset="utf-8">
-
         <meta name="viewport" content="width=device-width">
         <meta name="mobile-web-app-capable" content="yes">
+        <meta name="robots" content="noindex,nofollow">
 
-        <?= Helper\js('assets/js/jquery-1.11.1.min.js') ?>
-        <?= Helper\js('assets/js/jquery-ui-1.10.4.custom.min.js') ?>
-        <?= Helper\js('assets/js/jquery.ui.touch-punch.min.js') ?>
-        <?= Helper\js('assets/js/chosen.jquery.min.js') ?>
-        <?= Helper\js('assets/js/app.js') ?>
+        <?php if (isset($auto_refresh)): ?>
+            <meta http-equiv="refresh" content="<?= BOARD_PUBLIC_CHECK_INTERVAL ?>" >
+        <?php endif ?>
+
+        <?php if (! isset($not_editable)): ?>
+            <?= Helper\js('assets/js/jquery-1.11.1.min.js') ?>
+            <?= Helper\js('assets/js/jquery-ui-1.10.4.custom.min.js') ?>
+            <?= Helper\js('assets/js/jquery.ui.touch-punch.min.js') ?>
+            <?= Helper\js('assets/js/chosen.jquery.min.js') ?>
+            <?= Helper\js('assets/js/app.js') ?>
+        <?php endif ?>
 
         <?= Helper\css('assets/css/app.css') ?>
         <?= Helper\css('assets/css/font-awesome.min.css') ?>
@@ -24,12 +30,9 @@
         <link rel="apple-touch-icon" sizes="144x144" href="assets/img/touch-icon-ipad-retina.png">
 
         <title><?= isset($title) ? Helper\escape($title).' - Kanboard' : 'Kanboard' ?></title>
-        <?php if (isset($auto_refresh)): ?>
-            <meta http-equiv="refresh" content="<?= BOARD_PUBLIC_CHECK_INTERVAL ?>" >
-        <?php endif ?>
     </head>
     <body>
-    <?php if (isset($no_layout)): ?>
+    <?php if (isset($no_layout) && $no_layout): ?>
         <?= $content_for_layout ?>
     <?php else: ?>
         <header>
@@ -37,7 +40,7 @@
                 <a class="logo" href="?">kanboard</a>
 
                 <ul>
-                    <?php if (isset($board_selector)): ?>
+                    <?php if (isset($board_selector) && ! empty($board_selector)): ?>
                     <li>
                         <select id="board-selector" data-placeholder="<?= t('Display another project') ?>">
                             <option value=""></option>
@@ -56,12 +59,14 @@
                     <li <?= isset($menu) && $menu === 'users' ? 'class="active"' : '' ?>>
                         <a href="?controller=user"><?= t('Users') ?></a>
                     </li>
-                    <li <?= isset($menu) && $menu === 'config' ? 'class="active"' : '' ?>>
-                        <a href="?controller=config"><?= t('Settings') ?></a>
-                    </li>
+                    <?php if (Helper\is_admin()): ?>
+                        <li class="hide-tablet <?= isset($menu) && $menu === 'config' ? 'active' : '' ?>">
+                            <a href="?controller=config"><?= t('Settings') ?></a>
+                        </li>
+                    <?php endif ?>
                     <li>
                         <a href="?controller=user&amp;action=logout<?= Helper\param_csrf() ?>"><?= t('Logout') ?></a>
-                        (<?= Helper\escape(Helper\get_username()) ?>)
+                        <span class="username">(<a href="?controller=user&amp;action=show&amp;user_id=<?= Helper\get_user_id() ?>"><?= Helper\escape(Helper\get_username()) ?></a>)</span>
                     </li>
                 </ul>
             </nav>

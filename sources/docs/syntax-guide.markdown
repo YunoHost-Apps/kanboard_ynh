@@ -1,7 +1,7 @@
 Syntax Guide
 ============
 
-Kanboard use the [Markdown syntax](http://en.wikipedia.org/wiki/Markdown) to write comments or tasks description.
+Kanboard use the [Markdown syntax](http://en.wikipedia.org/wiki/Markdown) to write comments or task descriptions.
 Here are some examples:
 
 Bold and italic
@@ -105,13 +105,14 @@ Execute this command: `tail -f /var/log/messages`.
 Use 3 backticks with eventually the language name.
 
 <pre>
-```php
+<code class="language-markdown">```php
 &lt;?php
 
 phpinfo();
 
 ?&gt;
 ```
+</code>
 </pre>
 
 ### Result

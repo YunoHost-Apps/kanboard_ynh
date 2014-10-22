@@ -4,7 +4,98 @@ namespace Schema;
 
 use Core\Security;
 
-const VERSION = 21;
+const VERSION = 27;
+
+function version_27($pdo)
+{
+    $pdo->exec('CREATE UNIQUE INDEX users_username_idx ON users(username)');
+}
+
+function version_26($pdo)
+{
+    $pdo->exec("ALTER TABLE config ADD COLUMN default_columns VARCHAR(255) DEFAULT ''");
+}
+
+function version_25($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE task_has_events (
+            id INT NOT NULL AUTO_INCREMENT,
+            date_creation INT NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INT,
+            project_id INT,
+            task_id INT,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec("
+        CREATE TABLE subtask_has_events (
+            id INT NOT NULL AUTO_INCREMENT,
+            date_creation INT NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INT,
+            project_id INT,
+            subtask_id INT,
+            task_id INT,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(subtask_id) REFERENCES task_has_subtasks(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec("
+        CREATE TABLE comment_has_events (
+            id INT NOT NULL AUTO_INCREMENT,
+            date_creation INT NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INT,
+            project_id INT,
+            comment_id INT,
+            task_id INT,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+}
+
+function version_24($pdo)
+{
+    $pdo->exec("ALTER TABLE projects ADD COLUMN is_public TINYINT(1) DEFAULT '0'");
+}
+
+function version_23($pdo)
+{
+    $pdo->exec("ALTER TABLE users ADD COLUMN notifications_enabled TINYINT(1) DEFAULT '0'");
+
+    $pdo->exec("
+        CREATE TABLE user_has_notifications (
+            user_id INT,
+            project_id INT,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            UNIQUE(project_id, user_id)
+        );
+    ");
+}
+
+function version_22($pdo)
+{
+    $pdo->exec("ALTER TABLE config ADD COLUMN webhooks_url_task_modification VARCHAR(255)");
+    $pdo->exec("ALTER TABLE config ADD COLUMN webhooks_url_task_creation VARCHAR(255)");
+}
 
 function version_21($pdo)
 {
@@ -19,7 +110,8 @@ function version_20($pdo)
 
 function version_19($pdo)
 {
-    $pdo->exec("ALTER TABLE config ADD COLUMN api_token VARCHAR(255) DEFAULT '".Security::generateToken()."'");
+    $pdo->exec("ALTER TABLE config ADD COLUMN api_token VARCHAR(255) DEFAULT ''");
+    $pdo->exec("UPDATE config SET api_token='".Security::generateToken()."'");
 }
 
 function version_18($pdo)
@@ -31,7 +123,7 @@ function version_18($pdo)
             status INT DEFAULT 0,
             time_estimated INT DEFAULT 0,
             time_spent INT DEFAULT 0,
-            task_id INT,
+            task_id INT NOT NULL,
             user_id INT,
             PRIMARY KEY (id),
             FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
@@ -119,52 +211,12 @@ function version_12($pdo)
     );
 }
 
-function version_11($pdo)
-{
-}
-
-function version_10($pdo)
-{
-}
-
-function version_9($pdo)
-{
-}
-
-function version_8($pdo)
-{
-}
-
-function version_7($pdo)
-{
-}
-
-function version_6($pdo)
-{
-}
-
-function version_5($pdo)
-{
-}
-
-function version_4($pdo)
-{
-}
-
-function version_3($pdo)
-{
-}
-
-function version_2($pdo)
-{
-}
-
 function version_1($pdo)
 {
     $pdo->exec("
         CREATE TABLE config (
             language CHAR(5) DEFAULT 'en_US',
-            webhooks_token VARCHAR(255),
+            webhooks_token VARCHAR(255) DEFAULT '',
             timezone VARCHAR(50) DEFAULT 'UTC'
         ) ENGINE=InnoDB CHARSET=utf8
     ");

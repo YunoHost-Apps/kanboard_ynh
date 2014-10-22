@@ -42,20 +42,20 @@ class Config extends Base
      */
     public function getLanguages()
     {
-        $languages = array(
-            'de_DE' => t('German'),
-            'en_US' => t('English'),
-            'es_ES' => t('Spanish'),
-            'fr_FR' => t('French'),
-            'pl_PL' => t('Polish'),
-            'pt_BR' => t('Portuguese (Brazilian)'),
-            'sv_SE' => t('Swedish'),
-            'zh_CN' => t('Chinese (Simplified)'),
+        // Sorted by value
+        return array(
+            'de_DE' => 'Deutsch',
+            'en_US' => 'English',
+            'es_ES' => 'Español',
+            'fr_FR' => 'Français',
+            'it_IT' => 'Italiano',
+            'pl_PL' => 'Polski',
+            'pt_BR' => 'Português (Brasil)',
+            'ru_RU' => 'Русский',
+            'fi_FI' => 'Suomi',
+            'sv_SE' => 'Svenska',
+            'zh_CN' => '中文(简体)',
         );
-
-        asort($languages);
-
-        return $languages;
     }
 
     /**
@@ -72,7 +72,7 @@ class Config extends Base
             $_SESSION['config'] = $this->getAll();
         }
 
-        if (isset($_SESSION['config'][$name])) {
+        if (! empty($_SESSION['config'][$name])) {
             return $_SESSION['config'][$name];
         }
 

@@ -44,7 +44,11 @@ class Table
         }
     }
 
-
+    /**
+     * Update
+     *
+     * Note: Do not use `rowCount()` the behaviour is different across drivers
+     */
     public function update(array $data)
     {
         $columns = array();
@@ -70,11 +74,7 @@ class Table
 
         $result = $this->db->execute($sql, $values);
 
-        if ($result !== false/* && $result->rowCount() > 0*/) {
-            return true;
-        }
-
-        return false;
+        return $result !== false;
     }
 
 
@@ -106,7 +106,9 @@ class Table
             $this->conditions()
         );
 
-        return false !== $this->db->execute($sql, $this->values);
+        $result = $this->db->execute($sql, $this->values);
+
+        return $result !== false && $result->rowCount() > 0;
     }
 
 
@@ -377,6 +379,12 @@ class Table
             case 'equal':
             case 'equals':
                 $sql = sprintf('%s = ?', $this->db->escapeIdentifier($column));
+                break;
+
+            case 'neq':
+            case 'notequal':
+            case 'notequals':
+                $sql = sprintf('%s != ?', $this->db->escapeIdentifier($column));
                 break;
 
             case 'gt':
