@@ -4,6 +4,7 @@ namespace Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
+use Core\Session;
 
 /**
  * User model
@@ -26,6 +27,24 @@ class User extends Base
      * @var integer
      */
     const EVERYBODY_ID = -1;
+
+    /**
+     * Return true is the given user id is administrator
+     *
+     * @access public
+     * @param  integer   $user_id   User id
+     * @return boolean
+     */
+    public function isAdmin($user_id)
+    {
+        $result = $this->db
+                    ->table(User::TABLE)
+                    ->eq('id', $user_id)
+                    ->eq('is_admin', 1)
+                    ->count();
+
+        return $result > 0;
+    }
 
     /**
      * Get the default project from the session
@@ -119,8 +138,62 @@ class User extends Base
         return $this->db
                     ->table(self::TABLE)
                     ->asc('username')
-                    ->columns('id', 'username', 'name', 'email', 'is_admin', 'default_project_id', 'is_ldap_user', 'notifications_enabled', 'google_id', 'github_id')
+                    ->columns(
+                        'id',
+                        'username',
+                        'name',
+                        'email',
+                        'is_admin',
+                        'default_project_id',
+                        'is_ldap_user',
+                        'notifications_enabled',
+                        'google_id',
+                        'github_id'
+                    )
                     ->findAll();
+    }
+
+    /**
+     * Get all users with pagination
+     *
+     * @access public
+     * @param  integer    $offset        Offset
+     * @param  integer    $limit         Limit
+     * @param  string     $column        Sorting column
+     * @param  string     $direction     Sorting direction
+     * @return array
+     */
+    public function paginate($offset = 0, $limit = 25, $column = 'username', $direction = 'ASC')
+    {
+        return $this->db
+                    ->table(self::TABLE)
+                    ->columns(
+                        'id',
+                        'username',
+                        'name',
+                        'email',
+                        'is_admin',
+                        'default_project_id',
+                        'is_ldap_user',
+                        'notifications_enabled',
+                        'google_id',
+                        'github_id'
+                    )
+                    ->offset($offset)
+                    ->limit($limit)
+                    ->orderBy($column, $direction)
+                    ->findAll();
+    }
+
+    /**
+     * Get the number of users
+     *
+     * @access public
+     * @return integer
+     */
+    public function count()
+    {
+        return $this->db->table(self::TABLE)->count();
     }
 
     /**
@@ -132,7 +205,18 @@ class User extends Base
     public function getList()
     {
         $users = $this->db->table(self::TABLE)->columns('id', 'username', 'name')->findAll();
+        return $this->prepareList($users);
+    }
 
+    /**
+     * Common method to prepare a user list
+     *
+     * @access public
+     * @param  array     $users    Users list (from database)
+     * @return array               Formated list
+     */
+    public function prepareList(array $users)
+    {
         $result = array();
 
         foreach ($users as $user) {
@@ -162,21 +246,8 @@ class User extends Base
             }
         }
 
-        if (isset($values['confirmation'])) {
-            unset($values['confirmation']);
-        }
-
-        if (isset($values['current_password'])) {
-            unset($values['current_password']);
-        }
-
-        if (isset($values['is_admin']) && empty($values['is_admin'])) {
-            $values['is_admin'] = 0;
-        }
-
-        if (isset($values['is_ldap_user']) && empty($values['is_ldap_user'])) {
-            $values['is_ldap_user'] = 0;
-        }
+        $this->removeFields($values, array('confirmation', 'current_password'));
+        $this->resetFields($values, array('is_admin', 'is_ldap_user'));
     }
 
     /**
@@ -205,7 +276,7 @@ class User extends Base
         $result = $this->db->table(self::TABLE)->eq('id', $values['id'])->update($values);
 
         // If the user is connected refresh his session
-        if (session_id() !== '' && $_SESSION['user']['id'] == $values['id']) {
+        if (Session::isOpen() && $_SESSION['user']['id'] == $values['id']) {
             $this->updateSession();
         }
 
@@ -381,61 +452,5 @@ class User extends Base
         }
 
         return array(false, $v->getErrors());
-    }
-
-    /**
-     * Get the user agent of the connected user
-     *
-     * @access public
-     * @return string
-     */
-    public function getUserAgent()
-    {
-        return empty($_SERVER['HTTP_USER_AGENT']) ? t('Unknown') : $_SERVER['HTTP_USER_AGENT'];
-    }
-
-    /**
-     * Get the real IP address of the connected user
-     *
-     * @access public
-     * @param  bool    $only_public   Return only public IP address
-     * @return string
-     */
-    public function getIpAddress($only_public = false)
-    {
-        $keys = array(
-            'HTTP_CLIENT_IP',
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_X_CLUSTER_CLIENT_IP',
-            'HTTP_FORWARDED_FOR',
-            'HTTP_FORWARDED',
-            'REMOTE_ADDR'
-        );
-
-        foreach ($keys as $key) {
-
-            if (isset($_SERVER[$key])) {
-
-                foreach (explode(',', $_SERVER[$key]) as $ip_address) {
-
-                    $ip_address = trim($ip_address);
-
-                    if ($only_public) {
-
-                        // Return only public IP address
-                        if (filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                            return $ip_address;
-                        }
-                    }
-                    else {
-
-                        return $ip_address;
-                    }
-                }
-            }
-        }
-
-        return t('Unknown');
     }
 }

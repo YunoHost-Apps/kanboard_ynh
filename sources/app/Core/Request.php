@@ -50,26 +50,15 @@ class Request
     }
 
     /**
-     * Get form values or unserialized json request
+     * Get form values and check for CSRF token
      *
      * @access public
      * @return array
      */
     public function getValues()
     {
-        if (! empty($_POST)) {
-
-            if (Security::validateCSRFFormToken($_POST)) {
-                return $_POST;
-            }
-
-            return array();
-        }
-
-        $result = json_decode($this->getBody(), true);
-
-        if ($result) {
-            return $result;
+        if (! empty($_POST) && Security::validateCSRFFormToken($_POST)) {
+            return $_POST;
         }
 
         return array();
@@ -135,5 +124,74 @@ class Request
     {
         $name = 'HTTP_'.str_replace('-', '_', strtoupper($name));
         return isset($_SERVER[$name]) ? $_SERVER[$name] : '';
+    }
+
+    /**
+     * Returns current request's query string, useful for redirecting
+     *
+     * @access public
+     * @return string
+     */
+    public function getQueryString()
+    {
+        return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
+    }
+
+    /**
+     * Get the user agent
+     *
+     * @static
+     * @access public
+     * @return string
+     */
+    public static function getUserAgent()
+    {
+        return empty($_SERVER['HTTP_USER_AGENT']) ? t('Unknown') : $_SERVER['HTTP_USER_AGENT'];
+    }
+
+    /**
+     * Get the real IP address of the user
+     *
+     * @static
+     * @access public
+     * @param  bool    $only_public   Return only public IP address
+     * @return string
+     */
+    public static function getIpAddress($only_public = false)
+    {
+        $keys = array(
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        );
+
+        foreach ($keys as $key) {
+
+            if (isset($_SERVER[$key])) {
+
+                foreach (explode(',', $_SERVER[$key]) as $ip_address) {
+
+                    $ip_address = trim($ip_address);
+
+                    if ($only_public) {
+
+                        // Return only public IP address
+                        if (filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                            return $ip_address;
+                        }
+                    }
+                    else {
+
+                        return $ip_address;
+                    }
+                }
+            }
+        }
+
+        return t('Unknown');
     }
 }

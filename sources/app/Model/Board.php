@@ -32,6 +32,29 @@ class Board extends Base
     }
 
     /**
+     * Get user default columns
+     *
+     * @access public
+     * @return array
+     */
+    public function getUserColumns()
+    {
+        $column_names = explode(',', $this->config->get('board_columns', implode(',', $this->getDefaultColumns())));
+        $columns = array();
+
+        foreach ($column_names as $column_name) {
+
+            $column_name = trim($column_name);
+
+            if (! empty($column_name)) {
+                $columns[] = array('title' => $column_name, 'task_limit' => 0);
+            }
+        }
+
+        return $columns;
+    }
+
+    /**
      * Create a board with default columns, must be executed inside a transaction
      *
      * @access public
@@ -211,14 +234,8 @@ class Board extends Base
      */
     public function get($project_id, array $filters = array())
     {
-        $this->db->startTransaction();
-
         $columns = $this->getColumns($project_id);
-
-        $filters[] = array('column' => 'project_id', 'operator' => 'eq', 'value' => $project_id);
-        $filters[] = array('column' => 'is_active', 'operator' => 'eq', 'value' => Task::STATUS_OPEN);
-
-        $tasks = $this->task->find($filters);
+        $tasks = $this->taskFinder->getTasksOnBoard($project_id);
 
         foreach ($columns as &$column) {
 
@@ -230,8 +247,6 @@ class Board extends Base
                 }
             }
         }
-
-        $this->db->closeTransaction();
 
         return $columns;
     }

@@ -1,19 +1,10 @@
 <?php
 
-// Board refresh frequency in seconds for the public board view
-defined('BOARD_PUBLIC_CHECK_INTERVAL') or define('BOARD_PUBLIC_CHECK_INTERVAL', 60);
-
-// Board refresh frequency in seconds (the value 0 disable this feature)
-defined('BOARD_CHECK_INTERVAL') or define('BOARD_CHECK_INTERVAL', 10);
-
-// Period (in second) to consider a task was modified recently
-defined('RECENT_TASK_PERIOD') or define('RECENT_TASK_PERIOD', 48*60*60);
-
 // Custom session save path
 defined('SESSION_SAVE_PATH') or define('SESSION_SAVE_PATH', '');
 
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', 'master');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.9');
 
 // Base directory
 define('BASE_URL_DIRECTORY', dirname($_SERVER['PHP_SELF']));
@@ -68,3 +59,6 @@ defined('MAIL_SMTP_USERNAME') or define('MAIL_SMTP_USERNAME', '');
 defined('MAIL_SMTP_PASSWORD') or define('MAIL_SMTP_PASSWORD', '');
 defined('MAIL_SMTP_ENCRYPTION') or define('MAIL_SMTP_ENCRYPTION', null);
 defined('MAIL_SENDMAIL_COMMAND') or define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
+
+// Enable or disable "Strict-Transport-Security" HTTP header
+defined('ENABLE_HSTS') or define('ENABLE_HSTS', true);

@@ -17,7 +17,7 @@ class Action extends Base
      */
     public function index()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
 
         $this->response->html($this->projectLayout('action_index', array(
             'values' => array('project_id' => $project['id']),
@@ -27,9 +27,9 @@ class Action extends Base
             'available_events' => $this->action->getAvailableEvents(),
             'available_params' => $this->action->getAllActionParameters(),
             'columns_list' => $this->board->getColumnsList($project['id']),
-            'users_list' => $this->project->getUsersList($project['id']),
+            'users_list' => $this->projectPermission->getUsersList($project['id']),
             'projects_list' => $this->project->getList(false),
-            'colors_list' => $this->task->getColors(),
+            'colors_list' => $this->color->getList(),
             'categories_list' => $this->category->getList($project['id']),
             'menu' => 'projects',
             'title' => t('Automatic actions')
@@ -37,23 +37,59 @@ class Action extends Base
     }
 
     /**
-     * Define action parameters (step 2)
+     * Choose the event according to the action (step 2)
+     *
+     * @access public
+     */
+    public function event()
+    {
+        $project = $this->getProjectManagement();
+        $values = $this->request->getValues();
+
+        if (empty($values['action_name']) || empty($values['project_id'])) {
+            $this->response->redirect('?controller=action&action=index&project_id='.$project['id']);
+        }
+
+        $this->response->html($this->projectLayout('action_event', array(
+            'values' => $values,
+            'project' => $project,
+            'events' => $this->action->getCompatibleEvents($values['action_name']),
+            'menu' => 'projects',
+            'title' => t('Automatic actions')
+        )));
+    }
+
+    /**
+     * Define action parameters (step 3)
      *
      * @access public
      */
     public function params()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
         $values = $this->request->getValues();
-        $action = $this->action->load($values['action_name'], $values['project_id']);
+
+        if (empty($values['action_name']) || empty($values['project_id']) || empty($values['event_name'])) {
+            $this->response->redirect('?controller=action&action=index&project_id='.$project['id']);
+        }
+
+        $action = $this->action->load($values['action_name'], $values['project_id'], $values['event_name']);
+        $action_params = $action->getActionRequiredParameters();
+
+        if (empty($action_params)) {
+            $this->doCreation($project, $values + array('params' => array()));
+        }
+
+        $projects_list = $this->project->getList(false);
+        unset($projects_list[$project['id']]);
 
         $this->response->html($this->projectLayout('action_params', array(
             'values' => $values,
-            'action_params' => $action->getActionRequiredParameters(),
+            'action_params' => $action_params,
             'columns_list' => $this->board->getColumnsList($project['id']),
-            'users_list' => $this->project->getUsersList($project['id']),
-            'projects_list' => $this->project->getList(false),
-            'colors_list' => $this->task->getColors(),
+            'users_list' => $this->projectPermission->getUsersList($project['id']),
+            'projects_list' => $projects_list,
+            'colors_list' => $this->color->getList(),
             'categories_list' => $this->category->getList($project['id']),
             'project' => $project,
             'menu' => 'projects',
@@ -68,9 +104,18 @@ class Action extends Base
      */
     public function create()
     {
-        $project = $this->getProject();
-        $values = $this->request->getValues();
+        $this->doCreation($this->getProjectManagement(), $this->request->getValues());
+    }
 
+    /**
+     * Save the action
+     *
+     * @access private
+     * @param  array     $project   Project properties
+     * @param  array     $values    Form values
+     */
+    private function doCreation(array $project, array $values)
+    {
         list($valid,) = $this->action->validateCreation($values);
 
         if ($valid) {
@@ -93,7 +138,7 @@ class Action extends Base
      */
     public function confirm()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
 
         $this->response->html($this->projectLayout('action_remove', array(
             'action' => $this->action->getById($this->request->getIntegerParam('action_id')),
@@ -113,6 +158,7 @@ class Action extends Base
     public function remove()
     {
         $this->checkCSRFParam();
+        $project = $this->getProjectManagement();
         $action = $this->action->getById($this->request->getIntegerParam('action_id'));
 
         if ($action && $this->action->remove($action['id'])) {
@@ -121,6 +167,6 @@ class Action extends Base
             $this->session->flashError(t('Unable to remove this action.'));
         }
 
-        $this->response->redirect('?controller=action&action=index&project_id='.$action['project_id']);
+        $this->response->redirect('?controller=action&action=index&project_id='.$project['id']);
     }
 }

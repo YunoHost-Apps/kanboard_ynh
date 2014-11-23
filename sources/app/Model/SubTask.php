@@ -82,6 +82,7 @@ class SubTask extends Base
                              ->eq('task_id', $task_id)
                              ->columns(self::TABLE.'.*', User::TABLE.'.username', User::TABLE.'.name')
                              ->join(User::TABLE, 'id', 'user_id')
+                             ->asc(self::TABLE.'.id')
                              ->findAll();
 
         foreach ($subtasks as &$subtask) {
@@ -128,17 +129,8 @@ class SubTask extends Base
      */
     public function prepare(array &$values)
     {
-        if (isset($values['another_subtask'])) {
-            unset($values['another_subtask']);
-        }
-
-        if (isset($values['time_estimated']) && empty($values['time_estimated'])) {
-            $values['time_estimated'] = 0;
-        }
-
-        if (isset($values['time_spent']) && empty($values['time_spent'])) {
-            $values['time_spent'] = 0;
-        }
+        $this->removeFields($values, array('another_subtask'));
+        $this->resetFields($values, array('time_estimated', 'time_spent'));
     }
 
     /**

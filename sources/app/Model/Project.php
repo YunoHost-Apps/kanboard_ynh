@@ -4,7 +4,7 @@ namespace Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
-use Event\ProjectModificationDate;
+use Event\ProjectModificationDateListener;
 use Core\Security;
 
 /**
@@ -23,13 +23,6 @@ class Project extends Base
     const TABLE = 'projects';
 
     /**
-     * SQL table name for users
-     *
-     * @var string
-     */
-    const TABLE_USERS = 'project_has_users';
-
-    /**
      * Value for active project
      *
      * @var integer
@@ -42,157 +35,6 @@ class Project extends Base
      * @var integer
      */
     const INACTIVE = 0;
-
-    /**
-     * Get a list of people that can be assigned for tasks
-     *
-     * @access public
-     * @param  integer   $project_id            Project id
-     * @param  bool      $prepend_unassigned    Prepend the 'Unassigned' value
-     * @param  bool      $prepend_everybody     Prepend the 'Everbody' value
-     * @return array
-     */
-    public function getUsersList($project_id, $prepend_unassigned = true, $prepend_everybody = false)
-    {
-        $allowed_users = $this->getAllowedUsers($project_id);
-
-        if (empty($allowed_users)) {
-            $allowed_users = $this->user->getList();
-        }
-
-        if ($prepend_unassigned) {
-            $allowed_users = array(t('Unassigned')) + $allowed_users;
-        }
-
-        if ($prepend_everybody) {
-            $allowed_users = array(User::EVERYBODY_ID => t('Everybody')) + $allowed_users;
-        }
-
-        return $allowed_users;
-    }
-
-    /**
-     * Get a list of allowed people for a project
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @return array
-     */
-    public function getAllowedUsers($project_id)
-    {
-        $users = $this->db
-            ->table(self::TABLE_USERS)
-            ->join(User::TABLE, 'id', 'user_id')
-            ->eq('project_id', $project_id)
-            ->asc('username')
-            ->columns(User::TABLE.'.id', User::TABLE.'.username', User::TABLE.'.name')
-            ->findAll();
-
-        $result = array();
-
-        foreach ($users as $user) {
-            $result[$user['id']] = $user['name'] ?: $user['username'];
-        }
-
-        asort($result);
-
-        return $result;
-    }
-
-    /**
-     * Get allowed and not allowed users for a project
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @return array
-     */
-    public function getAllUsers($project_id)
-    {
-        $users = array(
-            'allowed' => array(),
-            'not_allowed' => array(),
-        );
-
-        $all_users = $this->user->getList();
-
-        $users['allowed'] = $this->getAllowedUsers($project_id);
-
-        foreach ($all_users as $user_id => $username) {
-
-            if (! isset($users['allowed'][$user_id])) {
-                $users['not_allowed'][$user_id] = $username;
-            }
-        }
-
-        return $users;
-    }
-
-    /**
-     * Allow a specific user for a given project
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @param  integer   $user_id      User id
-     * @return bool
-     */
-    public function allowUser($project_id, $user_id)
-    {
-        return $this->db
-                    ->table(self::TABLE_USERS)
-                    ->save(array('project_id' => $project_id, 'user_id' => $user_id));
-    }
-
-    /**
-     * Revoke a specific user for a given project
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @param  integer   $user_id      User id
-     * @return bool
-     */
-    public function revokeUser($project_id, $user_id)
-    {
-        return $this->db
-                    ->table(self::TABLE_USERS)
-                    ->eq('project_id', $project_id)
-                    ->eq('user_id', $user_id)
-                    ->remove();
-    }
-
-    /**
-     * Check if a specific user is allowed to access to a given project
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @param  integer   $user_id      User id
-     * @return bool
-     */
-    public function isUserAllowed($project_id, $user_id)
-    {
-        // If there is nobody specified, everybody have access to the project
-        $nb_users = $this->db
-                    ->table(self::TABLE_USERS)
-                    ->eq('project_id', $project_id)
-                    ->count();
-
-        if ($nb_users < 1) return true;
-
-        // Check if user has admin rights
-        $nb_users = $this->db
-                    ->table(User::TABLE)
-                    ->eq('id', $user_id)
-                    ->eq('is_admin', 1)
-                    ->count();
-
-        if ($nb_users > 0) return true;
-
-        // Otherwise, allow only specific users
-        return (bool) $this->db
-                    ->table(self::TABLE_USERS)
-                    ->eq('project_id', $project_id)
-                    ->eq('user_id', $user_id)
-                    ->count();
-    }
 
     /**
      * Get a project by the id
@@ -242,6 +84,18 @@ class Project extends Base
     }
 
     /**
+     * Return true if the project is private
+     *
+     * @access public
+     * @param  integer   $project_id    Project id
+     * @return boolean
+     */
+    public function isPrivate($project_id)
+    {
+        return (bool) $this->db->table(self::TABLE)->eq('id', $project_id)->eq('is_private', 1)->count();
+    }
+
+    /**
      * Get all projects, optionaly fetch stats for each project and can check users permissions
      *
      * @access public
@@ -256,7 +110,7 @@ class Project extends Base
 
             foreach ($projects as $key => $project) {
 
-                if (! $this->isUserAllowed($project['id'], $this->acl->getUserId())) {
+                if (! $this->projectPermission->isUserAllowed($project['id'], $this->acl->getUserId())) {
                     unset($projects[$key]);
                 }
             }
@@ -329,37 +183,6 @@ class Project extends Base
     }
 
     /**
-     * Filter a list of projects for a given user
-     *
-     * @access public
-     * @param  array     $projects     Project list: ['project_id' => 'project_name']
-     * @param  integer   $user_id      User id
-     * @return array
-     */
-    public function filterListByAccess(array $projects, $user_id)
-    {
-        foreach ($projects as $project_id => $project_name) {
-            if (! $this->isUserAllowed($project_id, $user_id)) {
-                unset($projects[$project_id]);
-            }
-        }
-
-        return $projects;
-    }
-
-    /**
-     * Return a list of projects for a given user
-     *
-     * @access public
-     * @param  integer   $user_id      User id
-     * @return array
-     */
-    public function getAvailableList($user_id)
-    {
-        return $this->filterListByAccess($this->getListByStatus(self::ACTIVE), $user_id);
-    }
-
-    /**
      * Gather some task metrics for a given project
      *
      * @access public
@@ -373,12 +196,12 @@ class Project extends Base
         $stats['nb_active_tasks'] = 0;
 
         foreach ($columns as &$column) {
-            $column['nb_active_tasks'] = $this->task->countByColumnId($project_id, $column['id']);
+            $column['nb_active_tasks'] = $this->taskFinder->countByColumnId($project_id, $column['id']);
             $stats['nb_active_tasks'] += $column['nb_active_tasks'];
         }
 
         $stats['columns'] = $columns;
-        $stats['nb_tasks'] = $this->task->countByProjectId($project_id);
+        $stats['nb_tasks'] = $this->taskFinder->countByProjectId($project_id);
         $stats['nb_inactive_tasks'] = $stats['nb_tasks'] - $stats['nb_active_tasks'];
 
         return $stats;
@@ -393,41 +216,22 @@ class Project extends Base
      */
     public function createProjectFromAnotherProject($project_id)
     {
-        $project_name = $this->db->table(self::TABLE)->eq('id', $project_id)->findOneColumn('name');
+        $project = $this->getById($project_id);
 
-        $project = array(
-            'name' => $project_name.' ('.t('Clone').')',
+        $values = array(
+            'name' => $project['name'].' ('.t('Clone').')',
             'is_active' => true,
             'last_modified' => 0,
             'token' => '',
+            'is_public' => 0,
+            'is_private' => empty($project['is_private']) ? 0 : 1,
         );
 
-        if (! $this->db->table(self::TABLE)->save($project)) {
+        if (! $this->db->table(self::TABLE)->save($values)) {
             return false;
         }
 
         return $this->db->getConnection()->getLastId();
-    }
-
-    /**
-     * Copy user access from a project to another one
-     *
-     * @author Antonio Rabelo
-     * @param  integer    $project_from      Project Template
-     * @return integer    $project_to        Project that receives the copy
-     * @return boolean
-     */
-    public function duplicateUsers($project_from, $project_to)
-    {
-        $users = $this->getAllowedUsers($project_from);
-
-        foreach ($users as $user_id => $name) {
-            if (! $this->allowUser($project_to, $user_id)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -443,33 +247,18 @@ class Project extends Base
 
         // Get the cloned project Id
         $clone_project_id = $this->createProjectFromAnotherProject($project_id);
+
         if (! $clone_project_id) {
             $this->db->cancelTransaction();
             return false;
         }
 
-        // Clone Board
-        if (! $this->board->duplicate($project_id, $clone_project_id)) {
-            $this->db->cancelTransaction();
-            return false;
-        }
+        foreach (array('board', 'category', 'projectPermission', 'action') as $model) {
 
-        // Clone Categories
-        if (! $this->category->duplicate($project_id, $clone_project_id)) {
-            $this->db->cancelTransaction();
-            return false;
-        }
-
-        // Clone Allowed Users
-        if (! $this->duplicateUsers($project_id, $clone_project_id)) {
-            $this->db->cancelTransaction();
-            return false;
-        }
-
-        // Clone Actions
-        if (! $this->action->duplicate($project_id, $clone_project_id)) {
-            $this->db->cancelTransaction();
-            return false;
+            if (! $this->$model->duplicate($project_id, $clone_project_id)) {
+                $this->db->cancelTransaction();
+                return false;
+            }
         }
 
         $this->db->closeTransaction();
@@ -482,14 +271,16 @@ class Project extends Base
      *
      * @access public
      * @param  array    $values   Form values
+     * @param  integer  $user_id  User who create the project
      * @return integer            Project id
      */
-    public function create(array $values)
+    public function create(array $values, $user_id = 0)
     {
         $this->db->startTransaction();
 
         $values['token'] = '';
         $values['last_modified'] = time();
+        $values['is_private'] = empty($values['is_private']) ? 0 : 1;
 
         if (! $this->db->table(self::TABLE)->save($values)) {
             $this->db->cancelTransaction();
@@ -497,19 +288,16 @@ class Project extends Base
         }
 
         $project_id = $this->db->getConnection()->getLastId();
-        $column_names = explode(',', $this->config->get('default_columns', implode(',', $this->board->getDefaultColumns())));
-        $columns = array();
 
-        foreach ($column_names as $column_name) {
-
-            $column_name = trim($column_name);
-
-            if (! empty($column_name)) {
-                $columns[] = array('title' => $column_name, 'task_limit' => 0);
-            }
+        if (! $this->board->create($project_id, $this->board->getUserColumns())) {
+            $this->db->cancelTransaction();
+            return false;
         }
 
-        $this->board->create($project_id, $columns);
+        if ($values['is_private'] && $user_id) {
+            $this->projectPermission->allowUser($project_id, $user_id);
+        }
+
         $this->db->closeTransaction();
 
         return (int) $project_id;
@@ -702,28 +490,6 @@ class Project extends Base
     }
 
     /**
-     * Validate allowed users
-     *
-     * @access public
-     * @param  array   $values           Form values
-     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
-     */
-    public function validateUserAccess(array $values)
-    {
-        $v = new Validator($values, array(
-            new Validators\Required('project_id', t('The project id is required')),
-            new Validators\Integer('project_id', t('This value must be an integer')),
-            new Validators\Required('user_id', t('The user id is required')),
-            new Validators\Integer('user_id', t('This value must be an integer')),
-        ));
-
-        return array(
-            $v->execute(),
-            $v->getErrors()
-        );
-    }
-
-    /**
      * Attach events
      *
      * @access public
@@ -737,43 +503,19 @@ class Project extends Base
             Task::EVENT_MOVE_COLUMN,
             Task::EVENT_MOVE_POSITION,
             Task::EVENT_ASSIGNEE_CHANGE,
+            GithubWebhook::EVENT_ISSUE_OPENED,
+            GithubWebhook::EVENT_ISSUE_CLOSED,
+            GithubWebhook::EVENT_ISSUE_REOPENED,
+            GithubWebhook::EVENT_ISSUE_ASSIGNEE_CHANGE,
+            GithubWebhook::EVENT_ISSUE_LABEL_CHANGE,
+            GithubWebhook::EVENT_ISSUE_COMMENT,
+            GithubWebhook::EVENT_COMMIT,
         );
 
-        $listener = new ProjectModificationDate($this);
+        $listener = new ProjectModificationDateListener($this->registry);
 
         foreach ($events as $event_name) {
             $this->event->attach($event_name, $listener);
         }
-    }
-
-    /**
-     * Get project activity
-     *
-     * @access public
-     * @param  integer   $project_id   Project id
-     * @return array
-     */
-    public function getActivity($project_id)
-    {
-        $activity = array();
-        $tasks = $this->taskHistory->getAllContentByProjectId($project_id, 25);
-        $comments = $this->commentHistory->getAllContentByProjectId($project_id, 25);
-        $subtasks = $this->subtaskHistory->getAllContentByProjectId($project_id, 25);
-
-        foreach ($tasks as &$task) {
-            $activity[$task['date_creation'].'-'.$task['id']] = $task;
-        }
-
-        foreach ($subtasks as &$subtask) {
-            $activity[$subtask['date_creation'].'-'.$subtask['id']] = $subtask;
-        }
-
-        foreach ($comments as &$comment) {
-            $activity[$comment['date_creation'].'-'.$comment['id']] = $comment;
-        }
-
-        krsort($activity);
-
-        return $activity;
     }
 }

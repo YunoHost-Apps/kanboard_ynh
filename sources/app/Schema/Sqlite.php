@@ -3,8 +3,93 @@
 namespace Schema;
 
 use Core\Security;
+use PDO;
 
-const VERSION = 27;
+const VERSION = 34;
+
+function version_34($pdo)
+{
+    $pdo->exec('ALTER TABLE projects ADD COLUMN is_everybody_allowed INTEGER DEFAULT "0"');
+}
+
+function version_33($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE project_activities (
+            id INTEGER PRIMARY KEY,
+            date_creation INTEGER NOT NULL,
+            event_name TEXT NOT NULL,
+            creator_id INTEGER,
+            project_id INTEGER,
+            task_id INTEGER,
+            data TEXT,
+            FOREIGN KEY(creator_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        )
+    ");
+
+    $pdo->exec('DROP TABLE task_has_events');
+    $pdo->exec('DROP TABLE comment_has_events');
+    $pdo->exec('DROP TABLE subtask_has_events');
+}
+
+function version_32($pdo)
+{
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN date_started INTEGER");
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN time_spent NUMERIC DEFAULT 0");
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN time_estimated NUMERIC DEFAULT 0");
+}
+
+function version_31($pdo)
+{
+    $pdo->exec('ALTER TABLE projects ADD COLUMN is_private INTEGER DEFAULT "0"');
+}
+
+function version_30($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('application_date_format', 'm/d/Y'));
+}
+
+function version_29($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE settings (
+            option TEXT PRIMARY KEY,
+            value TEXT DEFAULT ''
+        )
+    ");
+
+    // Migrate old config parameters
+    $rq = $pdo->prepare('SELECT * FROM config');
+    $rq->execute();
+    $parameters = $rq->fetch(PDO::FETCH_ASSOC);
+
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('board_highlight_period', defined('RECENT_TASK_PERIOD') ? RECENT_TASK_PERIOD : 48*60*60));
+    $rq->execute(array('board_public_refresh_interval', defined('BOARD_PUBLIC_CHECK_INTERVAL') ? BOARD_PUBLIC_CHECK_INTERVAL : 60));
+    $rq->execute(array('board_private_refresh_interval', defined('BOARD_CHECK_INTERVAL') ? BOARD_CHECK_INTERVAL : 10));
+    $rq->execute(array('board_columns', $parameters['default_columns']));
+    $rq->execute(array('webhook_url_task_creation', $parameters['webhooks_url_task_creation']));
+    $rq->execute(array('webhook_url_task_modification', $parameters['webhooks_url_task_modification']));
+    $rq->execute(array('webhook_token', $parameters['webhooks_token']));
+    $rq->execute(array('api_token', $parameters['api_token']));
+    $rq->execute(array('application_language', $parameters['language']));
+    $rq->execute(array('application_timezone', $parameters['timezone']));
+    $rq->execute(array('application_url', defined('KANBOARD_URL') ? KANBOARD_URL : ''));
+
+    $pdo->exec('DROP TABLE config');
+}
+
+function version_28($pdo)
+{
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN reference TEXT DEFAULT ''");
+    $pdo->exec("ALTER TABLE comments ADD COLUMN reference TEXT DEFAULT ''");
+
+    $pdo->exec('CREATE INDEX tasks_reference_idx ON tasks(reference)');
+    $pdo->exec('CREATE INDEX comments_reference_idx ON comments(reference)');
+}
 
 function version_27($pdo)
 {
@@ -118,8 +203,8 @@ function version_18($pdo)
             id INTEGER PRIMARY KEY,
             title TEXT COLLATE NOCASE,
             status INTEGER DEFAULT 0,
-            time_estimated INTEGER DEFAULT 0,
-            time_spent INTEGER DEFAULT 0,
+            time_estimated NUMERIC DEFAULT 0,
+            time_spent NUMERIC DEFAULT 0,
             task_id INTEGER NOT NULL,
             user_id INTEGER,
             FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE

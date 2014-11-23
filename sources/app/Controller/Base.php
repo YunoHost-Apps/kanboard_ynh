@@ -5,7 +5,6 @@ namespace Controller;
 use Core\Tool;
 use Core\Registry;
 use Core\Security;
-use Core\Translator;
 use Model\LastLogin;
 
 /**
@@ -19,17 +18,24 @@ use Model\LastLogin;
  * @property \Model\Action             $action
  * @property \Model\Board              $board
  * @property \Model\Category           $category
+ * @property \Model\Color              $color
  * @property \Model\Comment            $comment
  * @property \Model\Config             $config
  * @property \Model\File               $file
  * @property \Model\LastLogin          $lastLogin
  * @property \Model\Notification       $notification
  * @property \Model\Project            $project
+ * @property \Model\ProjectPermission  $projectPermission
  * @property \Model\SubTask            $subTask
  * @property \Model\Task               $task
  * @property \Model\TaskHistory        $taskHistory
+ * @property \Model\TaskExport         $taskExport
+ * @property \Model\TaskFinder         $taskFinder
+ * @property \Model\TaskPermission     $taskPermission
+ * @property \Model\TaskValidator      $taskValidator
  * @property \Model\CommentHistory     $commentHistory
  * @property \Model\SubtaskHistory     $subtaskHistory
+ * @property \Model\TimeTracking       $timeTracking
  * @property \Model\User               $user
  * @property \Model\Webhook            $webhook
  */
@@ -112,19 +118,22 @@ abstract class Base
         $this->response->csp(array('style-src' => "'self' 'unsafe-inline'"));
         $this->response->nosniff();
         $this->response->xss();
-        $this->response->hsts();
-        $this->response->xframe();
 
-        // Load translations
-        $language = $this->config->get('language', 'en_US');
-        if ($language !== 'en_US') Translator::load($language);
+        // Allow the public board iframe inclusion
+        if ($action !== 'readonly') {
+            $this->response->xframe();
+        }
 
-        // Set timezone
-        date_default_timezone_set($this->config->get('timezone', 'UTC'));
+        if (ENABLE_HSTS) {
+            $this->response->hsts();
+        }
+
+        $this->config->setupTranslations();
+        $this->config->setupTimezone();
 
         // Authentication
         if (! $this->authentication->isAuthenticated($controller, $action)) {
-            $this->response->redirect('?controller=user&action=login');
+            $this->response->redirect('?controller=user&action=login&redirect_query='.urlencode($this->request->getQueryString()));
         }
 
         // Check if the user is allowed to see this page
@@ -144,13 +153,11 @@ abstract class Base
     private function attachEvents()
     {
         $models = array(
+            'projectActivity', // Order is important
             'action',
             'project',
             'webhook',
             'notification',
-            'taskHistory',
-            'commentHistory',
-            'subtaskHistory',
         );
 
         foreach ($models as $model) {
@@ -206,11 +213,8 @@ abstract class Base
      */
     protected function checkProjectPermissions($project_id)
     {
-        if ($this->acl->isRegularUser()) {
-
-            if ($project_id > 0 && ! $this->project->isUserAllowed($project_id, $this->acl->getUserId())) {
-                $this->forbidden();
-            }
+        if ($this->acl->isRegularUser() && ! $this->projectPermission->isUserAllowed($project_id, $this->acl->getUserId())) {
+            $this->forbidden();
         }
     }
 
@@ -235,6 +239,10 @@ abstract class Base
      */
     protected function taskLayout($template, array $params)
     {
+        if (isset($params['task']) && $this->taskPermission->canRemoveTask($params['task']) === false) {
+            $params['hide_remove_menu'] = true;
+        }
+
         $content = $this->template->load($template, $params);
         $params['task_content_for_layout'] = $content;
 
@@ -253,6 +261,7 @@ abstract class Base
     {
         $content = $this->template->load($template, $params);
         $params['project_content_for_layout'] = $content;
+        $params['menu'] = 'projects';
 
         return $this->template->layout('project_layout', $params);
     }
@@ -265,7 +274,7 @@ abstract class Base
      */
     protected function getTask()
     {
-        $task = $this->task->getById($this->request->getIntegerParam('task_id'), true);
+        $task = $this->taskFinder->getDetails($this->request->getIntegerParam('task_id'));
 
         if (! $task) {
             $this->notfound();
@@ -294,6 +303,27 @@ abstract class Base
         }
 
         $this->checkProjectPermissions($project['id']);
+
+        return $project;
+    }
+
+    /**
+     * Common method to get a project with administration rights
+     *
+     * @access protected
+     * @return array
+     */
+    protected function getProjectManagement()
+    {
+        $project = $this->project->getById($this->request->getIntegerParam('project_id'));
+
+        if (! $project) {
+            $this->notfound();
+        }
+
+        if ($this->acl->isRegularUser() && ! $this->projectPermission->adminAllowed($project['id'], $this->acl->getUserId())) {
+            $this->forbidden();
+        }
 
         return $project;
     }
