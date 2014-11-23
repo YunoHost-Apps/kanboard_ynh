@@ -121,6 +121,16 @@ td li {
     background: rgb(219, 235, 255)
 }
 
+th a {
+    text-decoration: none;
+    color: #333;
+}
+
+th a:focus,
+th a:hover {
+    text-decoration: underline;
+}
+
 /* forms */
 form {
     padding: 10px;
@@ -187,17 +197,17 @@ select {
 }
 
 ::-webkit-input-placeholder {
-    color: #bbb;
+    color: #ddd;
     padding-top: 2px;
 }
 
 ::-ms-input-placeholder {
-    color: #bbb;
+    color: #ddd;
     padding-top: 2px;
 }
 
 ::-moz-placeholder {
-    color: #bbb;
+    color: #ddd;
     padding-top: 2px;
 }
 
@@ -220,6 +230,10 @@ textarea.form-error {
 .form-errors {
     color: #b94a48;
     list-style-type: none;
+}
+
+ul.form-errors li {
+    margin-left: 0;
 }
 
 .form-help {
@@ -348,6 +362,15 @@ input.form-date {
     color: #333;
     background-color: #f0f0f0;
     border-color: #ddd;
+}
+
+.alert ul {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.alert li {
+    margin-left: 25px;
 }
 
 /* labels */
@@ -508,6 +531,15 @@ nav .active a {
     border-bottom: 1px dotted red;
 }
 
+.page-header h2 a {
+    color: #ddd;
+}
+
+.page-header h2 a:focus,
+.page-header h2 a:hover {
+    color: #333;
+}
+
 .page-header ul {
     text-align: left;
     margin-top: 5px;
@@ -568,9 +600,14 @@ a.filter-on {
     margin-top: 5px;
 }
 
+#board {
+    table-layout: fixed;
+}
+
 #board th a {
     text-decoration: none;
     font-size: 150%;
+    color: #3366CC;
 }
 
 #board td {
@@ -615,6 +652,7 @@ a.filter-on {
     border: 1px solid #000;
     padding: 5px;
     font-size: 95%;
+    word-wrap: break-word;
 }
 
 .task-board-recent {
@@ -720,18 +758,21 @@ a.task-board-nobody {
 }
 
 /* task view */
+.config-show,
 .user-show,
 .project-show,
 .task-show {
     position: relative;
 }
 
+.config-show-main,
 .user-show-main,
 .project-show-main,
 .task-show-main {
     margin-left: 330px;
 }
 
+.config-show-sidebar,
 .user-show-sidebar,
 .project-show-sidebar,
 .task-show-sidebar {
@@ -746,6 +787,7 @@ a.task-board-nobody {
     border-radius: 5px;
 }
 
+.config-show-sidebar li,
 .user-show-sidebar li,
 .project-show-sidebar li,
 .task-show-sidebar li {
@@ -828,6 +870,12 @@ a.task-board-nobody {
     margin-top: 10px;
 }
 
+.task-time-form {
+    margin-top: 10px;
+    margin-bottom: 25px;
+    padding: 3px;
+}
+
 /* comments */
 .comment {
     margin-bottom: 20px;
@@ -891,6 +939,11 @@ a.task-board-nobody {
     max-width: 800px;
 }
 
+#comments .comment-textarea {
+    height: 80px;
+    width: 500px;
+}
+
 /* subtasks */
 .subtasks-table {
     font-size: 0.85em;
@@ -898,15 +951,6 @@ a.task-board-nobody {
 
 .subtasks-table td {
     vertical-align: middle;
-}
-
-.subtasks-time-tracking h4 {
-    margin-bottom: 5px;
-}
-
-.subtasks-time-tracking li {
-    list-style-type: square;
-    margin-left: 30px;
 }
 
 /* markdown content */
@@ -1000,9 +1044,8 @@ tr td.task-orange,
     border-color: rgb(255, 172, 98);
 }
 
-/* config page */
-.listing,
-.settings {
+/* listing block */
+.listing {
     border-radius: 4px;
     padding: 8px 35px 8px 14px;
     margin-bottom: 20px;
@@ -1011,8 +1054,7 @@ tr td.task-orange,
     background-color: #f0f0f0;
 }
 
-.listing li,
-.settings li {
+.listing li {
     list-style-type: square;
     margin-left: 20px;
     margin-bottom: 3px;
@@ -1025,22 +1067,23 @@ tr td.task-orange,
 
 /* project view */
 .project-listing {
-    border-left: 3px solid #000;
-    margin-left: 35px;
-    padding-bottom: 10px;
-    max-width: 700px;
+    max-width: 500px;
+    margin-left: 30px;
 }
 
 .project-listing li {
-    font-size: 1.3em;
-    line-height: 1.7em;
-    list-style-type: none;
-    margin-left: 20px;
-    border-bottom: 1px dashed #ccc;
+    font-weight: bold;
+    padding: 10px;
+    margin-top: 8px;
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
 .project-listing li:hover {
-    border-color: #333;
+    border-color: #ccc;
+    background: #fcfcfc;
+    box-shadow: 0 0 8px rgba(200, 200, 200, 0.6);
 }
 
 .project-listing a {
@@ -1080,6 +1123,37 @@ tr td.task-orange,
     padding-top: 5px;
 }
 
+.activity-description ul {
+    margin-top: 10px;
+}
+
+.activity-description li {
+    margin-left: 40px;
+    list-style-type: circle;
+    color: #555;
+}
+
+.activity-description .markdown {
+    margin-top: 10px;
+    color: #555;
+}
+
+/* dashboard */
+#dashboard table {
+    font-size: 0.95em;
+}
+
+.dashboard-left-column {
+    width: 55%;
+    float: left;
+}
+
+.dashboard-right-column {
+    margin-left: 5%;
+    width: 40%;
+    float: left;
+}
+
 /* confirmation box */
 .confirm {
     max-width: 700px;
@@ -1109,6 +1183,19 @@ tr td.task-orange,
 /* datepicker */
 #ui-datepicker-div {
     font-size: 0.8em;
+}
+
+/* pagination */
+#pagination {
+    text-align: center;
+}
+
+#pagination-next {
+    margin-left: 5px;
+}
+
+#pagination-previous {
+    margin-right: 5px;
 }
 
 /* responsive design */

@@ -15,35 +15,22 @@ use Core\Security;
 class Board extends Base
 {
     /**
-     * Move a column up
+     * Move a column down or up
      *
      * @access public
      */
-    public function moveUp()
+    public function moveColumn()
     {
         $this->checkCSRFParam();
-        $project_id = $this->request->getIntegerParam('project_id');
+        $project = $this->getProjectManagement();
         $column_id = $this->request->getIntegerParam('column_id');
+        $direction = $this->request->getStringParam('direction');
 
-        $this->board->moveUp($project_id, $column_id);
+        if ($direction === 'up' || $direction === 'down') {
+            $this->board->{'move'.$direction}($project['id'], $column_id);
+        }
 
-        $this->response->redirect('?controller=board&action=edit&project_id='.$project_id);
-    }
-
-    /**
-     * Move a column down
-     *
-     * @access public
-     */
-    public function moveDown()
-    {
-        $this->checkCSRFParam();
-        $project_id = $this->request->getIntegerParam('project_id');
-        $column_id = $this->request->getIntegerParam('column_id');
-
-        $this->board->moveDown($project_id, $column_id);
-
-        $this->response->redirect('?controller=board&action=edit&project_id='.$project_id);
+        $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
     }
 
     /**
@@ -55,11 +42,11 @@ class Board extends Base
     {
         $task = $this->getTask();
         $project = $this->project->getById($task['project_id']);
-        $projects = $this->project->getAvailableList($this->acl->getUserId());
+        $projects = $this->projectPermission->getAllowedProjects($this->acl->getUserId());
         $params = array(
             'errors' => array(),
             'values' => $task,
-            'users_list' => $this->project->getUsersList($project['id']),
+            'users_list' => $this->projectPermission->getUsersList($project['id']),
             'projects' => $projects,
             'current_project_id' => $project['id'],
             'current_project_name' => $project['name'],
@@ -88,7 +75,7 @@ class Board extends Base
         $values = $this->request->getValues();
         $this->checkProjectPermissions($values['project_id']);
 
-        list($valid,) = $this->task->validateAssigneeModification($values);
+        list($valid,) = $this->taskValidator->validateAssigneeModification($values);
 
         if ($valid && $this->task->update($values)) {
             $this->session->flash(t('Task updated successfully.'));
@@ -109,7 +96,7 @@ class Board extends Base
     {
         $task = $this->getTask();
         $project = $this->project->getById($task['project_id']);
-        $projects = $this->project->getAvailableList($this->acl->getUserId());
+        $projects = $this->projectPermission->getAllowedProjects($this->acl->getUserId());
         $params = array(
             'errors' => array(),
             'values' => $task,
@@ -142,7 +129,7 @@ class Board extends Base
         $values = $this->request->getValues();
         $this->checkProjectPermissions($values['project_id']);
 
-        list($valid,) = $this->task->validateCategoryModification($values);
+        list($valid,) = $this->taskValidator->validateCategoryModification($values);
 
         if ($valid && $this->task->update($values)) {
             $this->session->flash(t('Task updated successfully.'));
@@ -177,8 +164,8 @@ class Board extends Base
             'categories' => $this->category->getList($project['id'], false),
             'title' => $project['name'],
             'no_layout' => true,
-            'auto_refresh' => true,
             'not_editable' => true,
+            'board_public_refresh_interval' => $this->config->get('board_public_refresh_interval'),
         )));
     }
 
@@ -194,7 +181,7 @@ class Board extends Base
         $project_id = $last_seen_project_id ?: $favorite_project_id;
 
         if (! $project_id) {
-            $projects = $this->project->getAvailableList($this->acl->getUserId());
+            $projects = $this->projectPermission->getAllowedProjects($this->acl->getUserId());
 
             if (empty($projects)) {
 
@@ -220,7 +207,7 @@ class Board extends Base
     public function show($project_id = 0)
     {
         $project = $this->getProject($project_id);
-        $projects = $this->project->getAvailableList($this->acl->getUserId());
+        $projects = $this->projectPermission->getAllowedProjects($this->acl->getUserId());
 
         $board_selector = $projects;
         unset($board_selector[$project['id']]);
@@ -228,16 +215,18 @@ class Board extends Base
         $this->user->storeLastSeenProjectId($project['id']);
 
         $this->response->html($this->template->layout('board_index', array(
-            'users' => $this->project->getUsersList($project['id'], true, true),
+            'users' => $this->projectPermission->getUsersList($project['id'], true, true),
             'filters' => array('user_id' => UserModel::EVERYBODY_ID),
             'projects' => $projects,
             'current_project_id' => $project['id'],
-            'current_project_name' => $projects[$project['id']],
+            'current_project_name' => $project['name'],
             'board' => $this->board->get($project['id']),
             'categories' => $this->category->getList($project['id'], true, true),
             'menu' => 'boards',
-            'title' => $projects[$project['id']],
+            'title' => $project['name'],
             'board_selector' => $board_selector,
+            'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
+            'board_highlight_period' => $this->config->get('board_highlight_period'),
         )));
     }
 
@@ -248,7 +237,7 @@ class Board extends Base
      */
     public function edit()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
         $columns = $this->board->getColumns($project['id']);
         $values = array();
 
@@ -274,7 +263,7 @@ class Board extends Base
      */
     public function update()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
         $columns = $this->board->getColumns($project['id']);
         $data = $this->request->getValues();
         $values = $columns_list = array();
@@ -315,7 +304,7 @@ class Board extends Base
      */
     public function add()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
         $columns = $this->board->getColumnsList($project['id']);
         $data = $this->request->getValues();
         $values = array();
@@ -348,13 +337,27 @@ class Board extends Base
     }
 
     /**
-     * Confirmation dialog before removing a column
+     * Remove a column
      *
      * @access public
      */
-    public function confirm()
+    public function remove()
     {
-        $project = $this->getProject();
+        $project = $this->getProjectManagement();
+
+        if ($this->request->getStringParam('remove') === 'yes') {
+
+            $this->checkCSRFParam();
+            $column = $this->board->getColumn($this->request->getIntegerParam('column_id'));
+
+            if ($column && $this->board->removeColumn($column['id'])) {
+                $this->session->flash(t('Column removed successfully.'));
+            } else {
+                $this->session->flashError(t('Unable to remove this column.'));
+            }
+
+            $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
+        }
 
         $this->response->html($this->projectLayout('board_remove', array(
             'column' => $this->board->getColumn($this->request->getIntegerParam('column_id')),
@@ -362,25 +365,6 @@ class Board extends Base
             'menu' => 'projects',
             'title' => t('Remove a column from a board')
         )));
-    }
-
-    /**
-     * Remove a column
-     *
-     * @access public
-     */
-    public function remove()
-    {
-        $this->checkCSRFParam();
-        $column = $this->board->getColumn($this->request->getIntegerParam('column_id'));
-
-        if ($column && $this->board->removeColumn($column['id'])) {
-            $this->session->flash(t('Column removed successfully.'));
-        } else {
-            $this->session->flashError(t('Unable to remove this column.'));
-        }
-
-        $this->response->redirect('?controller=board&action=edit&project_id='.$column['project_id']);
     }
 
     /**
@@ -394,7 +378,7 @@ class Board extends Base
 
         if ($project_id > 0 && $this->request->isAjax()) {
 
-            if (! $this->project->isUserAllowed($project_id, $this->acl->getUserId())) {
+            if (! $this->projectPermission->isUserAllowed($project_id, $this->acl->getUserId())) {
                 $this->response->status(401);
             }
 
@@ -407,6 +391,8 @@ class Board extends Base
                         'current_project_id' => $project_id,
                         'board' => $this->board->get($project_id),
                         'categories' => $this->category->getList($project_id, false),
+                        'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
+                        'board_highlight_period' => $this->config->get('board_highlight_period'),
                     )),
                     201
                 );
@@ -433,7 +419,7 @@ class Board extends Base
             $project_id = $this->request->getIntegerParam('project_id');
             $timestamp = $this->request->getIntegerParam('timestamp');
 
-            if ($project_id > 0 && ! $this->project->isUserAllowed($project_id, $this->acl->getUserId())) {
+            if ($project_id > 0 && ! $this->projectPermission->isUserAllowed($project_id, $this->acl->getUserId())) {
                 $this->response->text('Not Authorized', 401);
             }
 
@@ -443,6 +429,8 @@ class Board extends Base
                         'current_project_id' => $project_id,
                         'board' => $this->board->get($project_id),
                         'categories' => $this->category->getList($project_id, false),
+                        'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
+                        'board_highlight_period' => $this->config->get('board_highlight_period'),
                     ))
                 );
             }

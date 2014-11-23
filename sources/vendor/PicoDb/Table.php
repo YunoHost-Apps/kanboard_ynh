@@ -173,6 +173,10 @@ class Table
 
     public function buildSelectQuery()
     {
+        foreach ($this->columns as $key => $value) {
+            $this->columns[$key] = $this->db->escapeIdentifier($value);
+        }
+
         return sprintf(
             'SELECT %s %s FROM %s %s %s %s %s %s %s',
             $this->distinct ? 'DISTINCT' : '',
@@ -350,7 +354,7 @@ class Table
         switch (strtolower($name)) {
 
             case 'in':
-                if (isset($arguments[1]) && is_array($arguments[1])) {
+                if (isset($arguments[1]) && is_array($arguments[1]) && ! empty($arguments[1])) {
 
                     $sql = sprintf(
                         '%s IN (%s)',
@@ -361,7 +365,7 @@ class Table
                 break;
 
             case 'notin':
-                if (isset($arguments[1]) && is_array($arguments[1])) {
+                if (isset($arguments[1]) && is_array($arguments[1]) && ! empty($arguments[1])) {
 
                     $sql = sprintf(
                         '%s NOT IN (%s)',

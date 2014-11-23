@@ -39,9 +39,10 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask_create', array(
             'values' => array(
                 'task_id' => $task['id'],
+                'another_subtask' => $this->request->getIntegerParam('another_subtask', 0)
             ),
             'errors' => array(),
-            'users_list' => $this->project->getUsersList($task['project_id']),
+            'users_list' => $this->projectPermission->getUsersList($task['project_id']),
             'task' => $task,
             'menu' => 'tasks',
             'title' => t('Add a sub-task')
@@ -70,7 +71,7 @@ class Subtask extends Base
             }
 
             if (isset($values['another_subtask']) && $values['another_subtask'] == 1) {
-                $this->response->redirect('?controller=subtask&action=create&task_id='.$task['id']);
+                $this->response->redirect('?controller=subtask&action=create&task_id='.$task['id'].'&another_subtask=1');
             }
 
             $this->response->redirect('?controller=task&action=show&task_id='.$task['id'].'#subtasks');
@@ -79,7 +80,7 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask_create', array(
             'values' => $values,
             'errors' => $errors,
-            'users_list' => $this->project->getUsersList($task['project_id']),
+            'users_list' => $this->projectPermission->getUsersList($task['project_id']),
             'task' => $task,
             'menu' => 'tasks',
             'title' => t('Add a sub-task')
@@ -99,7 +100,7 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask_edit', array(
             'values' => $subtask,
             'errors' => array(),
-            'users_list' => $this->project->getUsersList($task['project_id']),
+            'users_list' => $this->projectPermission->getUsersList($task['project_id']),
             'status_list' => $this->subTask->getStatusList(),
             'subtask' => $subtask,
             'task' => $task,
@@ -136,7 +137,7 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask_edit', array(
             'values' => $values,
             'errors' => $errors,
-            'users_list' => $this->project->getUsersList($task['project_id']),
+            'users_list' => $this->projectPermission->getUsersList($task['project_id']),
             'status_list' => $this->subTask->getStatusList(),
             'subtask' => $subtask,
             'task' => $task,
@@ -179,6 +180,29 @@ class Subtask extends Base
         }
         else {
             $this->session->flashError(t('Unable to remove this sub-task.'));
+        }
+
+        $this->response->redirect('?controller=task&action=show&task_id='.$task['id'].'#subtasks');
+    }
+
+    /**
+     * Change status to the next status: Toto -> In Progress -> Done
+     *
+     * @access public
+     */
+    public function toggleStatus()
+    {
+        $task = $this->getTask();
+        $subtask = $this->getSubtask();
+
+        $value = array(
+            'id' => $subtask['id'],
+            'status' => ($subtask['status'] + 1) % 3,
+            'task_id' => $task['id'],
+        );
+
+        if (! $this->subTask->update($value)) {
+            $this->session->flashError(t('Unable to update your sub-task.'));
         }
 
         $this->response->redirect('?controller=task&action=show&task_id='.$task['id'].'#subtasks');
