@@ -8,7 +8,7 @@
 	"license": "AGPL 3.0",
     "developer": {
         "name": "mbugeia",
-        "email": "maxime.bugeia@gmail.com",
+        "email": "kanboard@mbugeia.eu",
         "url": "http://kanboard.net/"
     },
     "multi_instance": "false",
