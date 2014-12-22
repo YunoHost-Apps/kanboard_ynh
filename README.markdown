@@ -7,11 +7,10 @@ Kanboard is a simple visual task board web application.
 
 Official website: <http://kanboard.net>
 
-Kanboard v1.0.9
+Kanboard v1.0.10
 
 
 TODO
 ----
 
-- multi instance
 - language choice
