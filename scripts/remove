@@ -1,18 +1,19 @@
 #!/bin/bash
+app=kanboard
 
-db_user=kanboard
-db_name=kanboard
+# Retrieve arguments
+domain=$(sudo yunohost app setting $app domain)
 root_pwd=$(sudo cat /etc/yunohost/mysql)
-domain=$(sudo yunohost app setting kanboard domain)
 
-mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localhost ;"
-sudo rm -rf /var/www/kanboard
-sudo rm -f /etc/nginx/conf.d/$domain.d/kanboard.conf
+# Remove sources
+sudo rm -rf /var/www/$app
 
-sudo yunohost app setting kanboard mysqlpwd -d
-sudo yunohost app setting kanboard adminusername -d
-sudo yunohost app setting kanboard domain -d
-sudo yunohost app setting kanboard path -d
+# Remove database
+mysql -u root -p$root_pwd -e "DROP DATABASE $app ; DROP USER $app@localhost ;"
 
+# Remove configuration files
+sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Restart services
 sudo service nginx reload
 sudo yunohost app ssowatconf
