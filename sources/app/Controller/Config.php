@@ -20,12 +20,12 @@ class Config extends Base
      */
     private function layout($template, array $params)
     {
+        $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->acl->getUserId());
         $params['values'] = $this->config->getAll();
         $params['errors'] = array();
-        $params['menu'] = 'config';
         $params['config_content_for_layout'] = $this->template->load($template, $params);
 
-        return $this->template->layout('config_layout', $params);
+        return $this->template->layout('config/layout', $params);
     }
 
     /**
@@ -59,9 +59,9 @@ class Config extends Base
      */
     public function index()
     {
-        $this->response->html($this->layout('config_about', array(
+        $this->response->html($this->layout('config/about', array(
             'db_size' => $this->config->getDatabaseSize(),
-            'title' => t('About'),
+            'title' => t('Settings').' &gt; '.t('About'),
         )));
     }
 
@@ -74,11 +74,11 @@ class Config extends Base
     {
         $this->common('application');
 
-        $this->response->html($this->layout('config_application', array(
-            'title' => t('Application settings'),
+        $this->response->html($this->layout('config/application', array(
             'languages' => $this->config->getLanguages(),
             'timezones' => $this->config->getTimezones(),
             'date_formats' => $this->dateParser->getAvailableFormats(),
+            'title' => t('Settings').' &gt; '.t('Application settings'),
         )));
     }
 
@@ -91,9 +91,9 @@ class Config extends Base
     {
         $this->common('board');
 
-        $this->response->html($this->layout('config_board', array(
-            'title' => t('Board settings'),
+        $this->response->html($this->layout('config/board', array(
             'default_columns' => implode(', ', $this->board->getDefaultColumns()),
+            'title' => t('Settings').' &gt; '.t('Board settings'),
         )));
     }
 
@@ -106,8 +106,8 @@ class Config extends Base
     {
         $this->common('webhook');
 
-        $this->response->html($this->layout('config_webhook', array(
-            'title' => t('Webhook settings'),
+        $this->response->html($this->layout('config/webhook', array(
+            'title' => t('Settings').' &gt; '.t('Webhook settings'),
         )));
     }
 
@@ -118,8 +118,8 @@ class Config extends Base
      */
     public function api()
     {
-        $this->response->html($this->layout('config_api', array(
-            'title' => t('API'),
+        $this->response->html($this->layout('config/api', array(
+            'title' => t('Settings').' &gt; '.t('API'),
         )));
     }
 

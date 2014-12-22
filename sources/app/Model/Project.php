@@ -192,7 +192,7 @@ class Project extends Base
     public function getStats($project_id)
     {
         $stats = array();
-        $columns = $this->board->getcolumns($project_id);
+        $columns = $this->board->getColumns($project_id);
         $stats['nb_active_tasks'] = 0;
 
         foreach ($columns as &$column) {
@@ -270,11 +270,12 @@ class Project extends Base
      * Create a project
      *
      * @access public
-     * @param  array    $values   Form values
-     * @param  integer  $user_id  User who create the project
-     * @return integer            Project id
+     * @param  array    $values     Form values
+     * @param  integer  $user_id    User who create the project
+     * @param  bool     $add_user   Automatically add the user
+     * @return integer              Project id
      */
-    public function create(array $values, $user_id = 0)
+    public function create(array $values, $user_id = 0, $add_user = false)
     {
         $this->db->startTransaction();
 
@@ -294,7 +295,7 @@ class Project extends Base
             return false;
         }
 
-        if ($values['is_private'] && $user_id) {
+        if ($add_user && $user_id) {
             $this->projectPermission->allowUser($project_id, $user_id);
         }
 
@@ -512,7 +513,7 @@ class Project extends Base
             GithubWebhook::EVENT_COMMIT,
         );
 
-        $listener = new ProjectModificationDateListener($this->registry);
+        $listener = new ProjectModificationDateListener($this->container);
 
         foreach ($events as $event_name) {
             $this->event->attach($event_name, $listener);

@@ -134,23 +134,22 @@ class SubTask extends Base
     }
 
     /**
-     * Create
+     * Create a new subtask
      *
      * @access public
      * @param  array    $values    Form values
-     * @return bool
+     * @return bool|integer
      */
     public function create(array $values)
     {
         $this->prepare($values);
-        $result = $this->db->table(self::TABLE)->save($values);
+        $subtask_id = $this->persist(self::TABLE, $values);
 
-        if ($result) {
-            $values['id'] = $this->db->getConnection()->getLastId();
-            $this->event->trigger(self::EVENT_CREATE, $values);
+        if ($subtask_id) {
+            $this->event->trigger(self::EVENT_CREATE, array('id' => $subtask_id) + $values);
         }
 
-        return $result;
+        return $subtask_id;
     }
 
     /**
@@ -170,6 +169,28 @@ class SubTask extends Base
         }
 
         return $result;
+    }
+
+    /**
+     * Change the status of subtask
+     *
+     * Todo -> In progress -> Done -> Todo -> etc...
+     *
+     * @access public
+     * @param  integer  $subtask_id
+     * @return bool
+     */
+    public function toggleStatus($subtask_id)
+    {
+        $subtask = $this->getById($subtask_id);
+
+        $values = array(
+            'id' => $subtask['id'],
+            'status' => ($subtask['status'] + 1) % 3,
+            'task_id' => $subtask['task_id'],
+        );
+
+        return $this->update($values);
     }
 
     /**
@@ -194,22 +215,22 @@ class SubTask extends Base
      */
     public function duplicate($src_task_id, $dst_task_id)
     {
-        $subtasks = $this->db->table(self::TABLE)
-                             ->columns('title', 'time_estimated')
-                             ->eq('task_id', $src_task_id)
-                             ->findAll();
+        return $this->db->transaction(function ($db) use ($src_task_id, $dst_task_id) {
 
-        foreach ($subtasks as &$subtask) {
+            $subtasks = $db->table(SubTask::TABLE)
+                                 ->columns('title', 'time_estimated')
+                                 ->eq('task_id', $src_task_id)
+                                 ->findAll();
 
-            $subtask['task_id'] = $dst_task_id;
-            $subtask['time_spent'] = 0;
+            foreach ($subtasks as &$subtask) {
 
-            if (! $this->db->table(self::TABLE)->save($subtask)) {
-                return false;
+                $subtask['task_id'] = $dst_task_id;
+
+                if (! $db->table(SubTask::TABLE)->save($subtask)) {
+                    return false;
+                }
             }
-        }
-
-        return true;
+        });
     }
 
     /**
@@ -242,6 +263,29 @@ class SubTask extends Base
      * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
      */
     public function validateModification(array $values)
+    {
+        $rules = array(
+            new Validators\Required('id', t('The subtask id is required')),
+            new Validators\Required('task_id', t('The task id is required')),
+            new Validators\Required('title', t('The title is required')),
+        );
+
+        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
+
+        return array(
+            $v->execute(),
+            $v->getErrors()
+        );
+    }
+
+    /**
+     * Validate API modification
+     *
+     * @access public
+     * @param  array   $values           Form values
+     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
+     */
+    public function validateApiModification(array $values)
     {
         $rules = array(
             new Validators\Required('id', t('The subtask id is required')),

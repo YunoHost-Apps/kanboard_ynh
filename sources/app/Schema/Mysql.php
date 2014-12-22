@@ -5,7 +5,30 @@ namespace Schema;
 use PDO;
 use Core\Security;
 
-const VERSION = 34;
+const VERSION = 36;
+
+function version_36($pdo)
+{
+    $pdo->exec('ALTER TABLE tasks MODIFY title VARCHAR(255) NOT NULL');
+}
+
+function version_35($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE project_daily_summaries (
+            id INT NOT NULL AUTO_INCREMENT,
+            day CHAR(10) NOT NULL,
+            project_id INT NOT NULL,
+            column_id INT NOT NULL,
+            total INT NOT NULL DEFAULT 0,
+            PRIMARY KEY(id),
+            FOREIGN KEY(column_id) REFERENCES columns(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec('CREATE UNIQUE INDEX project_daily_column_stats_idx ON project_daily_summaries(day, project_id, column_id)');
+}
 
 function version_34($pdo)
 {

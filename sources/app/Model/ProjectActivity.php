@@ -147,7 +147,7 @@ class ProjectActivity extends Base
             SubTask::EVENT_CREATE,
         );
 
-        $listener = new ProjectActivityListener($this->registry);
+        $listener = new ProjectActivityListener($this->container);
 
         foreach ($events as $event_name) {
             $this->event->attach($event_name, $listener);
@@ -164,7 +164,7 @@ class ProjectActivity extends Base
     public function getContent(array $params)
     {
         $tpl = new Template;
-        return $tpl->load('event_'.str_replace('.', '_', $params['event_name']), $params);
+        return $tpl->load('event/'.str_replace('.', '_', $params['event_name']), $params);
     }
 
     /**

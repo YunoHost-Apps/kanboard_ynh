@@ -76,6 +76,17 @@ class Request
     }
 
     /**
+     * Get the Json request body
+     *
+     * @access public
+     * @return array
+     */
+    public function getJson()
+    {
+        return json_decode($this->getBody(), true);
+    }
+
+    /**
      * Get the content of an uploaded file
      *
      * @access public
@@ -111,6 +122,20 @@ class Request
     public function isAjax()
     {
         return $this->getHeader('X-Requested-With') === 'XMLHttpRequest';
+    }
+
+    /**
+     * Check if the page is requested through HTTPS
+     *
+     * Note: IIS return the value 'off' and other web servers an empty value when it's not HTTPS
+     *
+     * @static
+     * @access public
+     * @return boolean
+     */
+    public static function isHTTPS()
+    {
+        return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
     }
 
     /**

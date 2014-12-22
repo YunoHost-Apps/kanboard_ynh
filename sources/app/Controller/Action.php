@@ -19,7 +19,7 @@ class Action extends Base
     {
         $project = $this->getProjectManagement();
 
-        $this->response->html($this->projectLayout('action_index', array(
+        $this->response->html($this->projectLayout('action/index', array(
             'values' => array('project_id' => $project['id']),
             'project' => $project,
             'actions' => $this->action->getAllByProject($project['id']),
@@ -27,11 +27,10 @@ class Action extends Base
             'available_events' => $this->action->getAvailableEvents(),
             'available_params' => $this->action->getAllActionParameters(),
             'columns_list' => $this->board->getColumnsList($project['id']),
-            'users_list' => $this->projectPermission->getUsersList($project['id']),
+            'users_list' => $this->projectPermission->getMemberList($project['id']),
             'projects_list' => $this->project->getList(false),
             'colors_list' => $this->color->getList(),
             'categories_list' => $this->category->getList($project['id']),
-            'menu' => 'projects',
             'title' => t('Automatic actions')
         )));
     }
@@ -50,11 +49,10 @@ class Action extends Base
             $this->response->redirect('?controller=action&action=index&project_id='.$project['id']);
         }
 
-        $this->response->html($this->projectLayout('action_event', array(
+        $this->response->html($this->projectLayout('action/event', array(
             'values' => $values,
             'project' => $project,
             'events' => $this->action->getCompatibleEvents($values['action_name']),
-            'menu' => 'projects',
             'title' => t('Automatic actions')
         )));
     }
@@ -83,16 +81,15 @@ class Action extends Base
         $projects_list = $this->project->getList(false);
         unset($projects_list[$project['id']]);
 
-        $this->response->html($this->projectLayout('action_params', array(
+        $this->response->html($this->projectLayout('action/params', array(
             'values' => $values,
             'action_params' => $action_params,
             'columns_list' => $this->board->getColumnsList($project['id']),
-            'users_list' => $this->projectPermission->getUsersList($project['id']),
+            'users_list' => $this->projectPermission->getMemberList($project['id']),
             'projects_list' => $projects_list,
             'colors_list' => $this->color->getList(),
             'categories_list' => $this->category->getList($project['id']),
             'project' => $project,
-            'menu' => 'projects',
             'title' => t('Automatic actions')
         )));
     }
@@ -140,12 +137,11 @@ class Action extends Base
     {
         $project = $this->getProjectManagement();
 
-        $this->response->html($this->projectLayout('action_remove', array(
+        $this->response->html($this->projectLayout('action/remove', array(
             'action' => $this->action->getById($this->request->getIntegerParam('action_id')),
             'available_events' => $this->action->getAvailableEvents(),
             'available_actions' => $this->action->getAvailableActions(),
             'project' => $project,
-            'menu' => 'projects',
             'title' => t('Remove an action')
         )));
     }
