@@ -31,7 +31,7 @@ sudo cp -a ../sources/* $final_path
 # Copy and edit config.php
 sudo cp ../conf/config.php $final_path
 sudo sed -i "s/yuno_dbpdw/$db_pwd/g" $final_path/config.php
-sudo sed -i "s/yuno_dbuser/$db_user/g" $final_path/config.php
+sudo sed -i "s/yuno_dbuser/$app/g" $final_path/config.php
 sudo sed -i "s/yuno_admin/$admin/g" $final_path/config.php
 sudo sed -i "s/yuno_email/$email/g" $final_path/config.php
 sudo sed -i "s/yuno_url/$domain$path/g" $final_path/config.php
