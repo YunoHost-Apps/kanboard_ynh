@@ -1,12 +1,10 @@
 <p class="activity-title">
-    <?= e(
-            '%s change the assignee of the task <a href="?controller=task&amp;action=show&amp;task_id=%d">#%d</a> to %s',
-            Helper\escape($author),
-            $task_id,
-            $task_id,
-            Helper\escape($task['assignee_name'] ?: $task['assignee_username'])
-    ) ?>
+    <?= e('%s changed the assignee of the task %s to %s',
+            $this->e($author),
+            $this->a(t('#%d', $task['id']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])),
+            $this->e($task['assignee_name'] ?: $task['assignee_username'])
+        ) ?>
 </p>
 <p class="activity-description">
-    <em><?= Helper\escape($task['title']) ?></em>
+    <em><?= $this->e($task['title']) ?></em>
 </p>

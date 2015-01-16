@@ -9,7 +9,6 @@ class Postgres extends PDO
 {
     private $schema_table = 'schema_version';
 
-
     public function __construct(array $settings)
     {
         $required_atttributes = array(
@@ -34,7 +33,6 @@ class Postgres extends PDO
         }
     }
 
-
     public function getSchemaVersion()
     {
         $this->exec("CREATE TABLE IF NOT EXISTS ".$this->schema_table." (version SMALLINT DEFAULT 0)");
@@ -53,13 +51,11 @@ class Postgres extends PDO
         return 0;
     }
 
-
     public function setSchemaVersion($version)
     {
         $rq = $this->prepare('UPDATE '.$this->schema_table.' SET version=?');
         $rq->execute(array($version));
     }
-
 
     public function getLastId()
     {
@@ -68,9 +64,23 @@ class Postgres extends PDO
         return $rq->fetchColumn();
     }
 
-
     public function escapeIdentifier($value)
     {
         return $value;
+    }
+
+    public function operatorLikeCaseSensitive()
+    {
+        return 'LIKE';
+    }
+
+    public function operatorLikeNotCaseSensitive()
+    {
+        return 'ILIKE';
+    }
+
+    public function getDuplicateKeyErrorCode()
+    {
+        return array(23505, 23503);
     }
 }

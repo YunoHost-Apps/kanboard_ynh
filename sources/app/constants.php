@@ -1,7 +1,10 @@
 <?php
 
+// Enable/disable debug
+defined('DEBUG') or define('DEBUG', false);
+
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.10');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.11');
 
 // Base directory
 define('BASE_URL_DIRECTORY', dirname($_SERVER['PHP_SELF']));

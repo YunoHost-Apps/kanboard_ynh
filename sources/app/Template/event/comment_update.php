@@ -1,6 +1,9 @@
 <p class="activity-title">
-    <?= e('%s updated a comment on the task <a href="?controller=task&amp;action=show&amp;task_id=%d">#%d</a>', Helper\escape($author), $task_id, $task_id) ?>
+    <?= e('%s updated a comment on the task %s',
+            $this->e($author),
+            $this->a(t('#%d', $task['id']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']))
+        ) ?>
 </p>
 <div class="activity-description">
-    <em><?= Helper\escape($task['title']) ?></em><br/>
+    <em><?= $this->e($task['title']) ?></em><br/>
 </div>

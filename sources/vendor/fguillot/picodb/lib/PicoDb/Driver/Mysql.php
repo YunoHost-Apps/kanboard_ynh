@@ -38,7 +38,6 @@ class Mysql extends PDO
         }
     }
 
-
     public function getSchemaVersion()
     {
         $this->exec("CREATE TABLE IF NOT EXISTS `".$this->schema_table."` (`version` INT DEFAULT '0')");
@@ -57,22 +56,34 @@ class Mysql extends PDO
         return 0;
     }
 
-
     public function setSchemaVersion($version)
     {
         $rq = $this->prepare('UPDATE `'.$this->schema_table.'` SET `version`=?');
         $rq->execute(array($version));
     }
 
-
     public function getLastId()
     {
         return $this->lastInsertId();
     }
 
-
     public function escapeIdentifier($value)
     {
         return '`'.$value.'`';
+    }
+
+    public function operatorLikeCaseSensitive()
+    {
+        return 'LIKE BINARY';
+    }
+
+    public function operatorLikeNotCaseSensitive()
+    {
+        return 'LIKE';
+    }
+
+    public function getDuplicateKeyErrorCode()
+    {
+        return array(23000);
     }
 }

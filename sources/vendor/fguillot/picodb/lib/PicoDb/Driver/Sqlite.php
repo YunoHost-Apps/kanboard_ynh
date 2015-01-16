@@ -24,7 +24,6 @@ class Sqlite extends PDO
         $this->exec('PRAGMA foreign_keys = ON');
     }
 
-
     public function getSchemaVersion()
     {
         $rq = $this->prepare('PRAGMA user_version');
@@ -38,21 +37,33 @@ class Sqlite extends PDO
         return 0;
     }
 
-
     public function setSchemaVersion($version)
     {
         $this->exec('PRAGMA user_version='.$version);
     }
-
 
     public function getLastId()
     {
         return $this->lastInsertId();
     }
 
-
     public function escapeIdentifier($value)
     {
         return '"'.$value.'"';
+    }
+
+    public function operatorLikeCaseSensitive()
+    {
+        return 'LIKE';
+    }
+
+    public function operatorLikeNotCaseSensitive()
+    {
+        return 'LIKE';
+    }
+
+    public function getDuplicateKeyErrorCode()
+    {
+        return array(23000);
     }
 }
