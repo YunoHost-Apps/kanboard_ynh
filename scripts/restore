@@ -9,7 +9,7 @@ sudo cp -a $backup_dir/sources/. /var/www/$app
 
 # Restore mysql dump
 db_pwd=$(sudo yunohost app setting $app mysqlpwd)
-sudo mysql -u$app -p$db_pwd -D $app < $backup_dir/$app.dmp
+sudo mysql -u $app -p$db_pwd $app < $backup_dir/$app.dmp
 
 # Restore Nginx and YunoHost parameters
 sudo cp -a $backup_dir/yunohost/. /etc/yunohost/apps/$app
