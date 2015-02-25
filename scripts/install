@@ -34,11 +34,11 @@ sudo sed -i "s/yuno_dbpdw/$db_pwd/g" $final_path/config.php
 sudo sed -i "s/yuno_dbuser/$app/g" $final_path/config.php
 sudo sed -i "s/yuno_admin/$admin/g" $final_path/config.php
 sudo sed -i "s/yuno_email/$email/g" $final_path/config.php
-sudo sed -i "s/yuno_url/$domain$path/g" $final_path/config.php
 sudo sed -i "s/yuno_domain/$domain/g" $final_path/config.php
 
-# Set permissions to data directory
+# Set permissions to data directory and config file
 sudo chown -R www-data:www-data $final_path/data
+sudo chown www-data:www-data $final_path/config.php
 
 # Modify Nginx configuration file and copy it to Nginx conf directory
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf*
