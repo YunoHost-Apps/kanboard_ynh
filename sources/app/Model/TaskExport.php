@@ -24,7 +24,7 @@ class TaskExport extends Base
     public function export($project_id, $from, $to)
     {
         $tasks = $this->getTasks($project_id, $from, $to);
-        $swimlanes = $this->swimlane->getSwimlanesList($project_id);
+        $swimlanes = $this->swimlane->getList($project_id);
         $results = array($this->getColumns());
 
         foreach ($tasks as &$task) {
@@ -77,11 +77,11 @@ class TaskExport extends Base
         ';
 
         if (! is_numeric($from)) {
-            $from = $this->dateParser->resetDateToMidnight($this->dateParser->getTimestamp($from));
+            $from = $this->dateParser->removeTimeFromTimestamp($this->dateParser->getTimestamp($from));
         }
 
         if (! is_numeric($to)) {
-            $to = $this->dateParser->resetDateToMidnight(strtotime('+1 day', $this->dateParser->getTimestamp($to)));
+            $to = $this->dateParser->removeTimeFromTimestamp(strtotime('+1 day', $this->dateParser->getTimestamp($to)));
         }
 
         $rq = $this->db->execute($sql, array($from, $to, $project_id));

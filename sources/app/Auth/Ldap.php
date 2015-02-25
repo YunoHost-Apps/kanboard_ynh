@@ -29,6 +29,7 @@ class Ldap extends Base
      */
     public function authenticate($username, $password)
     {
+        $username = LDAP_USERNAME_CASE_SENSITIVE ? $username : strtolower($username);
         $result = $this->findUser($username, $password);
 
         if (is_array($result)) {
@@ -199,11 +200,90 @@ class Ldap extends Base
 
             return array(
                 'username' => $username,
-                'name' => isset($info[0][LDAP_ACCOUNT_FULLNAME][0]) ? $info[0][LDAP_ACCOUNT_FULLNAME][0] : '',
-                'email' => isset($info[0][LDAP_ACCOUNT_EMAIL][0]) ? $info[0][LDAP_ACCOUNT_EMAIL][0] : '',
+                'name' => $this->getFromInfo($info, LDAP_ACCOUNT_FULLNAME),
+                'email' => $this->getFromInfo($info, LDAP_ACCOUNT_EMAIL),
             );
         }
 
         return false;
+    }
+
+    /**
+     * Retrieve info on LDAP user
+     *
+     * @param string   $username  Username
+     * @param string   $email     Email address
+     */
+    public function lookup($username = null, $email = null)
+    {
+        $query = $this->getQuery($username, $email);
+        if ($query === false) {
+            return false;
+        }
+
+        // Connect and attempt anonymous bind
+        $ldap = $this->connect();
+        if (! is_resource($ldap) || ! $this->bind($ldap, null, null)) {
+            return false;
+        }
+
+        // Try to find user
+        $sr = @ldap_search($ldap, LDAP_ACCOUNT_BASE, $query, array(LDAP_ACCOUNT_FULLNAME, LDAP_ACCOUNT_EMAIL, LDAP_ACCOUNT_ID));
+        if ($sr === false) {
+            return false;
+        }
+
+        $info = ldap_get_entries($ldap, $sr);
+
+        // User not found
+        if (count($info) == 0 || $info['count'] == 0) {
+            return false;
+        }
+
+        // User id not retrieved: LDAP_ACCOUNT_ID not properly configured
+        if (! $username && ! isset($info[0][LDAP_ACCOUNT_ID][0])) {
+            return false;
+        }
+
+        return array(
+            'username' => $this->getFromInfo($info, LDAP_ACCOUNT_ID, $username),
+            'name' => $this->getFromInfo($info, LDAP_ACCOUNT_FULLNAME),
+            'email' => $this->getFromInfo($info, LDAP_ACCOUNT_EMAIL, $email),
+        );
+    }
+
+    /**
+     * Get the LDAP query to find a user
+     *
+     * @param string   $username  Username
+     * @param string   $email     Email address
+     */
+    private function getQuery($username, $email)
+    {
+        if ($username && $email) {
+            return '(&('.sprintf(LDAP_USER_PATTERN, $username).')('.sprintf(LDAP_ACCOUNT_EMAIL, $email).')';
+        }
+        else if ($username) {
+            return sprintf(LDAP_USER_PATTERN, $username);
+        }
+        else if ($email) {
+            return '('.LDAP_ACCOUNT_EMAIL.'='.$email.')';
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Return a value from the LDAP info
+     *
+     * @param array    $info     LDAP info
+     * @param string   $key      Key
+     * @param string   $default  Default value if key not set in entry
+     * @return string
+     */
+    private function getFromInfo($info, $key, $default = '')
+    {
+         return isset($info[0][$key][0]) ? $info[0][$key][0] : $default;
     }
 }

@@ -66,7 +66,7 @@ class Postgres extends PDO
 
     public function escapeIdentifier($value)
     {
-        return $value;
+        return '"'.$value.'"';
     }
 
     public function operatorLikeCaseSensitive()

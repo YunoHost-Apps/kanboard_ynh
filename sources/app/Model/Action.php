@@ -4,6 +4,7 @@ namespace Model;
 
 use Integration\GitlabWebhook;
 use Integration\GithubWebhook;
+use Integration\BitbucketWebhook;
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
 
@@ -49,6 +50,7 @@ class Action extends Base
             'TaskAssignCategoryColor' => t('Assign automatically a category based on a color'),
             'CommentCreation' => t('Create a comment from an external provider'),
             'TaskCreation' => t('Create a task from an external provider'),
+            'TaskLogMoveAnotherColumn' => t('Add a comment logging moving the task between columns'),
             'TaskAssignUser' => t('Change the assignee based on an external username'),
             'TaskAssignCategoryLabel' => t('Change the category based on an external label'),
         );
@@ -84,6 +86,7 @@ class Action extends Base
             GitlabWebhook::EVENT_COMMIT => t('Gitlab commit received'),
             GitlabWebhook::EVENT_ISSUE_OPENED => t('Gitlab issue opened'),
             GitlabWebhook::EVENT_ISSUE_CLOSED => t('Gitlab issue closed'),
+            BitbucketWebhook::EVENT_COMMIT => t('Bitbucket commit received'),
         );
 
         asort($values);

@@ -13,12 +13,69 @@ use PDO;
 class TaskFinder extends Base
 {
     /**
-     * Common request to fetch a list of tasks
+     * Get query for closed tasks
+     *
+     * @access public
+     * @param  integer    $project_id    Project id
+     * @return \PicoDb\Table
+     */
+    public function getClosedTaskQuery($project_id)
+    {
+        return $this->getExtendedQuery()
+                    ->eq('project_id', $project_id)
+                    ->eq('is_active', Task::STATUS_CLOSED);
+    }
+
+    /**
+     * Get query for task search
+     *
+     * @access public
+     * @param  integer    $project_id    Project id
+     * @param  string     $search        Search terms
+     * @return \PicoDb\Table
+     */
+    public function getSearchQuery($project_id, $search)
+    {
+        return $this->getExtendedQuery()
+                    ->eq('project_id', $project_id)
+                    ->ilike('title', '%'.$search.'%');
+    }
+
+    /**
+     * Get query for assigned user tasks
+     *
+     * @access public
+     * @param  integer    $user_id       User id
+     * @return \PicoDb\Table
+     */
+    public function getUserQuery($user_id)
+    {
+        return $this->db
+                    ->table(Task::TABLE)
+                    ->columns(
+                        'tasks.id',
+                        'tasks.title',
+                        'tasks.date_due',
+                        'tasks.date_creation',
+                        'tasks.project_id',
+                        'tasks.color_id',
+                        'tasks.time_spent',
+                        'tasks.time_estimated',
+                        'projects.name AS project_name'
+                    )
+                    ->join(Project::TABLE, 'id', 'project_id')
+                    ->eq(Task::TABLE.'.owner_id', $user_id)
+                    ->eq(Task::TABLE.'.is_active', Task::STATUS_OPEN)
+                    ->eq(Project::TABLE.'.is_active', Project::ACTIVE);
+    }
+
+    /**
+     * Extended query
      *
      * @access public
      * @return \PicoDb\Table
      */
-    public function getQuery()
+    public function getExtendedQuery()
     {
         return $this->db
             ->table(Task::TABLE)
@@ -27,6 +84,7 @@ class TaskFinder extends Base
                 '(SELECT count(*) FROM task_has_files WHERE task_id=tasks.id) AS nb_files',
                 '(SELECT count(*) FROM task_has_subtasks WHERE task_id=tasks.id) AS nb_subtasks',
                 '(SELECT count(*) FROM task_has_subtasks WHERE task_id=tasks.id AND status=2) AS nb_completed_subtasks',
+                '(SELECT count(*) FROM ' . TaskLink::TABLE . ' WHERE ' . TaskLink::TABLE . '.task_id = tasks.id) AS nb_links',
                 'tasks.id',
                 'tasks.reference',
                 'tasks.title',
@@ -45,6 +103,7 @@ class TaskFinder extends Base
                 'tasks.is_active',
                 'tasks.score',
                 'tasks.category_id',
+                'tasks.date_moved',
                 'users.username AS assignee_username',
                 'users.name AS assignee_name'
             )
@@ -62,7 +121,7 @@ class TaskFinder extends Base
      */
     public function getTasksByColumnAndSwimlane($project_id, $column_id, $swimlane_id = 0)
     {
-        return $this->getQuery()
+        return $this->getExtendedQuery()
                     ->eq('project_id', $project_id)
                     ->eq('column_id', $column_id)
                     ->eq('swimlane_id', $swimlane_id)
@@ -115,6 +174,18 @@ class TaskFinder extends Base
                     ->findAll();
 
         return $tasks;
+    }
+
+    /**
+     * Get project id for a given task
+     *
+     * @access public
+     * @param  integer   $task_id   Task id
+     * @return integer
+     */
+    public function getProjectId($task_id)
+    {
+        return (int) $this->db->table(Task::TABLE)->eq('id', $task_id)->findOneColumn('project_id') ?: 0;
     }
 
     /**
@@ -173,6 +244,7 @@ class TaskFinder extends Base
             tasks.score,
             tasks.category_id,
             tasks.swimlane_id,
+            tasks.date_moved,
             project_has_categories.name AS category_name,
             projects.name AS project_name,
             columns.title AS column_title,

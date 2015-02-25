@@ -12,7 +12,7 @@ use SimpleValidator\Validators;
  * @package  model
  * @author   Frederic Guillot
  */
-class SubTask extends Base
+class Subtask extends Base
 {
     /**
      * SQL table name
@@ -66,6 +66,49 @@ class SubTask extends Base
     }
 
     /**
+     * Add subtask status status to the resultset
+     *
+     * @access public
+     * @param  array    $subtasks   Subtasks
+     * @return array
+     */
+    public function addStatusName(array $subtasks)
+    {
+        $status = $this->getStatusList();
+
+        foreach ($subtasks as &$subtask) {
+            $subtask['status_name'] = $status[$subtask['status']];
+        }
+
+        return $subtasks;
+    }
+
+    /**
+     * Get the query to fetch subtasks assigned to a user
+     *
+     * @access public
+     * @param  integer    $user_id         User id
+     * @param  array      $status          List of status
+     * @return \PicoDb\Table
+     */
+    public function getUserQuery($user_id, array $status)
+    {
+        return $this->db->table(Subtask::TABLE)
+            ->columns(
+                Subtask::TABLE.'.*',
+                Task::TABLE.'.project_id',
+                Task::TABLE.'.color_id',
+                Project::TABLE.'.name AS project_name'
+            )
+            ->eq('user_id', $user_id)
+            ->eq(Project::TABLE.'.is_active', Project::ACTIVE)
+            ->in(Subtask::TABLE.'.status', $status)
+            ->join(Task::TABLE, 'id', 'task_id')
+            ->join(Project::TABLE, 'id', 'project_id', Task::TABLE)
+            ->filter(array($this, 'addStatusName'));
+    }
+
+    /**
      * Get all subtasks for a given task
      *
      * @access public
@@ -74,19 +117,14 @@ class SubTask extends Base
      */
     public function getAll($task_id)
     {
-        $status = $this->getStatusList();
-        $subtasks = $this->db->table(self::TABLE)
-                             ->eq('task_id', $task_id)
-                             ->columns(self::TABLE.'.*', User::TABLE.'.username', User::TABLE.'.name')
-                             ->join(User::TABLE, 'id', 'user_id')
-                             ->asc(self::TABLE.'.id')
-                             ->findAll();
-
-        foreach ($subtasks as &$subtask) {
-            $subtask['status_name'] = $status[$subtask['status']];
-        }
-
-        return $subtasks;
+        return $this->db
+                    ->table(self::TABLE)
+                    ->eq('task_id', $task_id)
+                    ->columns(self::TABLE.'.*', User::TABLE.'.username', User::TABLE.'.name')
+                    ->join(User::TABLE, 'id', 'user_id')
+                    ->asc(self::TABLE.'.id')
+                    ->filter(array($this, 'addStatusName'))
+                    ->findAll();
     }
 
     /**
@@ -101,18 +139,13 @@ class SubTask extends Base
     {
         if ($more) {
 
-            $subtask = $this->db->table(self::TABLE)
-                             ->eq(self::TABLE.'.id', $subtask_id)
-                             ->columns(self::TABLE.'.*', User::TABLE.'.username', User::TABLE.'.name')
-                             ->join(User::TABLE, 'id', 'user_id')
-                             ->findOne();
-
-            if ($subtask) {
-                $status = $this->getStatusList();
-                $subtask['status_name'] = $status[$subtask['status']];
-            }
-
-            return $subtask;
+            return $this->db
+                        ->table(self::TABLE)
+                        ->eq(self::TABLE.'.id', $subtask_id)
+                        ->columns(self::TABLE.'.*', User::TABLE.'.username', User::TABLE.'.name')
+                        ->join(User::TABLE, 'id', 'user_id')
+                        ->filter(array($this, 'addStatusName'))
+                        ->findOne();
         }
 
         return $this->db->table(self::TABLE)->eq('id', $subtask_id)->findOne();
@@ -165,6 +198,7 @@ class SubTask extends Base
         $result = $this->db->table(self::TABLE)->eq('id', $values['id'])->save($values);
 
         if ($result) {
+
             $this->container['dispatcher']->dispatch(
                 self::EVENT_UPDATE,
                 new SubtaskEvent($values)
@@ -197,6 +231,37 @@ class SubTask extends Base
     }
 
     /**
+     * Get the subtask in progress for this user
+     *
+     * @access public
+     * @param  integer   $user_id
+     * @return array
+     */
+    public function getSubtaskInProgress($user_id)
+    {
+        return $this->db->table(self::TABLE)
+                        ->eq('status', self::STATUS_INPROGRESS)
+                        ->eq('user_id', $user_id)
+                        ->findOne();
+    }
+
+    /**
+     * Return true if the user have a subtask in progress
+     *
+     * @access public
+     * @param  integer   $user_id
+     * @return boolean
+     */
+    public function hasSubtaskInProgress($user_id)
+    {
+        return $this->config->get('subtask_restriction') == 1 &&
+               $this->db->table(self::TABLE)
+                        ->eq('status', self::STATUS_INPROGRESS)
+                        ->eq('user_id', $user_id)
+                        ->count() === 1;
+    }
+
+    /**
      * Remove
      *
      * @access public
@@ -220,7 +285,7 @@ class SubTask extends Base
     {
         return $this->db->transaction(function ($db) use ($src_task_id, $dst_task_id) {
 
-            $subtasks = $db->table(SubTask::TABLE)
+            $subtasks = $db->table(Subtask::TABLE)
                                  ->columns('title', 'time_estimated')
                                  ->eq('task_id', $src_task_id)
                                  ->asc('id') // Explicit sorting for postgresql
@@ -230,7 +295,7 @@ class SubTask extends Base
 
                 $subtask['task_id'] = $dst_task_id;
 
-                if (! $db->table(SubTask::TABLE)->save($subtask)) {
+                if (! $db->table(Subtask::TABLE)->save($subtask)) {
                     return false;
                 }
             }

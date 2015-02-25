@@ -2,9 +2,10 @@
 
 // Enable/disable debug
 defined('DEBUG') or define('DEBUG', false);
+defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.'/../data/debug.log');
 
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.11');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.12');
 
 // Base directory
 define('BASE_URL_DIRECTORY', dirname($_SERVER['PHP_SELF']));
@@ -34,6 +35,8 @@ defined('LDAP_ACCOUNT_BASE') or define('LDAP_ACCOUNT_BASE', '');
 defined('LDAP_USER_PATTERN') or define('LDAP_USER_PATTERN', '');
 defined('LDAP_ACCOUNT_FULLNAME') or define('LDAP_ACCOUNT_FULLNAME', 'displayname');
 defined('LDAP_ACCOUNT_EMAIL') or define('LDAP_ACCOUNT_EMAIL', 'mail');
+defined('LDAP_ACCOUNT_ID') or define('LDAP_ACCOUNT_ID', '');
+defined('LDAP_USERNAME_CASE_SENSITIVE') or define('LDAP_USERNAME_CASE_SENSITIVE', false);
 
 // Google authentication
 defined('GOOGLE_AUTH') or define('GOOGLE_AUTH', false);
@@ -63,3 +66,7 @@ defined('MAIL_SENDMAIL_COMMAND') or define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/s
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 defined('ENABLE_HSTS') or define('ENABLE_HSTS', true);
+
+// Default files directory
+defined('FILES_DIR') or define('FILES_DIR', 'data/files/');
+

@@ -3,7 +3,6 @@
 namespace Core;
 
 use Pimple\Container;
-use Parsedown;
 
 /**
  * Template helpers
@@ -13,6 +12,7 @@ use Parsedown;
  *
  * @property \Core\Session             $session
  * @property \Model\Acl                $acl
+ * @property \Model\Config             $config
  * @property \Model\User               $user
  * @property \Model\UserSession        $userSession
  */
@@ -47,6 +47,33 @@ class Helper
     public function __get($name)
     {
         return $this->container[$name];
+    }
+
+    /**
+     * Get the age of an item in quasi human readable format.
+     * It's in this format: <1h , NNh, NNd
+     *
+     * @access public
+     * @param  integer    $timestamp    Unix timestamp of the artifact for which age will be calculated
+     * @param  integer    $now          Compare with this timestamp (Default value is the current unix timestamp)
+     * @return string
+     */
+    public function getTaskAge($timestamp, $now = null)
+    {
+        if ($now === null) {
+            $now = time();
+        }
+
+        $diff = $now - $timestamp;
+
+        if ($diff < 3600) {
+            return t('<1h');
+        }
+        else if ($diff < 86400) {
+            return t('%dh', $diff / 3600);
+        }
+
+        return t('%dd', ($now - $timestamp) / 86400);
     }
 
     /**
@@ -104,9 +131,9 @@ class Helper
      * @param  string   $filename   Filename
      * @return string
      */
-    public function css($filename)
+    public function css($filename, $is_file = true)
     {
-        return '<link rel="stylesheet" href="'.$filename.'?'.filemtime($filename).'" media="screen">';
+        return '<link rel="stylesheet" href="'.$filename.($is_file ? '?'.filemtime($filename) : '').'" media="screen">';
     }
 
     /**
@@ -194,9 +221,9 @@ class Helper
      * @param  string  $class    CSS class
      * @return string
      */
-    public function formSelect($name, array $options, array $values = array(), array $errors = array(), $class = '')
+    public function formSelect($name, array $options, array $values = array(), array $errors = array(), array $attributes = array(), $class = '')
     {
-        $html = '<select name="'.$name.'" id="form-'.$name.'" class="'.$class.'">';
+        $html = '<select name="'.$name.'" id="form-'.$name.'" class="'.$class.'" '.implode(' ', $attributes).'>';
 
         foreach ($options as $id => $value) {
 
@@ -245,7 +272,7 @@ class Helper
      */
     public function formRadio($name, $label, $value, $selected = false, $class = '')
     {
-        return '<label><input type="radio" name="'.$name.'" class="'.$class.'" value="'.$this->e($value).'" '.($selected ? 'selected="selected"' : '').'>'.$this->e($label).'</label>';
+        return '<label><input type="radio" name="'.$name.'" class="'.$class.'" value="'.$this->e($value).'" '.($selected ? 'selected="selected"' : '').'> '.$this->e($label).'</label>';
     }
 
     /**
@@ -417,7 +444,7 @@ class Helper
     }
 
     /**
-     * URL query string
+     * Generate controller/action url for templates
      *
      * u('task', 'show', array('task_id' => $task_id))
      *
@@ -429,83 +456,40 @@ class Helper
      */
     public function u($controller, $action, array $params = array(), $csrf = false)
     {
-        $html = '?controller='.$controller.'&amp;action='.$action;
+        $values = array(
+            'controller' => $controller,
+            'action' => $action,
+        );
 
         if ($csrf) {
             $params['csrf_token'] = Security::getCSRFToken();
         }
 
-        foreach ($params as $key => $value) {
-            $html .= '&amp;'.$key.'='.$value;
-        }
+        $values += $params;
 
-        return $html;
+        return '?'.http_build_query($values, '', '&amp;');
     }
 
     /**
-     * Pagination links
+     * Generate controller/action url
      *
-     * @param  array    $pagination    Pagination information
+     * l('task', 'show', array('task_id' => $task_id))
+     *
+     * @param  string   $controller  Controller name
+     * @param  string   $action      Action name
+     * @param  array    $params      Url parameters
      * @return string
      */
-    public function paginate(array $pagination)
+    public function url($controller, $action, array $params = array())
     {
-        extract($pagination);
+        $values = array(
+            'controller' => $controller,
+            'action' => $action,
+        );
 
-        if ($pagination['offset'] === 0 && ($total - $pagination['offset']) <= $limit) {
-            return '';
-        }
+        $values += $params;
 
-        $html = '<div class="pagination">';
-        $html .= '<span class="pagination-previous">';
-
-        if ($pagination['offset'] > 0) {
-            $offset = $pagination['offset'] - $limit;
-            $html .= $this->a('&larr; '.t('Previous'), $controller, $action, $params + compact('offset', 'order', 'direction'));
-        }
-        else {
-            $html .= '&larr; '.t('Previous');
-        }
-
-        $html .= '</span>';
-        $html .= '<span class="pagination-next">';
-
-        if (($total - $pagination['offset']) > $limit) {
-            $offset = $pagination['offset'] + $limit;
-            $html .= $this->a(t('Next').' &rarr;', $controller, $action, $params + compact('offset', 'order', 'direction'));
-        }
-        else {
-            $html .= t('Next').' &rarr;';
-        }
-
-        $html .= '</span>';
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /**
-     * Column sorting (work with pagination)
-     *
-     * @param  string   $label         Column title
-     * @param  string   $column        SQL column name
-     * @param  array    $pagination    Pagination information
-     * @return string
-     */
-    public function order($label, $column, array $pagination)
-    {
-        extract($pagination);
-
-        $prefix = '';
-
-        if ($order === $column) {
-            $prefix = $direction === 'DESC' ? '&#9660; ' : '&#9650; ';
-            $direction = $direction === 'DESC' ? 'ASC' : 'DESC';
-        }
-
-        $order = $column;
-
-        return $prefix.$this->a($label, $controller, $action, $params + compact('offset', 'order', 'direction'));
+        return '?'.http_build_query($values);
     }
 
     /**
@@ -517,24 +501,9 @@ class Helper
      */
     public function markdown($text, array $link = array())
     {
-        $html = Parsedown::instance()
-                    ->setMarkupEscaped(true) # escapes markup (HTML)
-                    ->text($text);
-
-        // Replace task #123 by a link to the task
-        if (! empty($link) && preg_match_all('!#(\d+)!i', $html, $matches, PREG_SET_ORDER)) {
-
-            foreach ($matches as $match) {
-
-                $html = str_replace(
-                    $match[0],
-                    $this->a($match[0], $link['controller'], $link['action'], $link['params'] + array('task_id' => $match[1])),
-                    $html
-                );
-            }
-        }
-
-        return $html;
+        $parser = new Markdown($link, $this);
+        $parser->setMarkupEscaped(true);
+        return $parser->text($text);
     }
 
     /**
@@ -655,5 +624,57 @@ class Helper
         }
 
         return $default_value;
+    }
+
+    /**
+     * Get javascript language code
+     *
+     * @access public
+     * @return string
+     */
+    public function jsLang()
+    {
+        return $this->config->getJsLanguageCode();
+    }
+
+    /**
+     * Get current timezone
+     *
+     * @access public
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->config->getCurrentTimezone();
+    }
+
+    /**
+     * Get the link to toggle subtask status
+     *
+     * @access public
+     * @param  array   $subtask
+     * @param  string  $redirect
+     * @return string
+     */
+    public function toggleSubtaskStatus(array $subtask, $redirect)
+    {
+        if ($subtask['status'] == 0 && isset($this->session['has_subtask_inprogress']) && $this->session['has_subtask_inprogress'] === true) {
+
+            return $this->a(
+                trim($this->render('subtask/icons', array('subtask' => $subtask))) . $this->e($subtask['title']),
+                'subtask',
+                'subtaskRestriction',
+                array('task_id' => $subtask['task_id'], 'subtask_id' => $subtask['id'], 'redirect' => $redirect),
+                false,
+                'popover task-board-popover'
+            );
+        }
+
+        return $this->a(
+            trim($this->render('subtask/icons', array('subtask' => $subtask))) . $this->e($subtask['title']),
+            'subtask',
+            'toggleStatus',
+            array('task_id' => $subtask['task_id'], 'subtask_id' => $subtask['id'], 'redirect' => $redirect)
+        );
     }
 }

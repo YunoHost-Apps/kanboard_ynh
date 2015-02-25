@@ -95,27 +95,25 @@ class Project extends Base
     }
 
     /**
-     * Get all projects, optionaly fetch stats for each project and can check users permissions
+     * Get all projects
      *
      * @access public
-     * @param  bool       $filter_permissions    If true, remove projects not allowed for the current user
      * @return array
      */
-    public function getAll($filter_permissions = false)
+    public function getAll()
     {
-        $projects = $this->db->table(self::TABLE)->asc('name')->findAll();
+        return $this->db->table(self::TABLE)->asc('name')->findAll();
+    }
 
-        if ($filter_permissions) {
-
-            foreach ($projects as $key => $project) {
-
-                if (! $this->projectPermission->isUserAllowed($project['id'], $this->userSession->getId())) {
-                    unset($projects[$key]);
-                }
-            }
-        }
-
-        return $projects;
+    /**
+     * Get all project ids
+     *
+     * @access public
+     * @return array
+     */
+    public function getAllIds()
+    {
+        return $this->db->table(self::TABLE)->asc('name')->findAllByColumn('id');
     }
 
     /**
@@ -128,10 +126,10 @@ class Project extends Base
     public function getList($prepend = true)
     {
         if ($prepend) {
-            return array(t('None')) + $this->db->table(self::TABLE)->asc('name')->listing('id', 'name');
+            return array(t('None')) + $this->db->hashtable(self::TABLE)->asc('name')->getAll('id', 'name');
         }
 
-        return $this->db->table(self::TABLE)->asc('name')->listing('id', 'name');
+        return $this->db->hashtable(self::TABLE)->asc('name')->getAll('id', 'name');
     }
 
     /**
@@ -160,10 +158,10 @@ class Project extends Base
     public function getListByStatus($status)
     {
         return $this->db
-                    ->table(self::TABLE)
+                    ->hashtable(self::TABLE)
                     ->asc('name')
                     ->eq('is_active', $status)
-                    ->listing('id', 'name');
+                    ->getAll('id', 'name');
     }
 
     /**
@@ -188,7 +186,7 @@ class Project extends Base
      * @param  integer    $project_id    Project id
      * @return array
      */
-    public function getStats($project_id)
+    public function getTaskStats($project_id)
     {
         $stats = array();
         $stats['nb_active_tasks'] = 0;
@@ -208,62 +206,57 @@ class Project extends Base
     }
 
     /**
-     * Create a project from another one.
+     * Get stats for each column of a project
      *
-     * @author Antonio Rabelo
-     * @param  integer    $project_id      Project Id
-     * @return integer                     Cloned Project Id
+     * @access public
+     * @param  array    $project
+     * @return array
      */
-    public function createProjectFromAnotherProject($project_id)
+    public function getColumnStats(array &$project)
     {
-        $project = $this->getById($project_id);
+        $project['columns'] = $this->board->getColumns($project['id']);
+        $stats = $this->board->getColumnStats($project['id']);
 
-        $values = array(
-            'name' => $project['name'].' ('.t('Clone').')',
-            'is_active' => true,
-            'last_modified' => 0,
-            'token' => '',
-            'is_public' => 0,
-            'is_private' => empty($project['is_private']) ? 0 : 1,
-        );
-
-        if (! $this->db->table(self::TABLE)->save($values)) {
-            return 0;
+        foreach ($project['columns'] as &$column) {
+            $column['nb_tasks'] = isset($stats[$column['id']]) ? $stats[$column['id']] : 0;
         }
 
-        return $this->db->getConnection()->getLastId();
+        return $project;
     }
 
     /**
-     * Clone a project
+     * Apply column stats to a collection of projects (filter callback)
      *
-     * @author Antonio Rabelo
-     * @param  integer    $project_id  Project Id
-     * @return integer                 Cloned Project Id
+     * @access public
+     * @param  array    $projects
+     * @return array
      */
-    public function duplicate($project_id)
+    public function applyColumnStats(array $projects)
     {
-        $this->db->startTransaction();
-
-        // Get the cloned project Id
-        $clone_project_id = $this->createProjectFromAnotherProject($project_id);
-
-        if (! $clone_project_id) {
-            $this->db->cancelTransaction();
-            return false;
+        foreach ($projects as &$project) {
+            $this->getColumnStats($project);
         }
 
-        foreach (array('board', 'category', 'projectPermission', 'action') as $model) {
+        return $projects;
+    }
 
-            if (! $this->$model->duplicate($project_id, $clone_project_id)) {
-                $this->db->cancelTransaction();
-                return false;
-            }
+    /**
+     * Get project summary for a list of project
+     *
+     * @access public
+     * @param  array      $project_ids     List of project id
+     * @return \PicoDb\Table
+     */
+    public function getQueryColumnStats(array $project_ids)
+    {
+        if (empty($project_ids)) {
+            return $this->db->table(Project::TABLE)->limit(0);
         }
 
-        $this->db->closeTransaction();
-
-        return (int) $clone_project_id;
+        return $this->db
+                    ->table(Project::TABLE)
+                    ->in('id', $project_ids)
+                    ->filter(array($this, 'applyColumnStats'));
     }
 
     /**

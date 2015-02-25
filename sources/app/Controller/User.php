@@ -56,7 +56,7 @@ class User extends Base
 
         if ($valid) {
             if ($redirect_query !== '') {
-                $this->response->redirect('?'.$redirect_query);
+                $this->response->redirect('?'.urldecode($redirect_query));
             }
             else {
                 $this->response->redirect('?controller=app');
@@ -115,31 +115,19 @@ class User extends Base
      */
     public function index()
     {
-        $direction = $this->request->getStringParam('direction', 'ASC');
-        $order = $this->request->getStringParam('order', 'username');
-        $offset = $this->request->getIntegerParam('offset', 0);
-        $limit = 25;
-
-        $users = $this->user->paginate($offset, $limit, $order, $direction);
-        $nb_users = $this->user->count();
+        $paginator = $this->paginator
+                ->setUrl('user', 'index')
+                ->setMax(30)
+                ->setOrder('username')
+                ->setQuery($this->user->getQuery())
+                ->calculate();
 
         $this->response->html(
             $this->template->layout('user/index', array(
                 'board_selector' => $this->projectPermission->getAllowedProjects($this->userSession->getId()),
                 'projects' => $this->project->getList(),
-                'nb_users' => $nb_users,
-                'users' => $users,
-                'title' => t('Users').' ('.$nb_users.')',
-                'pagination' => array(
-                    'controller' => 'user',
-                    'action' => 'index',
-                    'direction' => $direction,
-                    'order' => $order,
-                    'total' => $nb_users,
-                    'offset' => $offset,
-                    'limit' => $limit,
-                    'params' => array(),
-                ),
+                'title' => t('Users').' ('.$paginator->getTotal().')',
+                'paginator' => $paginator,
         )));
     }
 
@@ -198,6 +186,43 @@ class User extends Base
             'user' => $user,
             'timezones' => $this->config->getTimezones(true),
             'languages' => $this->config->getLanguages(true),
+        )));
+    }
+
+    /**
+     * Display user calendar
+     *
+     * @access public
+     */
+    public function calendar()
+    {
+        $user = $this->getUser();
+
+        $this->response->html($this->layout('user/calendar', array(
+            'user' => $user,
+        )));
+    }
+
+    /**
+     * Display timesheet
+     *
+     * @access public
+     */
+    public function timesheet()
+    {
+        $user = $this->getUser();
+
+        $subtask_paginator = $this->paginator
+            ->setUrl('user', 'timesheet', array('user_id' => $user['id'], 'pagination' => 'subtasks'))
+            ->setMax(20)
+            ->setOrder('start')
+            ->setDirection('DESC')
+            ->setQuery($this->subtaskTimeTracking->getUserQuery($user['id']))
+            ->calculateOnlyIf($this->request->getStringParam('pagination') === 'subtasks');
+
+        $this->response->html($this->layout('user/timesheet', array(
+            'subtask_paginator' => $subtask_paginator,
+            'user' => $user,
         )));
     }
 
@@ -330,7 +355,7 @@ class User extends Base
 
         if ($this->request->isPost()) {
 
-            $values = $this->request->getValues();
+            $values = $this->request->getValues() + array('disable_login_form' => 0);
 
             if ($this->userSession->isAdmin()) {
                 $values += array('is_admin' => 0);
@@ -462,7 +487,7 @@ class User extends Base
      *
      * @access public
      */
-    public function gitHub()
+    public function github()
     {
         $code = $this->request->getStringParam('code');
 
@@ -506,7 +531,7 @@ class User extends Base
      *
      * @access public
      */
-    public function unlinkGitHub()
+    public function unlinkGithub()
     {
         $this->checkCSRFParam();
 

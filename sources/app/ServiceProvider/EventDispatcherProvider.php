@@ -12,6 +12,8 @@ use Subscriber\ProjectActivitySubscriber;
 use Subscriber\ProjectDailySummarySubscriber;
 use Subscriber\ProjectModificationDateSubscriber;
 use Subscriber\WebhookSubscriber;
+use Subscriber\SubtaskTimesheetSubscriber;
+use Subscriber\TaskMovedDateSubscriber;
 
 class EventDispatcherProvider implements ServiceProviderInterface
 {
@@ -25,6 +27,8 @@ class EventDispatcherProvider implements ServiceProviderInterface
         $container['dispatcher']->addSubscriber(new ProjectModificationDateSubscriber($container));
         $container['dispatcher']->addSubscriber(new WebhookSubscriber($container));
         $container['dispatcher']->addSubscriber(new NotificationSubscriber($container));
+        $container['dispatcher']->addSubscriber(new SubtaskTimesheetSubscriber($container));
+        $container['dispatcher']->addSubscriber(new TaskMovedDateSubscriber($container));
 
         // Automatic actions
         $container['action']->attachEvents();

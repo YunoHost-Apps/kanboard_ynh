@@ -3,7 +3,7 @@
 namespace SimpleValidator\Validators;
 
 use SimpleValidator\Base;
-use \DateTime;
+use DateTime;
 
 class Date extends Base
 {

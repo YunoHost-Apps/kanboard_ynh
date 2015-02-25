@@ -30,7 +30,7 @@ class TaskPosition extends Base
         $result = $this->calculateAndSave($project_id, $task_id, $column_id, $position, $swimlane_id);
 
         if ($result) {
-
+            
             if ($original_task['swimlane_id'] != $swimlane_id) {
                 $this->calculateAndSave($project_id, 0, $column_id, 1, $original_task['swimlane_id']);
             }

@@ -1,20 +1,20 @@
 [
     {
         "name": "erusev/parsedown",
-        "version": "1.1.1",
-        "version_normalized": "1.1.1.0",
+        "version": "1.5.1",
+        "version_normalized": "1.5.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/erusev/parsedown.git",
-            "reference": "da5d75e97e1ed19e57bd54fa6cb595a6a0879a67"
+            "reference": "9da19c1108c39df9b42adc42e39b8371070652d0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/erusev/parsedown/zipball/da5d75e97e1ed19e57bd54fa6cb595a6a0879a67",
-            "reference": "da5d75e97e1ed19e57bd54fa6cb595a6a0879a67",
+            "url": "https://api.github.com/repos/erusev/parsedown/zipball/9da19c1108c39df9b42adc42e39b8371070652d0",
+            "reference": "9da19c1108c39df9b42adc42e39b8371070652d0",
             "shasum": ""
         },
-        "time": "2014-10-29 20:29:46",
+        "time": "2015-01-24 13:01:47",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -42,8 +42,8 @@
     },
     {
         "name": "fguillot/json-rpc",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
+        "version": "v0.0.1",
+        "version_normalized": "0.0.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/JsonRPC.git",
@@ -86,18 +86,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/picoDb.git",
-            "reference": "268b3389d2bc3c92ef749a63440d17bd75e2a628"
+            "reference": "88d9af320a4eee57691474b3ba9c84d6a882135c"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/268b3389d2bc3c92ef749a63440d17bd75e2a628",
-            "reference": "268b3389d2bc3c92ef749a63440d17bd75e2a628",
+            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/88d9af320a4eee57691474b3ba9c84d6a882135c",
+            "reference": "88d9af320a4eee57691474b3ba9c84d6a882135c",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2015-01-03 00:32:58",
+        "time": "2015-02-15 21:17:50",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -125,18 +125,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/simpleValidator.git",
-            "reference": "3bfa1ef0062906c83824ce8db1219914996d9bd4"
+            "reference": "5ebdb6df4c5f3aa2539b633eb4ae94c9e8c4ada7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/simpleValidator/zipball/3bfa1ef0062906c83824ce8db1219914996d9bd4",
-            "reference": "3bfa1ef0062906c83824ce8db1219914996d9bd4",
+            "url": "https://api.github.com/repos/fguillot/simpleValidator/zipball/5ebdb6df4c5f3aa2539b633eb4ae94c9e8c4ada7",
+            "reference": "5ebdb6df4c5f3aa2539b633eb4ae94c9e8c4ada7",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2014-11-25 22:58:14",
+        "time": "2015-02-14 21:04:14",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -199,8 +199,8 @@
     },
     {
         "name": "fguillot/simpleLogger",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
+        "version": "v0.0.1",
+        "version_normalized": "0.0.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/simpleLogger.git",
@@ -235,47 +235,6 @@
         ],
         "description": "PHP library to write logs (compatible with PSR-3)",
         "homepage": "https://github.com/fguillot/simpleLogger"
-    },
-    {
-        "name": "ircmaxell/password-compat",
-        "version": "1.0.3",
-        "version_normalized": "1.0.3.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/ircmaxell/password_compat.git",
-            "reference": "1fc1521b5e9794ea77e4eca30717be9635f1d4f4"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/ircmaxell/password_compat/zipball/1fc1521b5e9794ea77e4eca30717be9635f1d4f4",
-            "reference": "1fc1521b5e9794ea77e4eca30717be9635f1d4f4",
-            "shasum": ""
-        },
-        "time": "2013-04-30 19:58:08",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "files": [
-                "lib/password.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Anthony Ferrara",
-                "email": "ircmaxell@ircmaxell.com",
-                "homepage": "http://blog.ircmaxell.com"
-            }
-        ],
-        "description": "A compatibility library for the proposed simplified password hashing algorithm: https://wiki.php.net/rfc/password_hash",
-        "homepage": "https://github.com/ircmaxell/password_compat",
-        "keywords": [
-            "hashing",
-            "password"
-        ]
     },
     {
         "name": "lusitanian/oauth",
@@ -445,18 +404,18 @@
     },
     {
         "name": "symfony/console",
-        "version": "v2.6.1",
-        "version_normalized": "2.6.1.0",
+        "version": "v2.6.4",
+        "version_normalized": "2.6.4.0",
         "target-dir": "Symfony/Component/Console",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Console.git",
-            "reference": "ef825fd9f809d275926547c9e57cbf14968793e8"
+            "reference": "e44154bfe3e41e8267d7a3794cd9da9a51cfac34"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Console/zipball/ef825fd9f809d275926547c9e57cbf14968793e8",
-            "reference": "ef825fd9f809d275926547c9e57cbf14968793e8",
+            "url": "https://api.github.com/repos/symfony/Console/zipball/e44154bfe3e41e8267d7a3794cd9da9a51cfac34",
+            "reference": "e44154bfe3e41e8267d7a3794cd9da9a51cfac34",
             "shasum": ""
         },
         "require": {
@@ -472,7 +431,7 @@
             "symfony/event-dispatcher": "",
             "symfony/process": ""
         },
-        "time": "2014-12-02 20:19:20",
+        "time": "2015-01-25 04:39:26",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -504,18 +463,18 @@
     },
     {
         "name": "symfony/event-dispatcher",
-        "version": "v2.6.1",
-        "version_normalized": "2.6.1.0",
+        "version": "v2.6.4",
+        "version_normalized": "2.6.4.0",
         "target-dir": "Symfony/Component/EventDispatcher",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/EventDispatcher.git",
-            "reference": "720fe9bca893df7ad1b4546649473b5afddf0216"
+            "reference": "f75989f3ab2743a82fe0b03ded2598a2b1546813"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/720fe9bca893df7ad1b4546649473b5afddf0216",
-            "reference": "720fe9bca893df7ad1b4546649473b5afddf0216",
+            "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/f75989f3ab2743a82fe0b03ded2598a2b1546813",
+            "reference": "f75989f3ab2743a82fe0b03ded2598a2b1546813",
             "shasum": ""
         },
         "require": {
@@ -523,16 +482,16 @@
         },
         "require-dev": {
             "psr/log": "~1.0",
-            "symfony/config": "~2.0",
+            "symfony/config": "~2.0,>=2.0.5",
             "symfony/dependency-injection": "~2.6",
             "symfony/expression-language": "~2.6",
-            "symfony/stopwatch": "~2.2"
+            "symfony/stopwatch": "~2.3"
         },
         "suggest": {
             "symfony/dependency-injection": "",
             "symfony/http-kernel": ""
         },
-        "time": "2014-12-02 20:19:20",
+        "time": "2015-02-01 16:10:57",
         "type": "library",
         "extra": {
             "branch-alias": {

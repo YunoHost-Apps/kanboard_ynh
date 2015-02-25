@@ -1,4 +1,4 @@
-<div class="task-<?= $task['color_id'] ?> task-show-details">
+<div class="color-<?= $task['color_id'] ?> task-show-details">
     <h2><?= $this->e('#'.$task['id'].' '.$task['title']) ?></h2>
     <?php if ($task['score']): ?>
         <span class="task-score"><?= $this->e($task['score']) ?></span>
@@ -60,6 +60,7 @@
             <?= t('Column on the board:') ?>
             <strong><?= $this->e($task['column_title']) ?></strong>
             (<?= $this->e($task['project_name']) ?>)
+            <?= dt('since %B %e, %Y at %k:%M %p', $task['date_moved']) ?>
         </li>
         <li><?= t('Task position:').' '.$this->e($task['position']) ?></li>
         <?php if ($task['category_name']): ?>

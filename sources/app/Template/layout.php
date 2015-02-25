@@ -14,6 +14,7 @@
             <?= $this->js('assets/js/app.js') ?>
         <?php endif ?>
 
+        <?= $this->css($this->u('app', 'colors'), false) ?>
         <?= $this->css('assets/css/app.css') ?>
 
         <link rel="icon" type="image/png" href="assets/img/favicon.png">
@@ -24,17 +25,21 @@
 
         <title><?= isset($title) ? $this->e($title) : 'Kanboard' ?></title>
     </head>
-    <body data-status-url="<?= $this->u('app', 'status') ?>" data-login-url="<?= $this->u('user', 'login') ?>">
+    <body data-status-url="<?= $this->u('app', 'status') ?>"
+          data-login-url="<?= $this->u('user', 'login') ?>"
+          data-timezone="<?= $this->getTimezone() ?>"
+          data-js-lang="<?= $this->jsLang() ?>">
+
     <?php if (isset($no_layout) && $no_layout): ?>
         <?= $content_for_layout ?>
     <?php else: ?>
         <header>
             <nav>
-                <h1><?= $this->a('<i class="fa fa-home fa-fw"></i>', 'app', 'index', array(), false, 'home-link', t('Dashboard')).' '.$this->summary($this->e($title)) ?></h1>
+                <h1><?= $this->a('K<span>B</span>', 'app', 'index', array(), false, 'logo', t('Dashboard')).' '.$this->summary($this->e($title)) ?></h1>
                 <ul>
                     <?php if (isset($board_selector) && ! empty($board_selector)): ?>
                     <li>
-                        <select id="board-selector" data-placeholder="<?= t('Display another project') ?>" data-board-url="<?= $this->u('board', 'show', array('project_id' => '%d')) ?>">
+                        <select id="board-selector" data-placeholder="<?= t('Display another project') ?>" data-board-url="<?= $this->u('board', 'show', array('project_id' => 'PROJECT_ID')) ?>">
                             <option value=""></option>
                             <?php foreach($board_selector as $board_id => $board_name): ?>
                                 <option value="<?= $board_id ?>"><?= $this->e($board_name) ?></option>

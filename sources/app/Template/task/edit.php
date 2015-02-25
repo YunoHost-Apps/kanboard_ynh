@@ -9,7 +9,7 @@
     <div class="form-column">
 
         <?= $this->formLabel(t('Title'), 'title') ?>
-        <?= $this->formText('title', $values, $errors, array('required')) ?><br/>
+        <?= $this->formText('title', $values, $errors, array('required', 'maxlength="200"')) ?><br/>
 
         <?= $this->formLabel(t('Description'), 'description') ?>
 
@@ -59,7 +59,7 @@
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue"/>
         <?= t('or') ?>
         <?php if ($ajax): ?>
-            <?= $this->a(t('cancel'), 'board', 'show', array('project_id' => $task['project_id'])) ?>
+            <?= $this->a(t('cancel'), 'board', 'show', array('project_id' => $task['project_id']), false, 'close-popover') ?>
         <?php else: ?>
             <?= $this->a(t('cancel'), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>
         <?php endif ?>
