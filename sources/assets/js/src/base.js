@@ -168,7 +168,8 @@ var Kanboard = (function() {
 
             // Project select box
             $("#board-selector").chosen({
-                width: 180
+                width: 180,
+                no_results_text: $("#board-selector").data("notfound")
             });
 
             $("#board-selector").change(function() {
@@ -192,6 +193,22 @@ var Kanboard = (function() {
             $(".column-tooltip").tooltip({
                 content: function() {
                     return '<div class="markdown">' + $(this).attr("title") + '</div>';
+                },
+                position: {
+                    my: 'left-20 top',
+                    at: 'center bottom+9',
+                    using: function(position, feedback) {
+
+                        $(this).css(position);
+
+                        var arrow_pos = feedback.target.left + feedback.target.width / 2 - feedback.element.left - 20;
+
+                        $("<div>")
+                            .addClass("tooltip-arrow")
+                            .addClass(feedback.vertical)
+                            .addClass(arrow_pos == 0 ? "align-left" : "align-right")
+                            .appendTo(this);
+                    }
                 }
             });
 
@@ -204,6 +221,11 @@ var Kanboard = (function() {
 
             // Popover
             $(document).on("click", ".popover", Kanboard.Popover);
+
+            // Autofocus fields (html5 autofocus works only with page onload)
+            $("input[autofocus]").each(function(index, element) {
+                $(this).focus();
+            })
 
             // Datepicker
             $(".form-date").datepicker({
@@ -224,7 +246,23 @@ var Kanboard = (function() {
 
             // Dropdown
             $(".dropit-submenu").hide();
-            $('.dropdown').not(".dropit").dropit();
+            $('.dropdown').not(".dropit").dropit({ triggerParentEl : "span" });
+
+            // Task auto-completion
+            if ($(".task-autocomplete").length) {
+            	$(".task-autocomplete").parent().find("input[type=submit]").attr('disabled','disabled');
+
+                $(".task-autocomplete").autocomplete({
+                    source: $(".task-autocomplete").data("search-url"),
+                    minLength: 2,
+                    select: function(event, ui) {
+                        var field = $(".task-autocomplete").data("dst-field");
+                        $("input[name=" + field + "]").val(ui.item.id);
+
+                        $(".task-autocomplete").parent().find("input[type=submit]").removeAttr('disabled');
+                    }
+                });
+            }
         }
     };
 

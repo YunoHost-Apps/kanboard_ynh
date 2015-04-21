@@ -27,6 +27,10 @@ class Mysql extends PDO
 
         $dsn = 'mysql:host='.$settings['hostname'].';dbname='.$settings['database'].';charset='.$settings['charset'];
 
+        if (! empty($settings['port'])) {
+            $dsn .= ';port='.$settings['port'];
+        }
+
         $options = array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode = STRICT_ALL_TABLES',
         );

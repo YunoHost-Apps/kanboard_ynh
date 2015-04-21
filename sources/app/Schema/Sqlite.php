@@ -6,7 +6,185 @@ use Core\Security;
 use PDO;
 use Model\Link;
 
-const VERSION = 45;
+const VERSION = 60;
+
+function version_60($pdo)
+{
+    $pdo->exec('ALTER TABLE users ADD COLUMN twofactor_activated INTEGER DEFAULT 0');
+    $pdo->exec('ALTER TABLE users ADD COLUMN twofactor_secret TEXT');
+}
+
+function version_59($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('integration_gravatar', '0'));
+}
+
+function version_58($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('integration_hipchat', '0'));
+    $rq->execute(array('integration_hipchat_api_url', 'https://api.hipchat.com'));
+    $rq->execute(array('integration_hipchat_room_id', ''));
+    $rq->execute(array('integration_hipchat_room_token', ''));
+}
+
+function version_57($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('integration_slack_webhook', '0'));
+    $rq->execute(array('integration_slack_webhook_url', ''));
+}
+
+function version_56($pdo)
+{
+    $pdo->exec('CREATE TABLE currencies ("currency" TEXT NOT NULL UNIQUE, "rate" REAL DEFAULT 0)');
+
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('application_currency', 'USD'));
+}
+
+function version_55($pdo)
+{
+    $pdo->exec('CREATE TABLE transitions (
+        "id" INTEGER PRIMARY KEY,
+        "user_id" INTEGER NOT NULL,
+        "project_id" INTEGER NOT NULL,
+        "task_id" INTEGER NOT NULL,
+        "src_column_id" INTEGER NOT NULL,
+        "dst_column_id" INTEGER NOT NULL,
+        "date" INTEGER NOT NULL,
+        "time_spent" INTEGER DEFAULT 0,
+        FOREIGN KEY(src_column_id) REFERENCES columns(id) ON DELETE CASCADE,
+        FOREIGN KEY(dst_column_id) REFERENCES columns(id) ON DELETE CASCADE,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+        FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    )');
+
+    $pdo->exec("CREATE INDEX transitions_task_index ON transitions(task_id)");
+    $pdo->exec("CREATE INDEX transitions_project_index ON transitions(project_id)");
+    $pdo->exec("CREATE INDEX transitions_user_index ON transitions(user_id)");
+}
+
+function version_54($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('subtask_forecast', '0'));
+}
+
+function version_53($pdo)
+{
+    $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
+    $rq->execute(array('application_stylesheet', ''));
+}
+
+function version_52($pdo)
+{
+    $pdo->exec("ALTER TABLE subtask_time_tracking ADD COLUMN time_spent REAL DEFAULT 0");
+}
+
+function version_51($pdo)
+{
+    $pdo->exec('CREATE TABLE budget_lines (
+        "id" INTEGER PRIMARY KEY,
+        "project_id" INTEGER NOT NULL,
+        "amount" REAL NOT NULL,
+        "date" TEXT NOT NULL,
+        "comment" TEXT,
+        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+    )');
+}
+
+function version_50($pdo)
+{
+    $pdo->exec('CREATE TABLE timetable_day (
+        "id" INTEGER PRIMARY KEY,
+        "user_id" INTEGER NOT NULL,
+        "start" TEXT NOT NULL,
+        "end" TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    )');
+
+    $pdo->exec('CREATE TABLE timetable_week (
+        "id" INTEGER PRIMARY KEY,
+        "user_id" INTEGER NOT NULL,
+        "day" INTEGER NOT NULL,
+        "start" TEXT NOT NULL,
+        "end" TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    )');
+
+    $pdo->exec('CREATE TABLE timetable_off (
+        "id" INTEGER PRIMARY KEY,
+        "user_id" INTEGER NOT NULL,
+        "date" TEXT NOT NULL,
+        "all_day" INTEGER DEFAULT 0,
+        "start" TEXT DEFAULT 0,
+        "end" TEXT DEFAULT 0,
+        "comment" TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    )');
+
+    $pdo->exec('CREATE TABLE timetable_extra (
+        "id" INTEGER PRIMARY KEY,
+        "user_id" INTEGER NOT NULL,
+        "date" TEXT NOT NULL,
+        "all_day" INTEGER DEFAULT 0,
+        "start" TEXT DEFAULT 0,
+        "end" TEXT DEFAULT 0,
+        "comment" TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    )');
+}
+
+function version_49($pdo)
+{
+    $pdo->exec("CREATE TABLE hourly_rates (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        rate REAL DEFAULT 0,
+        date_effective INTEGER NOT NULL,
+        currency TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+}
+
+function version_48($pdo)
+{
+    $pdo->exec('ALTER TABLE subtasks ADD COLUMN position INTEGER DEFAULT 1');
+
+    // Migrate all subtasks position
+
+    $task_id = 0;
+    $position = 1;
+    $urq = $pdo->prepare('UPDATE subtasks SET position=? WHERE id=?');
+
+    $rq = $pdo->prepare('SELECT * FROM subtasks ORDER BY task_id, id ASC');
+    $rq->execute();
+
+    foreach ($rq->fetchAll(PDO::FETCH_ASSOC) as $subtask) {
+
+        if ($task_id != $subtask['task_id']) {
+            $position = 1;
+            $task_id = $subtask['task_id'];
+        }
+
+        $urq->execute(array($position, $subtask['id']));
+        $position++;
+    }
+}
+
+function version_47($pdo)
+{
+    $pdo->exec('ALTER TABLE task_has_files RENAME TO files');
+    $pdo->exec('ALTER TABLE task_has_subtasks RENAME TO subtasks');
+}
+
+function version_46($pdo)
+{
+    $pdo->exec('ALTER TABLE projects ADD COLUMN description TEXT');
+}
 
 function version_45($pdo)
 {

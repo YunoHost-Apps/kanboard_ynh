@@ -16,6 +16,7 @@ use Pimple\Container;
  * @property \Model\Action                 $action
  * @property \Model\Authentication         $authentication
  * @property \Model\Board                  $board
+ * @property \Model\Budget                 $budget
  * @property \Model\Category               $category
  * @property \Model\Comment                $comment
  * @property \Model\CommentHistory         $commentHistory
@@ -42,7 +43,11 @@ use Pimple\Container;
  * @property \Model\TaskLink               $taskLink
  * @property \Model\TaskPosition           $taskPosition
  * @property \Model\TaskValidator          $taskValidator
- * @property \Model\TimeTracking           $timeTracking
+ * @property \Model\Timetable              $timetable
+ * @property \Model\TimetableDay           $timetableDay
+ * @property \Model\TimetableExtra         $timetableExtra
+ * @property \Model\TimetableOff           $timetableOfff
+ * @property \Model\TimetableWeek          $timetableWeek
  * @property \Model\SubtaskTimeTracking    $subtaskTimeTracking
  * @property \Model\User                   $user
  * @property \Model\UserSession            $userSession

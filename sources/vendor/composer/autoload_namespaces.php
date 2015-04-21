@@ -14,6 +14,7 @@ return array(
     'Pimple' => array($vendorDir . '/pimple/pimple/src'),
     'PicoDb' => array($vendorDir . '/fguillot/picodb/lib'),
     'Parsedown' => array($vendorDir . '/erusev/parsedown'),
+    'Otp' => array($vendorDir . '/christian-riesen/otp/src'),
     'OAuth\\Unit' => array($vendorDir . '/lusitanian/oauth/tests'),
     'OAuth' => array($vendorDir . '/lusitanian/oauth/src'),
     'JsonRPC' => array($vendorDir . '/fguillot/json-rpc/src'),

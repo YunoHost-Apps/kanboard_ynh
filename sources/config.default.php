@@ -1,5 +1,7 @@
 <?php
 
+// Rename this file to config.php if you want to change the values
+
 // Enable/Disable debug
 define('DEBUG', false);
 
@@ -39,6 +41,9 @@ define('DB_HOSTNAME', 'localhost');
 
 // Mysql/Postgres database name
 define('DB_NAME', 'kanboard');
+
+// Mysql/Postgres custom port (null = default port)
+define('DB_PORT', null);
 
 // Enable LDAP authentication (false by default)
 define('LDAP_AUTH', false);
@@ -121,3 +126,9 @@ define('REVERSE_PROXY_DEFAULT_DOMAIN', '');
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 define('ENABLE_HSTS', true);
+
+// Enable or disable "X-Frame-Options: DENY" HTTP header
+define('ENABLE_XFRAME', true);
+
+// Escape html inside markdown text
+define('MARKDOWN_ESCAPE_HTML', true);

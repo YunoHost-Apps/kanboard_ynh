@@ -14,7 +14,7 @@ use Model\Task as TaskModel;
 class Calendar extends Base
 {
     /**
-     * Show calendar view
+     * Show calendar view for projects
      *
      * @access public
      */
@@ -59,9 +59,7 @@ class Calendar extends Base
             ->filterByDueDateRange($start, $end)
             ->toCalendarEvents();
 
-        $subtask_timeslots = $this->subtaskTimeTracking->getProjectCalendarEvents($project_id, $start, $end);
-
-        $this->response->json(array_merge($due_tasks, $subtask_timeslots));
+        $this->response->json($due_tasks);
     }
 
     /**
@@ -84,7 +82,9 @@ class Calendar extends Base
 
         $subtask_timeslots = $this->subtaskTimeTracking->getUserCalendarEvents($user_id, $start, $end);
 
-        $this->response->json(array_merge($due_tasks, $subtask_timeslots));
+        $subtask_forcast = $this->config->get('subtask_forecast') == 1 ? $this->subtaskForecast->getCalendarEvents($user_id, $end) : array();
+
+        $this->response->json(array_merge($due_tasks, $subtask_timeslots, $subtask_forcast));
     }
 
     /**
@@ -100,7 +100,7 @@ class Calendar extends Base
 
             $this->taskModification->update(array(
                 'id' => $values['task_id'],
-                'date_due' => $values['date_due'],
+                'date_due' => substr($values['date_due'], 0, 10),
             ));
         }
     }

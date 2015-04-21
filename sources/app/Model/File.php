@@ -17,7 +17,7 @@ class File extends Base
      *
      * @var string
      */
-    const TABLE = 'task_has_files';
+    const TABLE = 'files';
 
     /**
      * Events
@@ -113,6 +113,38 @@ class File extends Base
     }
 
     /**
+     * Get all images for a given task
+     *
+     * @access public
+     * @param  integer   $task_id    Task id
+     * @return array
+     */
+    public function getAllImages($task_id)
+    {
+        return $this->db->table(self::TABLE)
+            ->eq('task_id', $task_id)
+            ->eq('is_image', 1)
+            ->asc('name')
+            ->findAll();
+    }
+
+    /**
+     * Get all files without images for a given task
+     *
+     * @access public
+     * @param  integer   $task_id    Task id
+     * @return array
+     */
+    public function getAllDocuments($task_id)
+    {
+        return $this->db->table(self::TABLE)
+            ->eq('task_id', $task_id)
+            ->eq('is_image', 0)
+            ->asc('name')
+            ->findAll();
+    }
+
+    /**
      * Check if a filename is an image
      *
      * @access public
@@ -121,7 +153,17 @@ class File extends Base
      */
     public function isImage($filename)
     {
-        return getimagesize($filename) !== false;
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        switch ($extension) {
+            case 'jpeg':
+            case 'jpg':
+            case 'png':
+            case 'gif':
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -188,7 +230,7 @@ class File extends Base
                             $task_id,
                             $original_filename,
                             $destination_filename,
-                            $this->isImage(FILES_DIR.$destination_filename)
+                            $this->isImage($original_filename)
                         );
                     }
                 }

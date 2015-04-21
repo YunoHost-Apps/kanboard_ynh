@@ -23,6 +23,10 @@ Kanboard.Board = (function() {
         Mousetrap.bind("s", function() {
             stack_toggle();
         });
+
+        Mousetrap.bind("c", function() {
+            compactview_toggle();
+        });
     }
 
     // Collapse/Expand tasks
@@ -241,11 +245,12 @@ Kanboard.Board = (function() {
                 board_load_events();
                 filter_apply();
                 stack_show();
+                compactview_reload();
             }
         });
     }
 
-    // Check if a board have been changed by someone else
+    // Check if the board have been changed by someone else
     function board_check()
     {
         if (Kanboard.IsVisible()) {
@@ -261,6 +266,7 @@ Kanboard.Board = (function() {
                         board_load_events();
                         filter_apply();
                         stack_show();
+                        compactview_reload();
                     }
                 }
             });
@@ -274,7 +280,7 @@ Kanboard.Board = (function() {
         var selectedCategoryId = $("#form-category_id").val();
         var filterDueDate = $("#more-filters option[value=filter-due-date]").is(":selected")
         var filterRecent = $("#more-filters option[value=filter-recent]").is(":selected")
-	    var projectId = $('#board').data('project-id');
+        var projectId = $('#board').data('project-id');
 
         $("[data-task-id]").each(function(index, item) {
 
@@ -313,18 +319,21 @@ Kanboard.Board = (function() {
     // Load filter events
     function filter_load_events()
     {
-	    var projectId = $('#board').data('project-id');
+        var projectId = $('#board').data('project-id');
 
         $("#form-user_id").chosen({
-            width: "180px"
+            width: "180px",
+            no_results_text: $("#form-user_id").data("notfound")
         });
 
         $("#form-category_id").chosen({
-            width: "200px"
+            width: "200px",
+            no_results_text: $("#form-category_id").data("notfound")
         });
 
         $("#more-filters").chosen({
-            width: "30%"
+            width: "30%",
+            no_results_text: $("#more-filters").data("notfound")
         });
 
         $(".apply-filters").change(function(e) {
@@ -348,7 +357,44 @@ Kanboard.Board = (function() {
 
         $("#more-filters").trigger("chosen:updated");
 
-    	filter_apply();
+        filter_apply();
+    }
+
+    function compactview_load_events()
+    {
+        jQuery(document).on('click', ".filter-toggle-scrolling", function(e) {
+            e.preventDefault();
+            compactview_toggle();
+        });
+
+        compactview_reload();
+    }
+
+    function compactview_toggle()
+    {
+        var scrolling = Kanboard.GetStorageItem("horizontal_scroll") || 1;
+        Kanboard.SetStorageItem("horizontal_scroll", scrolling == 0 ? 1 : 0);
+        compactview_reload();
+    }
+
+    function compactview_reload()
+    {
+        if (Kanboard.GetStorageItem("horizontal_scroll") == 0) {
+
+            $(".filter-wide").show();
+            $(".filter-compact").hide();
+
+            $("#board-container").addClass("board-container-compact");
+            $("#board th").addClass("board-column-compact");
+        }
+        else {
+
+            $(".filter-wide").hide();
+            $(".filter-compact").show();
+
+            $("#board-container").removeClass("board-container-compact");
+            $("#board th").removeClass("board-column-compact");
+        }
     }
 
     jQuery(document).ready(function() {
@@ -357,6 +403,7 @@ Kanboard.Board = (function() {
             board_load_events();
             filter_load_events();
             stack_load_events();
+            compactview_load_events();
             keyboard_shortcuts();
         }
     });

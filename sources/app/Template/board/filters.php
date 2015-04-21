@@ -1,8 +1,8 @@
 <div class="page-header">
     <ul class="board-filters">
         <li>
-            <ul class="dropdown">
-                <li>
+            <span class="dropdown">
+                <span>
                     <i class="fa fa-caret-down"></i> <a href="#" class="dropdown-menu"><?= t('Actions') ?></a>
                     <ul>
                         <li>
@@ -11,6 +11,14 @@
                             </span>
                             <span class="filter-expand" style="display: none">
                                 <i class="fa fa-expand fa-fw"></i> <a href="#" class="filter-expand-link"><?= t('Expand tasks') ?></a>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="filter-compact">
+                                <i class="fa fa-th fa-fw"></i> <a href="#" class="filter-toggle-scrolling"><?= t('Compact view') ?></a>
+                            </span>
+                            <span class="filter-wide" style="display: none">
+                                <i class="fa fa-arrows-h fa-fw"></i> <a href="#" class="filter-toggle-scrolling"><?= t('Horizontal scrolling') ?></a>
                             </span>
                         </li>
                         <li>
@@ -40,22 +48,26 @@
                             <?= $this->a(t('Analytics'), 'analytic', 'tasks', array('project_id' => $project['id'])) ?>
                         </li>
                         <li>
+                            <i class="fa fa-pie-chart fa-fw"></i>
+                            <?= $this->a(t('Budget'), 'budget', 'index', array('project_id' => $project['id'])) ?>
+                        </li>
+                        <li>
                             <i class="fa fa-cog fa-fw"></i>
                             <?= $this->a(t('Configure'), 'project', 'show', array('project_id' => $project['id'])) ?>
                         </li>
                         <?php endif ?>
                     </ul>
-                </li>
-            </ul>
+                </span>
+            </span>
         </li>
         <li>
-            <?= $this->formSelect('user_id', $users, array(), array(), array('data-placeholder="'.t('Filter by user').'"'), 'apply-filters chosen-select') ?>
+            <?= $this->formSelect('user_id', $users, array(), array(), array('data-placeholder="'.t('Filter by user').'"', 'data-notfound="'.t('No results match:').'"'), 'apply-filters chosen-select') ?>
         </li>
         <li>
-            <?= $this->formSelect('category_id', $categories, array(), array(), array('data-placeholder="'.t('Filter by category').'"'), 'apply-filters chosen-select') ?>
+            <?= $this->formSelect('category_id', $categories, array(), array(), array('data-placeholder="'.t('Filter by category').'"', 'data-notfound="'.t('No results match:').'"'), 'apply-filters chosen-select') ?>
         </li>
         <li>
-            <select id="more-filters" multiple data-placeholder="<?= t('More filters') ?>" class="apply-filters chosen-select hide-mobile">
+            <select id="more-filters" multiple data-placeholder="<?= t('More filters') ?>" data-notfound="<?= t('No results match:') ?>" class="apply-filters chosen-select hide-mobile">
                 <option value=""></option>
                 <option value="filter-due-date"><?= t('Filter by due date') ?></option>
                 <option value="filter-recent"><?= t('Filter recently updated') ?></option>

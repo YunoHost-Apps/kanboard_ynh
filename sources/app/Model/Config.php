@@ -22,6 +22,28 @@ class Config extends Base
     const TABLE = 'settings';
 
     /**
+     * Get available currencies
+     *
+     * @access public
+     * @return array
+     */
+    public function getCurrencies()
+    {
+        return array(
+            'USD' => t('USD - US Dollar'),
+            'EUR' => t('EUR - Euro'),
+            'GBP' => t('GBP - British Pound'),
+            'CHF' => t('CHF - Swiss Francs'),
+            'CAD' => t('CAD - Canadian Dollar'),
+            'AUD' => t('AUD - Australian Dollar'),
+            'NZD' => t('NZD - New Zealand Dollar'),
+            'INR' => t('INR - Indian Rupee'),
+            'JPY' => t('JPY - Japanese Yen'),
+            'RSD' => t('RSD - Serbian dinar'),
+        );
+    }
+
+    /**
      * Get available timezones
      *
      * @access public
@@ -58,11 +80,14 @@ class Config extends Base
             'fr_FR' => 'Français',
             'it_IT' => 'Italiano',
             'hu_HU' => 'Magyar',
+            'nl_NL' => 'Nederlands',
             'pl_PL' => 'Polski',
             'pt_BR' => 'Português (Brasil)',
             'ru_RU' => 'Русский',
+            'sr_Latn_RS' => 'Srpski',
             'fi_FI' => 'Suomi',
             'sv_SE' => 'Svenska',
+            'tr_TR' => 'Türkçe',
             'zh_CN' => '中文(简体)',
             'ja_JP' => '日本語',
             'th_TH' => 'ไทย',
@@ -99,6 +124,7 @@ class Config extends Base
             'zh_CN' => 'zh-cn',
             'ja_JP' => 'ja',
             'th_TH' => 'th',
+            'tr_TR' => 'tr',
         );
 
         $lang = $this->getCurrentLanguage();

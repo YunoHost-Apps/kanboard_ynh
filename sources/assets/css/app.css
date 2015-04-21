@@ -57,7 +57,16 @@ hr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
-/* links */
+
+#board-selector,
+.chosen-select {
+    min-height: 27px; /* Reserve some space to avoid re-layout due to chosen */
+}
+
+.avatar {
+    float: left;
+    margin-right: 10px;
+}/* links */
 a {
     color: #3366CC;
     border: none;
@@ -145,6 +154,10 @@ th a:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.table-stripped tr:nth-child(odd) td {
+    background: #fefefe;
 }
 
 .column-5 {
@@ -619,6 +632,10 @@ div.ui-tooltip {
     width: 550px;
 }
 
+.ui-tooltip-content .markdown p {
+    margin-bottom: 0px;
+}
+
 .tooltip-tasklinks li {
     list-style-type: none;
 }
@@ -735,6 +752,10 @@ nav .active a {
     font-size: 0.95em;
 }
 
+#more-filters {
+    display: none; /* Hide this filter initially, to avoid re-layout */
+}
+
 /* public board */
 .public-board {
     margin-top: 5px;
@@ -748,14 +769,28 @@ nav .active a {
 
 /* board table */
 #board-container {
-    overflow-x: scroll;
     padding-bottom: 180px; /* Space to avoid dropdown menu truncated */
+    overflow-x: scroll;
 }
 
-#board td,
+.board-container-compact {
+    overflow-x: initial;
+}
+
+#board {
+    table-layout: fixed;
+}
+
 #board th {
-    min-width: 240px;
-    max-width: 240px;
+    width: 120px; /* Width of swimlane column */
+}
+
+#board th.board-column {
+    width: 240px; /* Width of other columns, in default [horizontal scrolling] view mode */
+}
+
+#board th.board-column.board-column-compact {
+    width: initial; /* Do not force the width of the columns in compact view mode */
 }
 
 #board th a {
@@ -923,16 +958,14 @@ span.task-board-date-overdue {
 /* task score */
 .task-score {
     font-weight: bold;
-    position: absolute;
 }
 
 .task-board .task-score {
-    font-size: 1.6em;
-    left: 2px;
-    bottom: 0;
+    font-size: 1.1em;
 }
 
 .task-show-details .task-score {
+    position: absolute;
     bottom: 5px;
     right: 5px;
     font-size: 2em;
@@ -1049,6 +1082,41 @@ span.task-board-date-overdue {
 
 .task-link-closed {
     text-decoration: line-through;
+}
+.task-show-images {
+    list-style-type: none;
+}
+.task-show-images li img {
+    width: 100%;
+}
+.task-show-images li .img_container {
+    width: 250px;
+    height: 100px;
+    overflow: hidden;
+}
+.task-show-images li {
+    padding: 10px;
+    overflow: auto;
+    width: 250px;
+    min-height: 120px;
+    display: inline-block;
+    vertical-align: top;
+}
+.task-show-images li p{
+    padding: 5px;
+    font-weight: bold;
+}
+.task-show-images li:hover {
+    background: #eee;
+}
+.task-show-image-actions {
+    margin-left: 5px;
+}
+.task-show-images li .img_container:hover {
+    height: 100%;
+}
+.task-show-file-table {
+    width: auto;
 }
 /* comments */
 .comment {

@@ -117,7 +117,7 @@ class Board extends Base
         $project = $this->project->getByToken($token);
 
         // Token verification
-        if (! $project) {
+        if (empty($project)) {
             $this->forbidden(true);
         }
 
@@ -127,6 +127,7 @@ class Board extends Base
             'swimlanes' => $this->board->getBoard($project['id']),
             'categories' => $this->category->getList($project['id'], false),
             'title' => $project['name'],
+            'description' => $project['description'],
             'no_layout' => true,
             'not_editable' => true,
             'board_public_refresh_interval' => $this->config->get('board_public_refresh_interval'),
@@ -187,6 +188,7 @@ class Board extends Base
             'swimlanes' => $this->board->getBoard($project['id']),
             'categories' => $this->category->getList($project['id'], true, true),
             'title' => $project['name'],
+            'description' => $project['description'],
             'board_selector' => $board_selector,
             'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
             'board_highlight_period' => $this->config->get('board_highlight_period'),
@@ -309,7 +311,7 @@ class Board extends Base
             $this->checkCSRFParam();
             $column = $this->board->getColumn($this->request->getIntegerParam('column_id'));
 
-            if ($column && $this->board->removeColumn($column['id'])) {
+            if (! empty($column) && $this->board->removeColumn($column['id'])) {
                 $this->session->flash(t('Column removed successfully.'));
             } else {
                 $this->session->flashError(t('Unable to remove this column.'));
@@ -439,7 +441,8 @@ class Board extends Base
         $task = $this->getTask();
 
         $this->response->html($this->template->render('board/files', array(
-            'files' => $this->file->getAll($task['id']),
+            'files' => $this->file->getAllDocuments($task['id']),
+            'images' => $this->file->getAllImages($task['id']),
             'task' => $task,
         )));
     }

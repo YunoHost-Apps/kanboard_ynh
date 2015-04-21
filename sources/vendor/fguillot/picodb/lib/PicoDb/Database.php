@@ -248,7 +248,7 @@ class Database
 
             $this->setLogMessage($e->getMessage());
 
-            throw new RuntimeException('SQL error');
+            throw new RuntimeException('SQL error'.($this->log_queries ? ': '.$e->getMessage() : ''));
         }
     }
 

@@ -1,5 +1,111 @@
 [
     {
+        "name": "christian-riesen/base32",
+        "version": "1.2.1",
+        "version_normalized": "1.2.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ChristianRiesen/base32.git",
+            "reference": "6943e7b010ab224139fd4248ccf84865aa7b0f91"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ChristianRiesen/base32/zipball/6943e7b010ab224139fd4248ccf84865aa7b0f91",
+            "reference": "6943e7b010ab224139fd4248ccf84865aa7b0f91",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "4.*",
+            "satooshi/php-coveralls": "0.*"
+        },
+        "time": "2015-02-12 09:08:33",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Base32\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Christian Riesen",
+                "email": "chris.riesen@gmail.com",
+                "homepage": "http://christianriesen.com",
+                "role": "Developer"
+            }
+        ],
+        "description": "Base32 encoder/decoder according to RFC 4648",
+        "homepage": "https://github.com/ChristianRiesen/base32",
+        "keywords": [
+            "base32",
+            "decode",
+            "encode",
+            "rfc4648"
+        ]
+    },
+    {
+        "name": "christian-riesen/otp",
+        "version": "1.4",
+        "version_normalized": "1.4.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ChristianRiesen/otp.git",
+            "reference": "a209b8bbd975d96d6b5287f8658562061adef1f8"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ChristianRiesen/otp/zipball/a209b8bbd975d96d6b5287f8658562061adef1f8",
+            "reference": "a209b8bbd975d96d6b5287f8658562061adef1f8",
+            "shasum": ""
+        },
+        "require": {
+            "christian-riesen/base32": ">=1.0",
+            "php": ">=5.3.0"
+        },
+        "time": "2015-02-12 09:11:49",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Otp": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Christian Riesen",
+                "email": "chris.riesen@gmail.com",
+                "homepage": "http://christianriesen.com",
+                "role": "Developer"
+            }
+        ],
+        "description": "One Time Passwords, hotp and totp according to RFC4226 and RFC6238",
+        "homepage": "https://github.com/ChristianRiesen/otp",
+        "keywords": [
+            "googleauthenticator",
+            "hotp",
+            "otp",
+            "rfc4226",
+            "rfc6238",
+            "totp"
+        ]
+    },
+    {
         "name": "erusev/parsedown",
         "version": "1.5.1",
         "version_normalized": "1.5.1.0",
@@ -86,18 +192,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/picoDb.git",
-            "reference": "88d9af320a4eee57691474b3ba9c84d6a882135c"
+            "reference": "cd6a571d2de5c0b30d538d7cd6603dc16b25b844"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/88d9af320a4eee57691474b3ba9c84d6a882135c",
-            "reference": "88d9af320a4eee57691474b3ba9c84d6a882135c",
+            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/cd6a571d2de5c0b30d538d7cd6603dc16b25b844",
+            "reference": "cd6a571d2de5c0b30d538d7cd6603dc16b25b844",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2015-02-15 21:17:50",
+        "time": "2015-03-27 02:21:18",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -350,17 +456,17 @@
     },
     {
         "name": "swiftmailer/swiftmailer",
-        "version": "v5.3.1",
-        "version_normalized": "5.3.1.0",
+        "version": "v5.4.0",
+        "version_normalized": "5.4.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/swiftmailer/swiftmailer.git",
-            "reference": "c5f963e7f9d6f6438fda4f22d5cc2db296ec621a"
+            "reference": "31454f258f10329ae7c48763eb898a75c39e0a9f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/c5f963e7f9d6f6438fda4f22d5cc2db296ec621a",
-            "reference": "c5f963e7f9d6f6438fda4f22d5cc2db296ec621a",
+            "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/31454f258f10329ae7c48763eb898a75c39e0a9f",
+            "reference": "31454f258f10329ae7c48763eb898a75c39e0a9f",
             "shasum": ""
         },
         "require": {
@@ -369,11 +475,11 @@
         "require-dev": {
             "mockery/mockery": "~0.9.1"
         },
-        "time": "2014-12-05 14:17:14",
+        "time": "2015-03-14 06:06:39",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "5.3-dev"
+                "dev-master": "5.4-dev"
             }
         },
         "installation-source": "dist",
@@ -404,18 +510,18 @@
     },
     {
         "name": "symfony/console",
-        "version": "v2.6.4",
-        "version_normalized": "2.6.4.0",
+        "version": "v2.6.5",
+        "version_normalized": "2.6.5.0",
         "target-dir": "Symfony/Component/Console",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Console.git",
-            "reference": "e44154bfe3e41e8267d7a3794cd9da9a51cfac34"
+            "reference": "53f86497ccd01677e22435cfb7262599450a90d1"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Console/zipball/e44154bfe3e41e8267d7a3794cd9da9a51cfac34",
-            "reference": "e44154bfe3e41e8267d7a3794cd9da9a51cfac34",
+            "url": "https://api.github.com/repos/symfony/Console/zipball/53f86497ccd01677e22435cfb7262599450a90d1",
+            "reference": "53f86497ccd01677e22435cfb7262599450a90d1",
             "shasum": ""
         },
         "require": {
@@ -424,6 +530,7 @@
         "require-dev": {
             "psr/log": "~1.0",
             "symfony/event-dispatcher": "~2.1",
+            "symfony/phpunit-bridge": "~2.7",
             "symfony/process": "~2.1"
         },
         "suggest": {
@@ -431,7 +538,7 @@
             "symfony/event-dispatcher": "",
             "symfony/process": ""
         },
-        "time": "2015-01-25 04:39:26",
+        "time": "2015-03-13 17:37:22",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -463,18 +570,18 @@
     },
     {
         "name": "symfony/event-dispatcher",
-        "version": "v2.6.4",
-        "version_normalized": "2.6.4.0",
+        "version": "v2.6.5",
+        "version_normalized": "2.6.5.0",
         "target-dir": "Symfony/Component/EventDispatcher",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/EventDispatcher.git",
-            "reference": "f75989f3ab2743a82fe0b03ded2598a2b1546813"
+            "reference": "70f7c8478739ad21e3deef0d977b38c77f1fb284"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/f75989f3ab2743a82fe0b03ded2598a2b1546813",
-            "reference": "f75989f3ab2743a82fe0b03ded2598a2b1546813",
+            "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/70f7c8478739ad21e3deef0d977b38c77f1fb284",
+            "reference": "70f7c8478739ad21e3deef0d977b38c77f1fb284",
             "shasum": ""
         },
         "require": {
@@ -485,13 +592,14 @@
             "symfony/config": "~2.0,>=2.0.5",
             "symfony/dependency-injection": "~2.6",
             "symfony/expression-language": "~2.6",
+            "symfony/phpunit-bridge": "~2.7",
             "symfony/stopwatch": "~2.3"
         },
         "suggest": {
             "symfony/dependency-injection": "",
             "symfony/http-kernel": ""
         },
-        "time": "2015-02-01 16:10:57",
+        "time": "2015-03-13 17:37:22",
         "type": "library",
         "extra": {
             "branch-alias": {

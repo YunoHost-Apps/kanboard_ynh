@@ -17,6 +17,10 @@
         <?= $this->css($this->u('app', 'colors'), false) ?>
         <?= $this->css('assets/css/app.css') ?>
 
+        <?php if ($this->config->get('application_stylesheet')): ?>
+            <style><?= $this->config->get('application_stylesheet') ?></style>
+        <?php endif ?>
+
         <link rel="icon" type="image/png" href="assets/img/favicon.png">
         <link rel="apple-touch-icon" href="assets/img/touch-icon-iphone.png">
         <link rel="apple-touch-icon" sizes="72x72" href="assets/img/touch-icon-ipad.png">
@@ -35,11 +39,17 @@
     <?php else: ?>
         <header>
             <nav>
-                <h1><?= $this->a('K<span>B</span>', 'app', 'index', array(), false, 'logo', t('Dashboard')).' '.$this->summary($this->e($title)) ?></h1>
+                <h1><?= $this->a('K<span>B</span>', 'app', 'index', array(), false, 'logo', t('Dashboard')).' '.$this->summary($this->e($title)) ?>
+                    <?php if (! empty($description)): ?>
+                        <span class="column-tooltip" title='<?= $this->e($this->markdown($description)) ?>'>
+                            <i class="fa fa-info-circle"></i>
+                        </span>
+                    <?php endif ?>
+                </h1>
                 <ul>
                     <?php if (isset($board_selector) && ! empty($board_selector)): ?>
                     <li>
-                        <select id="board-selector" data-placeholder="<?= t('Display another project') ?>" data-board-url="<?= $this->u('board', 'show', array('project_id' => 'PROJECT_ID')) ?>">
+                        <select id="board-selector" data-notfound="<?= t('No results match:') ?>" data-placeholder="<?= t('Display another project') ?>" data-board-url="<?= $this->u('board', 'show', array('project_id' => 'PROJECT_ID')) ?>">
                             <option value=""></option>
                             <?php foreach($board_selector as $board_id => $board_name): ?>
                                 <option value="<?= $board_id ?>"><?= $this->e($board_name) ?></option>

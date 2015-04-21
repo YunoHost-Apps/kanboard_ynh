@@ -6,4 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Base32\\' => array($vendorDir . '/christian-riesen/base32/src'),
 );
