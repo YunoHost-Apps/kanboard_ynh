@@ -5,10 +5,7 @@ defined('DEBUG') or define('DEBUG', false);
 defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.'/../data/debug.log');
 
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.13');
-
-// Base directory
-define('BASE_URL_DIRECTORY', dirname($_SERVER['PHP_SELF']));
+defined('APP_VERSION') or define('APP_VERSION', '1.0.17');
 
 // Database driver: sqlite, mysql or postgres
 defined('DB_DRIVER') or define('DB_DRIVER', 'sqlite');
@@ -38,13 +35,14 @@ defined('LDAP_ACCOUNT_FULLNAME') or define('LDAP_ACCOUNT_FULLNAME', 'displayname
 defined('LDAP_ACCOUNT_EMAIL') or define('LDAP_ACCOUNT_EMAIL', 'mail');
 defined('LDAP_ACCOUNT_ID') or define('LDAP_ACCOUNT_ID', '');
 defined('LDAP_USERNAME_CASE_SENSITIVE') or define('LDAP_USERNAME_CASE_SENSITIVE', false);
+defined('LDAP_ACCOUNT_CREATION') or define('LDAP_ACCOUNT_CREATION', true);
 
 // Google authentication
 defined('GOOGLE_AUTH') or define('GOOGLE_AUTH', false);
 defined('GOOGLE_CLIENT_ID') or define('GOOGLE_CLIENT_ID', '');
 defined('GOOGLE_CLIENT_SECRET') or define('GOOGLE_CLIENT_SECRET', '');
 
-// GitHub authentication
+// Github authentication
 defined('GITHUB_AUTH') or define('GITHUB_AUTH', false);
 defined('GITHUB_CLIENT_ID') or define('GITHUB_CLIENT_ID', '');
 defined('GITHUB_CLIENT_SECRET') or define('GITHUB_CLIENT_SECRET', '');
@@ -64,6 +62,11 @@ defined('MAIL_SMTP_USERNAME') or define('MAIL_SMTP_USERNAME', '');
 defined('MAIL_SMTP_PASSWORD') or define('MAIL_SMTP_PASSWORD', '');
 defined('MAIL_SMTP_ENCRYPTION') or define('MAIL_SMTP_ENCRYPTION', null);
 defined('MAIL_SENDMAIL_COMMAND') or define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
+defined('POSTMARK_API_TOKEN') or define('POSTMARK_API_TOKEN', '');
+defined('MAILGUN_API_TOKEN') or define('MAILGUN_API_TOKEN', '');
+defined('MAILGUN_DOMAIN') or define('MAILGUN_DOMAIN', '');
+defined('SENDGRID_API_USER') or define('SENDGRID_API_USER', '');
+defined('SENDGRID_API_KEY') or define('SENDGRID_API_KEY', '');
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 defined('ENABLE_HSTS') or define('ENABLE_HSTS', true);
@@ -76,3 +79,12 @@ defined('FILES_DIR') or define('FILES_DIR', 'data/files/');
 
 // Escape html inside markdown text
 defined('MARKDOWN_ESCAPE_HTML') or define('MARKDOWN_ESCAPE_HTML', true);
+
+// API alternative authentication header, the default is HTTP Basic Authentication defined in RFC2617
+defined('API_AUTHENTICATION_HEADER') or define('API_AUTHENTICATION_HEADER', '');
+
+// Enable/disable url rewrite
+defined('ENABLE_URL_REWRITE') or define('ENABLE_URL_REWRITE', isset($_SERVER['HTTP_MOD_REWRITE']));
+
+// Hide login form
+defined('HIDE_LOGIN_FORM') or define('HIDE_LOGIN_FORM', false);

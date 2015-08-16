@@ -3,45 +3,159 @@
 namespace PicoDb;
 
 use PDO;
+use Closure;
 
+/**
+ * Table
+ *
+ * @author   Frederic Guillot
+ *
+ * @method   Table   addCondition($sql)
+ * @method   Table   beginOr()
+ * @method   Table   closeOr()
+ * @method   Table   eq($column, $value)
+ * @method   Table   neq($column, $value)
+ * @method   Table   in($column, array $values)
+ * @method   Table   notin($column, array $values)
+ * @method   Table   like($column, $value)
+ * @method   Table   ilike($column, $value)
+ * @method   Table   gt($column, $value)
+ * @method   Table   lt($column, $value)
+ * @method   Table   gte($column, $value)
+ * @method   Table   lte($column, $value)
+ * @method   Table   isNull($column)
+ * @method   Table   notNull($column)
+ */
 class Table
 {
+    /**
+     * Sorting direction
+     *
+     * @access public
+     * @var string
+     */
     const SORT_ASC = 'ASC';
     const SORT_DESC = 'DESC';
 
-    protected $db;
-    protected $table_name = '';
-    protected $values = array();
+    /**
+     * Condition instance
+     *
+     * @access public
+     * @var    Condition
+     */
+    public $condition;
 
+    /**
+     * Database instance
+     *
+     * @access protected
+     * @var    Database
+     */
+    protected $db;
+
+    /**
+     * Table name
+     *
+     * @access protected
+     * @var    string
+     */
+    protected $name = '';
+
+    /**
+     * Columns list for SELECT query
+     *
+     * @access private
+     * @var    array
+     */
     private $columns = array();
 
-    private $sql_limit = '';
-    private $sql_offset = '';
-    private $sql_order = '';
+    /**
+     * SQL limit
+     *
+     * @access private
+     * @var    string
+     */
+    private $sqlLimit = '';
 
+    /**
+     * SQL offset
+     *
+     * @access private
+     * @var    string
+     */
+    private $sqlOffset = '';
+
+    /**
+     * SQL order
+     *
+     * @access private
+     * @var    string
+     */
+    private $sqlOrder = '';
+
+    /**
+     * SQL custom SELECT value
+     *
+     * @access private
+     * @var    string
+     */
+    private $sqlSelect = '';
+
+    /**
+     * SQL joins
+     *
+     * @access private
+     * @var    array
+     */
     private $joins = array();
 
-    private $condition = '';
-    private $conditions = array();
-    private $or_conditions = array();
-    private $is_or_condition = false;
-
+    /**
+     * Use DISTINCT or not?
+     *
+     * @access private
+     * @var    boolean
+     */
     private $distinct = false;
-    private $group_by = array();
 
-    private $filter_callback = null;
+    /**
+     * Group by those columns
+     *
+     * @access private
+     * @var    array
+     */
+    private $groupBy = array();
+
+    /**
+     * Callback for result filtering
+     *
+     * @access private
+     * @var    Closure
+     */
+    private $callback = null;
 
     /**
      * Constructor
      *
      * @access public
-     * @param  \PicoDb\Database   $db
-     * @param  string             $table_name
+     * @param  Database   $db
+     * @param  string     $name
      */
-    public function __construct(Database $db, $table_name)
+    public function __construct(Database $db, $name)
     {
         $this->db = $db;
-        $this->table_name = $table_name;
+        $this->name = $name;
+        $this->condition = new Condition($db);
+    }
+
+    /**
+     * Return the table name
+     *
+     * @access public
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -53,12 +167,7 @@ class Table
      */
     public function save(array $data)
     {
-        if (! empty($this->conditions)) {
-            return $this->update($data);
-        }
-        else {
-            return $this->insert($data);
-        }
+        return $this->condition->hasCondition() ? $this->update($data) : $this->insert($data);
     }
 
     /**
@@ -75,20 +184,23 @@ class Table
         $columns = array();
         $values = array();
 
+        // Split columns and values
         foreach ($data as $column => $value) {
             $columns[] = $this->db->escapeIdentifier($column).'=?';
             $values[] = $value;
         }
 
-        foreach ($this->values as $value) {
+        // Append condition values
+        foreach ($this->condition->getValues() as $value) {
             $values[] = $value;
         }
 
+        // Build SQL query
         $sql = sprintf(
             'UPDATE %s SET %s %s',
-            $this->db->escapeIdentifier($this->table_name),
+            $this->db->escapeIdentifier($this->name),
             implode(', ', $columns),
-            $this->buildCondition()
+            $this->condition->build()
         );
 
         return $this->db->execute($sql, $values) !== false;
@@ -111,7 +223,7 @@ class Table
 
         $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->db->escapeIdentifier($this->table_name),
+            $this->db->escapeIdentifier($this->name),
             implode(', ', $columns),
             implode(', ', array_fill(0, count($data), '?'))
         );
@@ -129,25 +241,12 @@ class Table
     {
         $sql = sprintf(
             'DELETE FROM %s %s',
-            $this->db->escapeIdentifier($this->table_name),
-            $this->buildCondition()
+            $this->db->escapeIdentifier($this->name),
+            $this->condition->build()
         );
 
-        $result = $this->db->execute($sql, $this->values);
+        $result = $this->db->execute($sql, $this->condition->getValues());
         return $result->rowCount() > 0;
-    }
-
-    /**
-     * Add callback to alter the resultset
-     *
-     * @access public
-     * @param  array|callable  $callback
-     * @return \PicoDb\Table
-     */
-    public function filter($callback)
-    {
-        $this->filter_callback = $callback;
-        return $this;
     }
 
     /**
@@ -158,11 +257,11 @@ class Table
      */
     public function findAll()
     {
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->values);
+        $rq = $this->db->execute($this->buildSelectQuery(), $this->condition->getValues());
         $results = $rq->fetchAll(PDO::FETCH_ASSOC);
 
-        if (is_callable($this->filter_callback) && ! empty($results)) {
-            return call_user_func($this->filter_callback, $results);
+        if (is_callable($this->callback) && ! empty($results)) {
+            return call_user_func($this->callback, $results);
         }
 
         return $results;
@@ -173,12 +272,12 @@ class Table
      *
      * @access public
      * @param  string    $column
-     * @return boolean
+     * @return mixed
      */
     public function findAllByColumn($column)
     {
         $this->columns = array($column);
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->values);
+        $rq = $this->db->execute($this->buildSelectQuery(), $this->condition->getValues());
 
         return $rq->fetchAll(PDO::FETCH_COLUMN, 0);
     }
@@ -187,8 +286,7 @@ class Table
      * Fetch one row
      *
      * @access public
-     * @param  array    $data
-     * @return boolean
+     * @return array|null
      */
     public function findOne()
     {
@@ -210,35 +308,40 @@ class Table
         $this->limit(1);
         $this->columns = array($column);
 
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->values);
-
-        return $rq->fetchColumn();
+        return $this->db->execute($this->buildSelectQuery(), $this->condition->getValues())->fetchColumn();
     }
 
     /**
-     * Build a select query
+     * Build a subquery with an alias
      *
      * @access public
-     * @return string
+     * @param  string  $sql
+     * @param  string  $alias
+     * @return Table
      */
-    public function buildSelectQuery()
+    public function subquery($sql, $alias)
     {
-        foreach ($this->columns as $key => $value) {
-            $this->columns[$key] = $this->db->escapeIdentifier($value, $this->table_name);
-        }
+        $this->columns[] = '('.$sql.') AS '.$this->db->escapeIdentifier($alias);
+        return $this;
+    }
 
-        return sprintf(
-            'SELECT %s %s FROM %s %s %s %s %s %s %s',
-            $this->distinct ? 'DISTINCT' : '',
-            empty($this->columns) ? '*' : implode(', ', $this->columns),
-            $this->db->escapeIdentifier($this->table_name),
-            implode(' ', $this->joins),
-            $this->buildCondition(),
-            empty($this->group_by) ? '' : 'GROUP BY '.implode(', ', $this->group_by),
-            $this->sql_order,
-            $this->sql_limit,
-            $this->sql_offset
+    /**
+     * Exists
+     *
+     * @access public
+     * @return integer
+     */
+    public function exists()
+    {
+        $sql = sprintf(
+            'SELECT 1 FROM %s '.implode(' ', $this->joins).$this->condition->build(),
+            $this->db->escapeIdentifier($this->name)
         );
+
+        $rq = $this->db->execute($sql, $this->condition->getValues());
+        $result = $rq->fetchColumn();
+
+        return $result ? true : false;
     }
 
     /**
@@ -250,14 +353,35 @@ class Table
     public function count()
     {
         $sql = sprintf(
-            'SELECT COUNT(*) FROM %s '.implode(' ', $this->joins).$this->buildCondition().$this->sql_order.$this->sql_limit.$this->sql_offset,
-            $this->db->escapeIdentifier($this->table_name)
+            'SELECT COUNT(*) FROM %s '.implode(' ', $this->joins).$this->condition->build().$this->sqlOrder.$this->sqlLimit.$this->sqlOffset,
+            $this->db->escapeIdentifier($this->name)
         );
 
-        $rq = $this->db->execute($sql, $this->values);
-
+        $rq = $this->db->execute($sql, $this->condition->getValues());
         $result = $rq->fetchColumn();
+
         return $result ? (int) $result : 0;
+    }
+
+    /**
+     * Sum
+     *
+     * @access public
+     * @param  string   $column
+     * @return float
+     */
+    public function sum($column)
+    {
+        $sql = sprintf(
+            'SELECT SUM(%s) FROM %s '.implode(' ', $this->joins).$this->condition->build().$this->sqlOrder.$this->sqlLimit.$this->sqlOffset,
+            $this->db->escapeIdentifier($column),
+            $this->db->escapeIdentifier($this->name)
+        );
+
+        $rq = $this->db->execute($sql, $this->condition->getValues());
+        $result = $rq->fetchColumn();
+
+        return $result ? (float) $result : 0;
     }
 
     /**
@@ -269,7 +393,7 @@ class Table
      * @param  string   $local_column       Local column
      * @param  string   $local_table        Local table
      * @param  string   $alias              Join table alias
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function join($table, $foreign_column, $local_column, $local_table = '', $alias = '')
     {
@@ -277,84 +401,32 @@ class Table
             'LEFT JOIN %s ON %s=%s',
             $this->db->escapeIdentifier($table),
             $this->db->escapeIdentifier($alias ?: $table).'.'.$this->db->escapeIdentifier($foreign_column),
-            $this->db->escapeIdentifier($local_table ?: $this->table_name).'.'.$this->db->escapeIdentifier($local_column)
+            $this->db->escapeIdentifier($local_table ?: $this->name).'.'.$this->db->escapeIdentifier($local_column)
         );
 
         return $this;
     }
 
     /**
-     * Add custom condition
+     * Left join
      *
-     * @access private
+     * @access public
+     * @param  string   $table1
+     * @param  string   $alias1
+     * @param  string   $column1
+     * @param  string   $table2
+     * @param  string   $column2
      * @return Table
      */
-    private function condition($condition)
+    public function left($table1, $alias1, $column1, $table2, $column2)
     {
-        $this->condition = $condition;
-        return $this;
-    }
-
-    /**
-     * Build condition
-     *
-     * @access private
-     * @return string
-     */
-    private function buildCondition()
-    {
-        if (! empty($this->condition)) {
-            return 'WHERE '.$this->condition;
-        }
-
-        return empty($this->conditions) ? '' : ' WHERE '.implode(' AND ', $this->conditions);
-    }
-
-    /**
-     * Add new condition
-     *
-     * @access public
-     * @param  string   $sql
-     * @return Table
-     */
-    public function addCondition($sql)
-    {
-        if ($this->is_or_condition) {
-            $this->or_conditions[] = $sql;
-        }
-        else {
-            $this->conditions[] = $sql;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Start OR condition
-     *
-     * @access public
-     * @return \PicoDb\Table
-     */
-    public function beginOr()
-    {
-        $this->is_or_condition = true;
-        $this->or_conditions = array();
-        return $this;
-    }
-
-    /**
-     * Close OR condition
-     *
-     * @access public
-     * @return \PicoDb\Table
-     */
-    public function closeOr()
-    {
-        $this->is_or_condition = false;
-
-        if (! empty($this->or_conditions)) {
-            $this->conditions[] = '('.implode(' OR ', $this->or_conditions).')';
-        }
+        $this->joins[] = sprintf(
+            'LEFT JOIN %s AS %s ON %s=%s',
+            $this->db->escapeIdentifier($table1),
+            $this->db->escapeIdentifier($alias1),
+            $this->db->escapeIdentifier($alias1).'.'.$this->db->escapeIdentifier($column1),
+            $this->db->escapeIdentifier($table2).'.'.$this->db->escapeIdentifier($column2)
+        );
 
         return $this;
     }
@@ -365,18 +437,18 @@ class Table
      * @access public
      * @param  string   $column    Column name
      * @param  string   $order     Direction ASC or DESC
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function orderBy($column, $order = self::SORT_ASC)
     {
         $order = strtoupper($order);
         $order = $order === self::SORT_ASC || $order === self::SORT_DESC ? $order : self::SORT_ASC;
 
-        if ($this->sql_order === '') {
-            $this->sql_order = ' ORDER BY '.$this->db->escapeIdentifier($column).' '.$order;
+        if ($this->sqlOrder === '') {
+            $this->sqlOrder = ' ORDER BY '.$this->db->escapeIdentifier($column).' '.$order;
         }
         else {
-            $this->sql_order .= ', '.$this->db->escapeIdentifier($column).' '.$order;
+            $this->sqlOrder .= ', '.$this->db->escapeIdentifier($column).' '.$order;
         }
 
         return $this;
@@ -387,17 +459,11 @@ class Table
      *
      * @access public
      * @param  string   $column
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function asc($column)
     {
-        if ($this->sql_order === '') {
-            $this->sql_order = ' ORDER BY '.$this->db->escapeIdentifier($column).' '.self::SORT_ASC;
-        }
-        else {
-            $this->sql_order .= ', '.$this->db->escapeIdentifier($column).' '.self::SORT_ASC;
-        }
-
+        $this->orderBy($column, self::SORT_ASC);
         return $this;
     }
 
@@ -406,17 +472,11 @@ class Table
      *
      * @access public
      * @param  string   $column
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function desc($column)
     {
-        if ($this->sql_order === '') {
-            $this->sql_order = ' ORDER BY '.$this->db->escapeIdentifier($column).' '.self::SORT_DESC;
-        }
-        else {
-            $this->sql_order .= ', '.$this->db->escapeIdentifier($column).' '.self::SORT_DESC;
-        }
-
+        $this->orderBy($column, self::SORT_DESC);
         return $this;
     }
 
@@ -425,12 +485,12 @@ class Table
      *
      * @access public
      * @param  integer   $value
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function limit($value)
     {
         if (! is_null($value)) {
-            $this->sql_limit = ' LIMIT '.(int) $value;
+            $this->sqlLimit = ' LIMIT '.(int) $value;
         }
 
         return $this;
@@ -441,12 +501,12 @@ class Table
      *
      * @access public
      * @param  integer   $value
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function offset($value)
     {
         if (! is_null($value)) {
-            $this->sql_offset = ' OFFSET '.(int) $value;
+            $this->sqlOffset = ' OFFSET '.(int) $value;
         }
 
         return $this;
@@ -456,11 +516,23 @@ class Table
      * Group by
      *
      * @access public
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function groupBy()
     {
-        $this->group_by = func_get_args();
+        $this->groupBy = func_get_args();
+        return $this;
+    }
+
+    /**
+     * Custom select
+     *
+     * @access public
+     * @return Table
+     */
+    public function select($select)
+    {
+        $this->sqlSelect = $select;
         return $this;
     }
 
@@ -468,7 +540,7 @@ class Table
      * Define the columns for the select
      *
      * @access public
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function columns()
     {
@@ -480,7 +552,7 @@ class Table
      * Distinct
      *
      * @access public
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function distinct()
     {
@@ -490,118 +562,57 @@ class Table
     }
 
     /**
+     * Add callback to alter the resultset
+     *
+     * @access public
+     * @param  Closure|array  $callback
+     * @return Table
+     */
+    public function callback($callback)
+    {
+        $this->callback = $callback;
+        return $this;
+    }
+
+    /**
+     * Build a select query
+     *
+     * @access public
+     * @return string
+     */
+    public function buildSelectQuery()
+    {
+        if (empty($this->sqlSelect)) {
+            $this->columns = $this->db->escapeIdentifierList($this->columns);
+            $this->sqlSelect = ($this->distinct ? 'DISTINCT ' : '').(empty($this->columns) ? '*' : implode(', ', $this->columns));
+        }
+
+        $this->groupBy = $this->db->escapeIdentifierList($this->groupBy);
+
+        return trim(sprintf(
+            'SELECT %s FROM %s %s %s %s %s %s %s',
+            $this->sqlSelect,
+            $this->db->escapeIdentifier($this->name),
+            implode(' ', $this->joins),
+            $this->condition->build(),
+            empty($this->groupBy) ? '' : 'GROUP BY '.implode(', ', $this->groupBy),
+            $this->sqlOrder,
+            $this->sqlLimit,
+            $this->sqlOffset
+        ));
+    }
+
+    /**
      * Magic method for sql conditions
      *
      * @access public
      * @param  string   $name
      * @param  array    $arguments
-     * @return \PicoDb\Table
+     * @return Table
      */
     public function __call($name, array $arguments)
     {
-        $column = $arguments[0];
-        $sql = '';
-
-        switch (strtolower($name)) {
-
-            case 'in':
-                if (isset($arguments[1]) && is_array($arguments[1]) && ! empty($arguments[1])) {
-
-                    $sql = sprintf(
-                        '%s IN (%s)',
-                        $this->db->escapeIdentifier($column),
-                        implode(', ', array_fill(0, count($arguments[1]), '?'))
-                    );
-                }
-                break;
-
-            case 'notin':
-                if (isset($arguments[1]) && is_array($arguments[1]) && ! empty($arguments[1])) {
-
-                    $sql = sprintf(
-                        '%s NOT IN (%s)',
-                        $this->db->escapeIdentifier($column),
-                        implode(', ', array_fill(0, count($arguments[1]), '?'))
-                    );
-                }
-                break;
-
-            case 'like':
-                $sql = sprintf(
-                    '%s %s ?',
-                    $this->db->escapeIdentifier($column),
-                    $this->db->getConnection()->operatorLikeCaseSensitive()
-                );
-                break;
-
-            case 'ilike':
-                $sql = sprintf(
-                    '%s %s ?',
-                    $this->db->escapeIdentifier($column),
-                    $this->db->getConnection()->operatorLikeNotCaseSensitive()
-                );
-                break;
-
-            case 'eq':
-            case 'equal':
-            case 'equals':
-                $sql = sprintf('%s = ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'neq':
-            case 'notequal':
-            case 'notequals':
-                $sql = sprintf('%s != ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'gt':
-            case 'greaterthan':
-                $sql = sprintf('%s > ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'lt':
-            case 'lowerthan':
-                $sql = sprintf('%s < ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'gte':
-            case 'greaterthanorequals':
-                $sql = sprintf('%s >= ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'lte':
-            case 'lowerthanorequals':
-                $sql = sprintf('%s <= ?', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'isnull':
-                $sql = sprintf('%s IS NULL', $this->db->escapeIdentifier($column));
-                break;
-
-            case 'notnull':
-                $sql = sprintf('%s IS NOT NULL', $this->db->escapeIdentifier($column));
-                break;
-        }
-
-        if ($sql !== '') {
-
-            $this->addCondition($sql);
-
-            if (isset($arguments[1])) {
-
-                if (is_array($arguments[1])) {
-
-                    foreach ($arguments[1] as $value) {
-                        $this->values[] = $value;
-                    }
-                }
-                else {
-
-                    $this->values[] = $arguments[1];
-                }
-            }
-        }
-
+        call_user_func_array(array($this->condition, $name), $arguments);
         return $this;
     }
 }

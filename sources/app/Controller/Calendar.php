@@ -20,20 +20,9 @@ class Calendar extends Base
      */
     public function show()
     {
-        $project = $this->getProject();
-
         $this->response->html($this->template->layout('calendar/show', array(
             'check_interval' => $this->config->get('board_private_refresh_interval'),
-            'users_list' => $this->projectPermission->getMemberList($project['id'], true, true),
-            'categories_list' => $this->category->getList($project['id'], true, true),
-            'columns_list' => $this->board->getColumnsList($project['id'], true),
-            'swimlanes_list' => $this->swimlane->getList($project['id'], true),
-            'colors_list' => $this->color->getList(true),
-            'status_list' => $this->taskStatus->getList(true),
-            'project' => $project,
-            'title' => t('Calendar for "%s"', $project['name']),
-            'board_selector' => $this->projectPermission->getAllowedProjects($this->userSession->getId()),
-        )));
+        ) + $this->getProjectFilters('calendar', 'show')));
     }
 
     /**
@@ -47,19 +36,23 @@ class Calendar extends Base
         $start = $this->request->getStringParam('start');
         $end = $this->request->getStringParam('end');
 
-        $due_tasks = $this->taskFilter
-            ->create()
-            ->filterByProject($project_id)
-            ->filterByCategory($this->request->getIntegerParam('category_id', -1))
-            ->filterByOwner($this->request->getIntegerParam('owner_id', -1))
-            ->filterByColumn($this->request->getIntegerParam('column_id', -1))
-            ->filterBySwimlane($this->request->getIntegerParam('swimlane_id', -1))
-            ->filterByColor($this->request->getStringParam('color_id'))
-            ->filterByStatus($this->request->getIntegerParam('is_active', -1))
-            ->filterByDueDateRange($start, $end)
-            ->toCalendarEvents();
+        // Common filter
+        $filter = $this->taskFilter
+            ->search($this->userSession->getFilters($project_id))
+            ->filterByProject($project_id);
 
-        $this->response->json($due_tasks);
+        // Tasks
+        if ($this->config->get('calendar_project_tasks', 'date_started') === 'date_creation') {
+            $events = $filter->copy()->filterByCreationDateRange($start, $end)->toDateTimeCalendarEvents('date_creation', 'date_completed');
+        }
+        else {
+            $events = $filter->copy()->filterByStartDateRange($start, $end)->toDateTimeCalendarEvents('date_started', 'date_completed');
+        }
+
+        // Tasks with due date
+        $events = array_merge($events, $filter->copy()->filterByDueDateRange($start, $end)->toAllDayCalendarEvents());
+
+        $this->response->json($events);
     }
 
     /**
@@ -72,19 +65,30 @@ class Calendar extends Base
         $user_id = $this->request->getIntegerParam('user_id');
         $start = $this->request->getStringParam('start');
         $end = $this->request->getStringParam('end');
+        $filter = $this->taskFilter->create()->filterByOwner($user_id)->filterByStatus(TaskModel::STATUS_OPEN);
 
-        $due_tasks = $this->taskFilter
-                          ->create()
-                          ->filterByOwner($user_id)
-                          ->filterByStatus(TaskModel::STATUS_OPEN)
-                          ->filterByDueDateRange($start, $end)
-                          ->toCalendarEvents();
+        // Task with due date
+        $events = $filter->copy()->filterByDueDateRange($start, $end)->toAllDayCalendarEvents();
 
-        $subtask_timeslots = $this->subtaskTimeTracking->getUserCalendarEvents($user_id, $start, $end);
+        // Tasks
+        if ($this->config->get('calendar_user_tasks', 'date_started') === 'date_creation') {
+            $events = array_merge($events, $filter->copy()->filterByCreationDateRange($start, $end)->toDateTimeCalendarEvents('date_creation', 'date_completed'));
+        }
+        else {
+            $events = array_merge($events, $filter->copy()->filterByStartDateRange($start, $end)->toDateTimeCalendarEvents('date_started', 'date_completed'));
+        }
 
-        $subtask_forcast = $this->config->get('subtask_forecast') == 1 ? $this->subtaskForecast->getCalendarEvents($user_id, $end) : array();
+        // Subtasks time tracking
+        if ($this->config->get('calendar_user_subtasks_time_tracking') == 1) {
+            $events = array_merge($events, $this->subtaskTimeTracking->getUserCalendarEvents($user_id, $start, $end));
+        }
 
-        $this->response->json(array_merge($due_tasks, $subtask_timeslots, $subtask_forcast));
+        // Subtask estimates
+        if ($this->config->get('calendar_user_subtasks_forecast') == 1) {
+            $events = array_merge($events, $this->subtaskForecast->getCalendarEvents($user_id, $end));
+        }
+
+        $this->response->json($events);
     }
 
     /**

@@ -17,12 +17,13 @@ class Acl extends Base
      * @var array
      */
     private $public_acl = array(
-        'user' => array('login', 'check', 'google', 'github'),
+        'auth' => array('login', 'check'),
         'task' => array('readonly'),
         'board' => array('readonly'),
-        'project' => array('feed'),
         'webhook' => '*',
-        'app' => array('colors'),
+        'ical' => '*',
+        'feed' => '*',
+        'oauth' => array('google', 'github'),
     );
 
     /**
@@ -35,10 +36,17 @@ class Acl extends Base
         'board' => '*',
         'comment' => '*',
         'file' => '*',
-        'project' => array('show', 'tasks', 'search', 'activity'),
+        'project' => array('show'),
+        'listing' => '*',
+        'activity' => '*',
         'subtask' => '*',
         'task' => '*',
+        'taskduplication' => '*',
+        'taskcreation' => '*',
+        'taskmodification' => '*',
+        'taskstatus' => '*',
         'tasklink' => '*',
+        'timer' => '*',
         'calendar' => array('show', 'project'),
     );
 
@@ -51,8 +59,8 @@ class Acl extends Base
     private $manager_acl = array(
         'action' => '*',
         'analytic' => '*',
-        'board' => array('movecolumn', 'edit', 'editcolumn', 'updatecolumn', 'add', 'remove'),
         'category' => '*',
+        'column' => '*',
         'export' => array('tasks', 'subtasks', 'summary'),
         'project' => array('edit', 'update', 'share', 'integration', 'users', 'alloweverybody', 'allow', 'setowner', 'revoke', 'duplicate', 'disable', 'enable'),
         'swimlane' => '*',
@@ -66,13 +74,13 @@ class Acl extends Base
      * @var array
      */
     private $admin_acl = array(
-        'app' => array('dashboard'),
-        'user' => array('index', 'create', 'save', 'remove'),
+        'user' => array('index', 'create', 'save', 'remove', 'authentication'),
         'config' => '*',
         'link' => '*',
         'project' => array('remove'),
         'hourlyrate' => '*',
         'currency' => '*',
+        'twofactor' => array('disable'),
     );
 
     /**

@@ -40,7 +40,7 @@ class Export extends Base
             'date_formats' => $this->dateParser->getAvailableFormats(),
             'project' => $project,
             'title' => $page_title,
-        )));
+        ), 'export/sidebar'));
     }
 
     /**
@@ -70,7 +70,7 @@ class Export extends Base
      */
     public function summary()
     {
-        $this->common('projectDailySummary', 'getAggregatedMetrics', t('Summary'), 'summary', t('Daily project summary export'));
+        $this->common('ProjectDailyColumnStats', 'getAggregatedMetrics', t('Summary'), 'summary', t('Daily project summary export'));
     }
 
     /**

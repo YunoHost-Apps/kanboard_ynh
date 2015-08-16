@@ -3,67 +3,165 @@
 namespace PicoDb\Driver;
 
 use PDO;
-use LogicException;
+use PDOException;
 
-class Sqlite extends PDO
+/**
+ * Sqlite Driver
+ *
+ * @author   Frederic Guillot
+ */
+class Sqlite extends Base
 {
-    public function __construct(array $settings)
-    {
-        $required_atttributes = array(
-            'filename',
-        );
+    /**
+     * List of required settings options
+     *
+     * @access protected
+     * @var array
+     */
+    protected $requiredAtttributes = array('filename');
 
-        foreach ($required_atttributes as $attribute) {
-            if (! isset($settings[$attribute])) {
-                throw new LogicException('This configuration parameter is missing: "'.$attribute.'"');
-            }
+    /**
+     * Create a new PDO connection
+     *
+     * @access public
+     * @param  array   $settings
+     */
+    public function createConnection(array $settings)
+    {
+        $this->pdo = new PDO('sqlite:'.$settings['filename']);
+        $this->enableForeignKeys();
+    }
+
+    /**
+     * Enable foreign keys
+     *
+     * @access public
+     */
+    public function enableForeignKeys()
+    {
+        $this->pdo->exec('PRAGMA foreign_keys = ON');
+    }
+
+    /**
+     * Disable foreign keys
+     *
+     * @access public
+     */
+    public function disableForeignKeys()
+    {
+        $this->pdo->exec('PRAGMA foreign_keys = OFF');
+    }
+
+    /**
+     * Return true if the error code is a duplicate key
+     *
+     * @access public
+     * @param  integer  $code
+     * @return boolean
+     */
+    public function isDuplicateKeyError($code)
+    {
+        return $code == 23000;
+    }
+
+    /**
+     * Escape identifier
+     *
+     * @access public
+     * @param  string  $identifier
+     * @return string
+     */
+    public function escape($identifier)
+    {
+        return '"'.$identifier.'"';
+    }
+
+    /**
+     * Get non standard operator
+     *
+     * @access public
+     * @param  string  $operator
+     * @return string
+     */
+    public function getOperator($operator)
+    {
+        if ($operator === 'LIKE' || $operator === 'ILIKE') {
+            return 'LIKE';
         }
 
-        parent::__construct('sqlite:'.$settings['filename']);
-
-        $this->exec('PRAGMA foreign_keys = ON');
+        return '';
     }
 
-    public function getSchemaVersion()
-    {
-        $rq = $this->prepare('PRAGMA user_version');
-        $rq->execute();
-        $result = $rq->fetch(PDO::FETCH_ASSOC);
-
-        if (isset($result['user_version'])) {
-            return (int) $result['user_version'];
-        }
-
-        return 0;
-    }
-
-    public function setSchemaVersion($version)
-    {
-        $this->exec('PRAGMA user_version='.$version);
-    }
-
+    /**
+     * Get last inserted id
+     *
+     * @access public
+     * @return integer
+     */
     public function getLastId()
     {
-        return $this->lastInsertId();
+        return $this->pdo->lastInsertId();
     }
 
-    public function escapeIdentifier($value)
+    /**
+     * Get current schema version
+     *
+     * @access public
+     * @return integer
+     */
+    public function getSchemaVersion()
     {
-        return '"'.$value.'"';
+        $rq = $this->pdo->prepare('PRAGMA user_version');
+        $rq->execute();
+
+        return (int) $rq->fetchColumn();
     }
 
-    public function operatorLikeCaseSensitive()
+    /**
+     * Set current schema version
+     *
+     * @access public
+     * @param  integer  $version
+     */
+    public function setSchemaVersion($version)
     {
-        return 'LIKE';
+        $this->pdo->exec('PRAGMA user_version='.$version);
     }
 
-    public function operatorLikeNotCaseSensitive()
+    /**
+     * Upsert for a key/value variable
+     *
+     * @access public
+     * @param  string  $table
+     * @param  string  $keyColumn
+     * @param  string  $valueColumn
+     * @param  array   $dictionnary
+     */
+    public function upsert($table, $keyColumn, $valueColumn, array $dictionnary)
     {
-        return 'LIKE';
-    }
+        try {
+            $this->pdo->beginTransaction();
 
-    public function getDuplicateKeyErrorCode()
-    {
-        return array(23000);
+            foreach ($dictionnary as $key => $value) {
+
+                $sql = sprintf(
+                    'INSERT OR REPLACE INTO %s (%s, %s) VALUES (?, ?)',
+                    $this->escape($table),
+                    $this->escape($keyColumn),
+                    $this->escape($valueColumn)
+                );
+
+                $rq = $this->pdo->prepare($sql);
+                $rq->execute(array($key, $value));
+            }
+
+            $this->pdo->commit();
+
+            return true;
+        }
+        catch (PDOException $e) {
+            $this->pdo->rollback();
+            return false;
+        }
     }
 }

@@ -8,5 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     $vendorDir . '/swiftmailer/swiftmailer/lib/swift_required.php',
     $baseDir . '/app/functions.php',
-    $baseDir . '/app/Libs/password.php',
+    $baseDir . '/app/Library/password.php',
 );

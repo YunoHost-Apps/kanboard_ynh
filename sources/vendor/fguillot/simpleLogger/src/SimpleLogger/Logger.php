@@ -2,8 +2,10 @@
 
 namespace SimpleLogger;
 
+use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Handler for multiple loggers
@@ -11,7 +13,7 @@ use Psr\Log\LoggerInterface;
  * @package SimpleLogger
  * @author  Frédéric Guillot
  */
-class Logger implements LoggerAwareInterface
+class Logger extends AbstractLogger implements LoggerAwareInterface
 {
     /**
      * Logger instances
@@ -19,6 +21,34 @@ class Logger implements LoggerAwareInterface
      * @access private
      */
     private $loggers = array();
+
+    /**
+     * Get level priority (same values as Monolog)
+     *
+     * @param  mixed  $level
+     * @return integer
+     */
+    public function getLevelPriority($level)
+    {
+        switch ($level) {
+            case LogLevel::EMERGENCY:
+                return 600;
+            case LogLevel::ALERT:
+                return 550;
+            case LogLevel::CRITICAL:
+                return 500;
+            case LogLevel::ERROR:
+                return 400;
+            case LogLevel::WARNING:
+                return 300;
+            case LogLevel::NOTICE:
+                return 250;
+            case LogLevel::INFO:
+                return 200;
+        }
+
+        return 100;
+    }
 
     /**
      * Sets a logger instance on the object
@@ -33,14 +63,18 @@ class Logger implements LoggerAwareInterface
     /**
      * Proxy method to the real logger
      *
-     * @access public
-     * @param  string   $method     Method name
-     * @param  array    $arguments  Method arguments
+     * @param  mixed   $level
+     * @param  string  $message
+     * @param  array   $context
      */
-    public function __call($method, array $arguments = array())
+    public function log($level, $message, array $context = array())
     {
         foreach ($this->loggers as $logger) {
-            call_user_func_array(array($logger, $method), $arguments);
+
+            // Call the logger only if necessary
+            if ($this->getLevelPriority($level) >= $this->getLevelPriority($logger->getLevel())) {
+                $logger->log($level, $message, $context);
+            }
         }
     }
 }

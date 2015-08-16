@@ -83,7 +83,7 @@ class Request
      */
     public function getJson()
     {
-        return json_decode($this->getBody(), true);
+        return json_decode($this->getBody(), true) ?: array();
     }
 
     /**
@@ -160,6 +160,17 @@ class Request
     public function getQueryString()
     {
         return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
+    }
+
+    /**
+     * Returns uri
+     *
+     * @access public
+     * @return string
+     */
+    public function getUri()
+    {
+        return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
     }
 
     /**

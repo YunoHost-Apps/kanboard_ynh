@@ -1,4 +1,3 @@
-// Common functions
 var Kanboard = (function() {
 
     jQuery(document).ready(function() {
@@ -6,6 +5,14 @@ var Kanboard = (function() {
     });
 
     return {
+
+        ShowLoadingIcon: function() {
+            $("body").append('<span id="app-loading-icon">&nbsp;<i class="fa fa-spinner fa-spin"></i></span>');
+        },
+
+        HideLoadingIcon: function() {
+            $("#app-loading-icon").remove();
+        },
 
         // Return true if the element#id exists
         Exists: function(id) {
@@ -40,7 +47,7 @@ var Kanboard = (function() {
                 $("body").append('<div id="popover-container"><div id="popover-content">' + content + '</div></div>');
 
                 $("#popover-container").click(function() {
-                    $(this).remove();
+                    Kanboard.ClosePopover();
                 });
 
                 $("#popover-content").click(function(e) {
@@ -49,17 +56,22 @@ var Kanboard = (function() {
 
                 $(".close-popover").click(function(e) {
                     e.preventDefault();
-                    $('#popover-container').remove();
+                    Kanboard.ClosePopover();
                 });
 
-                Mousetrap.bind("esc", function() {
-                    $('#popover-container').remove();
+                Mousetrap.bindGlobal("esc", function() {
+                    Kanboard.ClosePopover();
                 });
 
                 if (callback) {
                     callback();
                 }
             });
+        },
+
+        ClosePopover: function() {
+            $('#popover-container').remove();
+            Kanboard.Screenshot.Destroy();
         },
 
         // Return true if the page is visible
@@ -166,6 +178,13 @@ var Kanboard = (function() {
 
         Init: function() {
 
+            // Chosen select
+            $(".chosen-select").chosen({
+                width: "200px",
+                no_results_text: $(".chosen-select").data("notfound"),
+                disable_search_threshold: 10
+            });
+
             // Project select box
             $("#board-selector").chosen({
                 width: 180,
@@ -179,40 +198,106 @@ var Kanboard = (function() {
             // Check the session every 60s
             window.setInterval(Kanboard.CheckSession, 60000);
 
-            // Keyboard shortcuts
+            // Submit form
             Mousetrap.bindGlobal("mod+enter", function() {
                 $("form").submit();
             });
 
+            // Open board selector
             Mousetrap.bind("b", function(e) {
                 e.preventDefault();
                 $('#board-selector').trigger('chosen:open');
             });
 
-            // Tooltip for column description
-            $(".column-tooltip").tooltip({
-                content: function() {
-                    return '<div class="markdown">' + $(this).attr("title") + '</div>';
-                },
-                position: {
-                    my: 'left-20 top',
-                    at: 'center bottom+9',
-                    using: function(position, feedback) {
+            // Focus to the search box
+            Mousetrap.bind("f", function(e) {
+                e.preventDefault();
 
-                        $(this).css(position);
+                var input = document.getElementById("form-search");
 
-                        var arrow_pos = feedback.target.left + feedback.target.width / 2 - feedback.element.left - 20;
-
-                        $("<div>")
-                            .addClass("tooltip-arrow")
-                            .addClass(feedback.vertical)
-                            .addClass(arrow_pos == 0 ? "align-left" : "align-right")
-                            .appendTo(this);
-                    }
+                if (input) {
+                    input.focus();
                 }
             });
 
+            // Switch view mode for projects: go to the board
+            Mousetrap.bind("v b", function(e) {
+                var link = $(".view-board");
+
+                if (link.length) {
+                    window.location = link.attr('href');
+                }
+            });
+
+            // Switch view mode for projects: go to the calendar
+            Mousetrap.bind("v c", function(e) {
+                var link = $(".view-calendar");
+
+                if (link.length) {
+                    window.location = link.attr('href');
+                }
+            });
+
+            // Switch view mode for projects: go to the listing
+            Mousetrap.bind("v l", function(e) {
+                var link = $(".view-listing");
+
+                if (link.length) {
+                    window.location = link.attr('href');
+                }
+            });
+
+            // Place cursor at the end when focusing on the search box
+            $(document).on("focus", "#form-search", function() {
+                if ($("#form-search")[0].setSelectionRange) {
+                   $('#form-search')[0].setSelectionRange($('#form-search').val().length, $('#form-search').val().length);
+                }
+            });
+
+            // Filter helper for search
+            $(document).on("click", ".filter-helper", function (e) {
+               e.preventDefault();
+               $("#form-search").val($(this).data("filter"));
+               $("form.search").submit();
+            });
+
+            // Collapse sidebar
+            $(document).on("click", ".sidebar-collapse", function (e) {
+               e.preventDefault();
+               $(".sidebar-container").addClass("sidebar-collapsed");
+               $(".sidebar-expand").show();
+               $(".sidebar h2").hide();
+               $(".sidebar ul").hide();
+               $(".sidebar-collapse").hide();
+            });
+
+            // Expand sidebar
+            $(document).on("click", ".sidebar-expand", function (e) {
+               e.preventDefault();
+               $(".sidebar-container").removeClass("sidebar-collapsed");
+               $(".sidebar-collapse").show();
+               $(".sidebar h2").show();
+               $(".sidebar ul").show();
+               $(".sidebar-expand").hide();
+            });
+
+            // Reload page when a destination project is changed
+            var reloading_project = false;
+            $("select.task-reload-project-destination").change(function() {
+                if (! reloading_project) {
+                    $(".loading-icon").show();
+                    reloading_project = true;
+                    window.location = $(this).data("redirect").replace(/PROJECT_ID/g, $(this).val());
+                }
+            });
+
+            // Datepicker translation
             $.datepicker.setDefaults($.datepicker.regional[$("body").data("js-lang")]);
+
+            // Alert box fadeout
+            $(".alert-fade-out").delay(4000).fadeOut(800, function() {
+                $(this).remove();
+            });
 
             Kanboard.InitAfterAjax();
         },
@@ -223,7 +308,7 @@ var Kanboard = (function() {
             $(document).on("click", ".popover", Kanboard.Popover);
 
             // Autofocus fields (html5 autofocus works only with page onload)
-            $("input[autofocus]").each(function(index, element) {
+            $("[autofocus]").each(function(index, element) {
                 $(this).focus();
             })
 
@@ -232,6 +317,15 @@ var Kanboard = (function() {
                 showOtherMonths: true,
                 selectOtherMonths: true,
                 dateFormat: 'yy-mm-dd',
+                constrainInput: false
+            });
+
+            // Datetime picker
+            $(".form-datetime").datetimepicker({
+                controlType: 'select',
+                oneLine: true,
+                dateFormat: 'yy-mm-dd',
+                // timeFormat: 'h:mm tt',
                 constrainInput: false
             });
 
@@ -250,11 +344,14 @@ var Kanboard = (function() {
 
             // Task auto-completion
             if ($(".task-autocomplete").length) {
-            	$(".task-autocomplete").parent().find("input[type=submit]").attr('disabled','disabled');
+
+                if ($('.opposite_task_id').val() == '') {
+                    $(".task-autocomplete").parent().find("input[type=submit]").attr('disabled','disabled');
+                }
 
                 $(".task-autocomplete").autocomplete({
                     source: $(".task-autocomplete").data("search-url"),
-                    minLength: 2,
+                    minLength: 1,
                     select: function(event, ui) {
                         var field = $(".task-autocomplete").data("dst-field");
                         $("input[name=" + field + "]").val(ui.item.id);
@@ -262,6 +359,34 @@ var Kanboard = (function() {
                         $(".task-autocomplete").parent().find("input[type=submit]").removeAttr('disabled');
                     }
                 });
+            }
+
+            // Tooltip for column description
+            $(".tooltip").tooltip({
+                content: function() {
+                    return '<div class="markdown">' + $(this).attr("title") + '</div>';
+                },
+                position: {
+                    my: 'left-20 top',
+                    at: 'center bottom+9',
+                    using: function(position, feedback) {
+
+                        $(this).css(position);
+
+                        var arrow_pos = feedback.target.left + feedback.target.width / 2 - feedback.element.left - 20;
+
+                        $("<div>")
+                            .addClass("tooltip-arrow")
+                            .addClass(feedback.vertical)
+                            .addClass(arrow_pos < 1 ? "align-left" : "align-right")
+                            .appendTo(this);
+                    }
+                }
+            });
+
+            // Screenshot
+            if (Kanboard.Exists("screenshot-zone")) {
+                Kanboard.Screenshot.Init();
             }
         }
     };

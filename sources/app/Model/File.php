@@ -49,7 +49,8 @@ class File extends Base
     {
         $file = $this->getbyId($file_id);
 
-        if (! empty($file) && @unlink(FILES_DIR.$file['path'])) {
+        if (! empty($file)) {
+            @unlink(FILES_DIR.$file['path']);
             return $this->db->table(self::TABLE)->eq('id', $file_id)->remove();
         }
 
@@ -66,10 +67,13 @@ class File extends Base
     public function removeAll($task_id)
     {
         $files = $this->getAll($task_id);
+        $results = array();
 
         foreach ($files as $file) {
-            $this->remove($file['id']);
+            $results[] = $this->remove($file['id']);
         }
+
+        return ! in_array(false, $results, true);
     }
 
     /**
@@ -79,22 +83,58 @@ class File extends Base
      * @param  integer  $task_id    Task id
      * @param  string   $name       Filename
      * @param  string   $path       Path on the disk
-     * @param  bool     $is_image   Image or not
-     * @return bool
+     * @param  integer  $size       File size
+     * @return bool|integer
      */
-    public function create($task_id, $name, $path, $is_image)
+    public function create($task_id, $name, $path, $size)
     {
-        $this->container['dispatcher']->dispatch(
-            self::EVENT_CREATE,
-            new FileEvent(array('task_id' => $task_id, 'name' => $name))
-        );
-
-        return $this->db->table(self::TABLE)->save(array(
+        $result = $this->db->table(self::TABLE)->save(array(
             'task_id' => $task_id,
-            'name' => $name,
+            'name' => substr($name, 0, 255),
             'path' => $path,
-            'is_image' => $is_image ? '1' : '0',
+            'is_image' => $this->isImage($name) ? 1 : 0,
+            'size' => $size,
+            'user_id' => $this->userSession->getId() ?: 0,
+            'date' => time(),
         ));
+
+        if ($result) {
+
+            $this->container['dispatcher']->dispatch(
+                self::EVENT_CREATE,
+                new FileEvent(array('task_id' => $task_id, 'name' => $name))
+            );
+
+            return (int) $this->db->getLastId();
+        }
+
+        return false;
+    }
+
+    /**
+     * Get PicoDb query to get all files
+     *
+     * @access public
+     * @return \PicoDb\Table
+     */
+    public function getQuery()
+    {
+        return $this->db
+            ->table(self::TABLE)
+            ->columns(
+                self::TABLE.'.id',
+                self::TABLE.'.name',
+                self::TABLE.'.path',
+                self::TABLE.'.is_image',
+                self::TABLE.'.task_id',
+                self::TABLE.'.date',
+                self::TABLE.'.user_id',
+                self::TABLE.'.size',
+                User::TABLE.'.username',
+                User::TABLE.'.name as user_name'
+            )
+            ->join(User::TABLE, 'id', 'user_id')
+            ->asc(self::TABLE.'.name');
     }
 
     /**
@@ -106,10 +146,7 @@ class File extends Base
      */
     public function getAll($task_id)
     {
-        return $this->db->table(self::TABLE)
-            ->eq('task_id', $task_id)
-            ->asc('name')
-            ->findAll();
+        return $this->getQuery()->eq('task_id', $task_id)->findAll();
     }
 
     /**
@@ -121,11 +158,7 @@ class File extends Base
      */
     public function getAllImages($task_id)
     {
-        return $this->db->table(self::TABLE)
-            ->eq('task_id', $task_id)
-            ->eq('is_image', 1)
-            ->asc('name')
-            ->findAll();
+        return $this->getQuery()->eq('task_id', $task_id)->eq('is_image', 1)->findAll();
     }
 
     /**
@@ -137,15 +170,11 @@ class File extends Base
      */
     public function getAllDocuments($task_id)
     {
-        return $this->db->table(self::TABLE)
-            ->eq('task_id', $task_id)
-            ->eq('is_image', 0)
-            ->asc('name')
-            ->findAll();
+        return $this->getQuery()->eq('task_id', $task_id)->eq('is_image', 0)->findAll();
     }
 
     /**
-     * Check if a filename is an image
+     * Check if a filename is an image (file types that can be shown as thumbnail)
      *
      * @access public
      * @param  string   $filename   Filename
@@ -181,36 +210,17 @@ class File extends Base
     }
 
     /**
-     * Check if the base directory is created correctly
-     *
-     * @access public
-     */
-    public function setup()
-    {
-        if (! is_dir(FILES_DIR)) {
-            if (! mkdir(FILES_DIR, 0755, true)) {
-                die('Unable to create the upload directory: "'.FILES_DIR.'"');
-            }
-        }
-
-        if (! is_writable(FILES_DIR)) {
-            die('The directory "'.FILES_DIR.'" must be writeable by your webserver user');
-        }
-    }
-
-    /**
      * Handle file upload
      *
      * @access public
-     * @param  integer $project_id Project id
-     * @param  integer $task_id Task id
-     * @param  string $form_name File form name
+     * @param  integer  $project_id    Project id
+     * @param  integer  $task_id       Task id
+     * @param  string   $form_name     File form name
      * @return bool
      */
     public function upload($project_id, $task_id, $form_name)
     {
-        $this->setup();
-        $result = array();
+        $results = array();
 
         if (! empty($_FILES[$form_name])) {
 
@@ -226,17 +236,154 @@ class File extends Base
 
                     if (@move_uploaded_file($uploaded_filename, FILES_DIR.$destination_filename)) {
 
-                        $result[] = $this->create(
+                        $results[] = $this->create(
                             $task_id,
                             $original_filename,
                             $destination_filename,
-                            $this->isImage($original_filename)
+                            $_FILES[$form_name]['size'][$key]
                         );
                     }
                 }
             }
         }
 
-        return count(array_unique($result)) === 1;
+        return ! in_array(false, $results, true);
+    }
+
+    /**
+     * Handle screenshot upload
+     *
+     * @access public
+     * @param  integer  $project_id   Project id
+     * @param  integer  $task_id      Task id
+     * @param  string   $blob         Base64 encoded image
+     * @return bool|integer
+     */
+    public function uploadScreenshot($project_id, $task_id, $blob)
+    {
+        $data = base64_decode($blob);
+
+        if (empty($data)) {
+            return false;
+        }
+
+        $original_filename = e('Screenshot taken %s', dt('%B %e, %Y at %k:%M %p', time())).'.png';
+        $destination_filename = $this->generatePath($project_id, $task_id, $original_filename);
+
+        @mkdir(FILES_DIR.dirname($destination_filename), 0755, true);
+        @file_put_contents(FILES_DIR.$destination_filename, $data);
+
+        return $this->create(
+            $task_id,
+            $original_filename,
+            $destination_filename,
+            strlen($data)
+        );
+    }
+
+    /**
+     * Handle file upload (base64 encoded content)
+     *
+     * @access public
+     * @param  integer  $project_id   Project id
+     * @param  integer  $task_id      Task id
+     * @param  string   $filename     Filename
+     * @param  string   $blob         Base64 encoded image
+     * @return bool|integer
+     */
+    public function uploadContent($project_id, $task_id, $filename, $blob)
+    {
+        $data = base64_decode($blob);
+
+        if (empty($data)) {
+            return false;
+        }
+
+        $destination_filename = $this->generatePath($project_id, $task_id, $filename);
+
+        @mkdir(FILES_DIR.dirname($destination_filename), 0755, true);
+        @file_put_contents(FILES_DIR.$destination_filename, $data);
+
+        return $this->create(
+            $task_id,
+            $filename,
+            $destination_filename,
+            strlen($data)
+        );
+    }
+
+    /**
+     * Generate a jpeg thumbnail from an image (output directly the image)
+     *
+     * @access public
+     * @param  string    $filename         Source image
+     * @param  integer   $resize_width     Desired image width
+     * @param  integer   $resize_height    Desired image height
+     */
+    public function generateThumbnail($filename, $resize_width, $resize_height)
+    {
+        $metadata = getimagesize($filename);
+        $src_width = $metadata[0];
+        $src_height = $metadata[1];
+        $dst_y = 0;
+        $dst_x = 0;
+
+        if (empty($metadata['mime'])) {
+            return;
+        }
+
+        if ($resize_width == 0 && $resize_height == 0) {
+            $resize_width = 100;
+            $resize_height = 100;
+        }
+
+        if ($resize_width > 0 && $resize_height == 0) {
+            $dst_width = $resize_width;
+            $dst_height = floor($src_height * ($resize_width / $src_width));
+            $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+        }
+        elseif ($resize_width == 0 && $resize_height > 0) {
+            $dst_width = floor($src_width * ($resize_height / $src_height));
+            $dst_height = $resize_height;
+            $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+        }
+        else {
+
+            $src_ratio = $src_width / $src_height;
+            $resize_ratio = $resize_width / $resize_height;
+
+            if ($src_ratio <= $resize_ratio) {
+                $dst_width = $resize_width;
+                $dst_height = floor($src_height * ($resize_width / $src_width));
+
+                $dst_y = ($dst_height - $resize_height) / 2 * (-1);
+            }
+            else {
+                $dst_width = floor($src_width * ($resize_height / $src_height));
+                $dst_height = $resize_height;
+
+                $dst_x = ($dst_width - $resize_width) / 2 * (-1);
+            }
+
+            $dst_image = imagecreatetruecolor($resize_width, $resize_height);
+        }
+
+        switch ($metadata['mime']) {
+            case 'image/jpeg':
+            case 'image/jpg':
+                $src_image = imagecreatefromjpeg($filename);
+                break;
+            case 'image/png':
+                $src_image = imagecreatefrompng($filename);
+                break;
+            case 'image/gif':
+                $src_image = imagecreatefromgif($filename);
+                break;
+            default:
+                return;
+        }
+
+        imagecopyresampled($dst_image, $src_image, $dst_x, $dst_y, 0, 0, $dst_width, $dst_height, $src_width, $src_height);
+        imagejpeg($dst_image);
     }
 }

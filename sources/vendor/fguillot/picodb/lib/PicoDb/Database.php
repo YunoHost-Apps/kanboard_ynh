@@ -3,21 +3,24 @@
 namespace PicoDb;
 
 use Closure;
-use PDO;
 use PDOException;
 use LogicException;
-use RuntimeException;
-use Picodb\Driver\Sqlite;
-use Picodb\Driver\Mysql;
-use Picodb\Driver\Postgres;
+use PicoDb\Driver\Sqlite;
+use PicoDb\Driver\Mysql;
+use PicoDb\Driver\Postgres;
 
+/**
+ * Database
+ *
+ * @author   Frederic Guillot
+ */
 class Database
 {
     /**
      * Database instances
      *
-     * @access private
      * @static
+     * @access private
      * @var array
      */
     private static $instances = array();
@@ -31,12 +34,11 @@ class Database
     private $logs = array();
 
     /**
-     * PDO instance
+     * Driver instance
      *
      * @access private
-     * @var PDO
      */
-    private $pdo;
+    private $driver;
 
     /**
      * Flag to calculate query time
@@ -52,7 +54,7 @@ class Database
      * @access public
      * @var boolean
      */
-    public $log_queries = false;
+    public $logQueries = false;
 
     /**
      * Number of SQL queries executed
@@ -60,10 +62,10 @@ class Database
      * @access public
      * @var integer
      */
-    public $nb_queries = 0;
+    public $nbQueries = 0;
 
     /**
-     * Constructor, iniatlize a PDO driver
+     * Initialize the driver
      *
      * @access public
      * @param  array     $settings    Connection settings
@@ -71,31 +73,22 @@ class Database
     public function __construct(array $settings)
     {
         if (! isset($settings['driver'])) {
-            throw new LogicException('You must define a database driver.');
+            throw new LogicException('You must define a database driver');
         }
 
         switch ($settings['driver']) {
-
             case 'sqlite':
-                require_once __DIR__.'/Driver/Sqlite.php';
-                $this->pdo = new Sqlite($settings);
+                $this->driver = new Sqlite($settings);
                 break;
-
             case 'mysql':
-                require_once __DIR__.'/Driver/Mysql.php';
-                $this->pdo = new Mysql($settings);
+                $this->driver = new Mysql($settings);
                 break;
-
             case 'postgres':
-                require_once __DIR__.'/Driver/Postgres.php';
-                $this->pdo = new Postgres($settings);
+                $this->driver = new Postgres($settings);
                 break;
-
             default:
-                throw new LogicException('This database driver is not supported.');
+                throw new LogicException('This database driver is not supported');
         }
-
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     /**
@@ -116,7 +109,7 @@ class Database
      * @param  string    $name        Instance name
      * @param  Closure   $callback    Callback
      */
-    public static function bootstrap($name, Closure $callback)
+    public static function setInstance($name, Closure $callback)
     {
         self::$instances[$name] = $callback;
     }
@@ -129,10 +122,10 @@ class Database
      * @param  string    $name   Instance name
      * @return Database
      */
-    public static function get($name)
+    public static function getInstance($name)
     {
         if (! isset(self::$instances[$name])) {
-            throw new LogicException('No database instance created with that name.');
+            throw new LogicException('No database instance created with that name');
         }
 
         if (is_callable(self::$instances[$name])) {
@@ -172,7 +165,29 @@ class Database
      */
     public function getConnection()
     {
-        return $this->pdo;
+        return $this->driver->getConnection();
+    }
+
+    /**
+     * Get the Driver instance
+     *
+     * @access public
+     * @return Sqlite|Postgres|Mysql
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * Get the last inserted id
+     *
+     * @access public
+     * @return integer
+     */
+    public function getLastId()
+    {
+        return $this->driver->getLastId();
     }
 
     /**
@@ -182,7 +197,7 @@ class Database
      */
     public function closeConnection()
     {
-        $this->pdo = null;
+        $this->driver->closeConnection();
     }
 
     /**
@@ -201,14 +216,33 @@ class Database
         }
 
         if (! empty($table)) {
-            return $this->pdo->escapeIdentifier($table).'.'.$this->pdo->escapeIdentifier($value);
+            return $this->driver->escape($table).'.'.$this->driver->escape($value);
         }
 
-        return $this->pdo->escapeIdentifier($value);
+        return $this->driver->escape($value);
+    }
+
+    /**
+     * Escape an identifier list
+     *
+     * @access public
+     * @param  array     $identifiers  List of identifiers
+     * @param  string    $table        Table name
+     * @return string[]
+     */
+    public function escapeIdentifierList(array $identifiers, $table = '')
+    {
+        foreach ($identifiers as $key => $value) {
+            $identifiers[$key] = $this->escapeIdentifier($value, $table);
+        }
+
+        return $identifiers;
     }
 
     /**
      * Execute a prepared statement
+     *
+     * Note: returns false on duplicate keys instead of SQLException
      *
      * @access public
      * @param  string    $sql      SQL query
@@ -219,7 +253,7 @@ class Database
     {
         try {
 
-            if ($this->log_queries) {
+            if ($this->logQueries) {
                 $this->setLogMessage($sql);
             }
 
@@ -227,28 +261,19 @@ class Database
                 $start = microtime(true);
             }
 
-            $rq = $this->pdo->prepare($sql);
+            $rq = $this->getConnection()->prepare($sql);
             $rq->execute($values);
 
             if ($this->stopwatch) {
                 $this->setLogMessage('DURATION='.(microtime(true) - $start));
             }
 
-            $this->nb_queries++;
+            $this->nbQueries++;
 
             return $rq;
         }
         catch (PDOException $e) {
-
-            $this->cancelTransaction();
-
-            if (in_array($e->getCode(), $this->pdo->getDuplicateKeyErrorCode())) {
-                return false;
-            }
-
-            $this->setLogMessage($e->getMessage());
-
-            throw new RuntimeException('SQL error'.($this->log_queries ? ': '.$e->getMessage() : ''));
+            return $this->handleSqlError($e);
         }
     }
 
@@ -261,11 +286,36 @@ class Database
      */
     public function transaction(Closure $callback)
     {
-        $this->pdo->beginTransaction();
-        $result = $callback($this); // Rollback is done in the execute() method
-        $this->closeTransaction();
+        try {
 
-        return $result === null ? true : $result;
+            $this->startTransaction();
+            $result = $callback($this);
+            $this->closeTransaction();
+
+            return $result === null ? true : $result;
+        }
+        catch (PDOException $e) {
+            return $this->handleSqlError($e);
+        }
+    }
+
+    /**
+     * Handle PDOException
+     *
+     * @access private
+     * @param  PDOException $e
+     * @return boolean
+     */
+    private function handleSqlError(PDOException $e)
+    {
+        $this->cancelTransaction();
+        $this->setLogMessage($e->getMessage());
+
+        if ($this->driver->isDuplicateKeyError($e->getCode())) {
+            return false;
+        }
+
+        throw new SQLException('SQL error'.($this->logQueries ? ': '.$e->getMessage() : ''));
     }
 
     /**
@@ -275,8 +325,8 @@ class Database
      */
     public function startTransaction()
     {
-        if (! $this->pdo->inTransaction()) {
-            $this->pdo->beginTransaction();
+        if (! $this->getConnection()->inTransaction()) {
+            $this->getConnection()->beginTransaction();
         }
     }
 
@@ -287,8 +337,8 @@ class Database
      */
     public function closeTransaction()
     {
-        if ($this->pdo->inTransaction()) {
-            $this->pdo->commit();
+        if ($this->getConnection()->inTransaction()) {
+            $this->getConnection()->commit();
         }
     }
 
@@ -299,8 +349,8 @@ class Database
      */
     public function cancelTransaction()
     {
-        if ($this->pdo->inTransaction()) {
-            $this->pdo->rollback();
+        if ($this->getConnection()->inTransaction()) {
+            $this->getConnection()->rollback();
         }
     }
 
@@ -308,11 +358,10 @@ class Database
      * Get a table instance
      *
      * @access public
-     * @return Picodb\Table
+     * @return Table
      */
     public function table($table_name)
     {
-        require_once __DIR__.'/Table.php';
         return new Table($this, $table_name);
     }
 
@@ -320,12 +369,10 @@ class Database
      * Get a hashtable instance
      *
      * @access public
-     * @return Picodb\Hashtable
+     * @return Hashtable
      */
     public function hashtable($table_name)
     {
-        require_once __DIR__.'/Table.php';
-        require_once __DIR__.'/Hashtable.php';
         return new Hashtable($this, $table_name);
     }
 
@@ -333,11 +380,10 @@ class Database
      * Get a schema instance
      *
      * @access public
-     * @return Picodb\Schema
+     * @return Schema
      */
     public function schema()
     {
-        require_once __DIR__.'/Schema.php';
         return new Schema($this);
     }
 }

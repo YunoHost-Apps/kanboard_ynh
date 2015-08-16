@@ -6,8 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Symfony\\Component\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher'),
-    'Symfony\\Component\\Console\\' => array($vendorDir . '/symfony/console'),
     'SimpleValidator' => array($vendorDir . '/fguillot/simple-validator/src'),
     'SimpleLogger' => array($vendorDir . '/fguillot/simpleLogger/src'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log'),
@@ -15,8 +13,7 @@ return array(
     'PicoDb' => array($vendorDir . '/fguillot/picodb/lib'),
     'Parsedown' => array($vendorDir . '/erusev/parsedown'),
     'Otp' => array($vendorDir . '/christian-riesen/otp/src'),
-    'OAuth\\Unit' => array($vendorDir . '/lusitanian/oauth/tests'),
-    'OAuth' => array($vendorDir . '/lusitanian/oauth/src'),
     'JsonRPC' => array($vendorDir . '/fguillot/json-rpc/src'),
+    'Eluceo\\iCal' => array($vendorDir . '/eluceo/ical/src'),
     '' => array($baseDir . '/app'),
 );

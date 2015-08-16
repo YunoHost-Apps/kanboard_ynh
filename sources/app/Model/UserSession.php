@@ -33,7 +33,6 @@ class UserSession extends Base
         }
 
         $user['id'] = (int) $user['id'];
-        $user['default_project_id'] = (int) $user['default_project_id'];
         $user['is_admin'] = (bool) $user['is_admin'];
         $user['is_ldap_user'] = (bool) $user['is_ldap_user'];
         $user['twofactor_activated'] = (bool) $user['twofactor_activated'];
@@ -86,17 +85,6 @@ class UserSession extends Base
     }
 
     /**
-     * Check if the given user_id is the connected user
-     *
-     * @param  integer   $user_id   User id
-     * @return boolean
-     */
-    public function isCurrentUser($user_id)
-    {
-        return $this->getId() == $user_id;
-    }
-
-    /**
      * Check is the user is connected
      *
      * @access public
@@ -108,35 +96,50 @@ class UserSession extends Base
     }
 
     /**
-     * Get the last seen project from the session
+     * Get project filters from the session
      *
      * @access public
-     * @return integer
+     * @param  integer  $project_id
+     * @return string
      */
-    public function getLastSeenProjectId()
+    public function getFilters($project_id)
     {
-        return empty($this->session['last_show_project_id']) ? 0 : $this->session['last_show_project_id'];
+        return ! empty($_SESSION['filters'][$project_id]) ? $_SESSION['filters'][$project_id] : 'status:open';
     }
 
     /**
-     * Get the default project from the session
+     * Save project filters in the session
      *
      * @access public
-     * @return integer
+     * @param  integer  $project_id
+     * @param  string   $filters
      */
-    public function getFavoriteProjectId()
+    public function setFilters($project_id, $filters)
     {
-        return isset($this->session['user']['default_project_id']) ? $this->session['user']['default_project_id'] : 0;
+        $_SESSION['filters'][$project_id] = $filters;
     }
 
     /**
-     * Set the last seen project from the session
+     * Is board collapsed or expanded
      *
      * @access public
-     * @param integer    $project_id    Project id
+     * @param  integer  $project_id
+     * @return boolean
      */
-    public function storeLastSeenProjectId($project_id)
+    public function isBoardCollapsed($project_id)
     {
-        $this->session['last_show_project_id'] = (int) $project_id;
+        return ! empty($_SESSION['board_collapsed'][$project_id]) ? $_SESSION['board_collapsed'][$project_id] : false;
+    }
+
+    /**
+     * Set board display mode
+     *
+     * @access public
+     * @param  integer  $project_id
+     * @param  boolean  $collapsed
+     */
+    public function setBoardDisplayMode($project_id, $collapsed)
+    {
+        $_SESSION['board_collapsed'][$project_id] = $collapsed;
     }
 }

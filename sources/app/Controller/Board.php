@@ -11,101 +11,6 @@ namespace Controller;
 class Board extends Base
 {
     /**
-     * Move a column down or up
-     *
-     * @access public
-     */
-    public function moveColumn()
-    {
-        $this->checkCSRFParam();
-        $project = $this->getProject();
-        $column_id = $this->request->getIntegerParam('column_id');
-        $direction = $this->request->getStringParam('direction');
-
-        if ($direction === 'up' || $direction === 'down') {
-            $this->board->{'move'.$direction}($project['id'], $column_id);
-        }
-
-        $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
-    }
-
-    /**
-     * Change a task assignee directly from the board
-     *
-     * @access public
-     */
-    public function changeAssignee()
-    {
-        $task = $this->getTask();
-        $project = $this->project->getById($task['project_id']);
-
-        $this->response->html($this->template->render('board/assignee', array(
-            'values' => $task,
-            'users_list' => $this->projectPermission->getMemberList($project['id']),
-            'project' => $project,
-        )));
-    }
-
-    /**
-     * Validate an assignee modification
-     *
-     * @access public
-     */
-    public function updateAssignee()
-    {
-        $values = $this->request->getValues();
-
-        list($valid,) = $this->taskValidator->validateAssigneeModification($values);
-
-        if ($valid && $this->taskModification->update($values)) {
-            $this->session->flash(t('Task updated successfully.'));
-        }
-        else {
-            $this->session->flashError(t('Unable to update your task.'));
-        }
-
-        $this->response->redirect('?controller=board&action=show&project_id='.$values['project_id']);
-    }
-
-    /**
-     * Change a task category directly from the board
-     *
-     * @access public
-     */
-    public function changeCategory()
-    {
-        $task = $this->getTask();
-        $project = $this->project->getById($task['project_id']);
-
-        $this->response->html($this->template->render('board/category', array(
-            'values' => $task,
-            'categories_list' => $this->category->getList($project['id']),
-            'project' => $project,
-        )));
-    }
-
-    /**
-     * Validate a category modification
-     *
-     * @access public
-     */
-    public function updateCategory()
-    {
-        $values = $this->request->getValues();
-
-        list($valid,) = $this->taskValidator->validateCategoryModification($values);
-
-        if ($valid && $this->taskModification->update($values)) {
-            $this->session->flash(t('Task updated successfully.'));
-        }
-        else {
-            $this->session->flashError(t('Unable to update your task.'));
-        }
-
-        $this->response->redirect('?controller=board&action=show&project_id='.$values['project_id']);
-    }
-
-    /**
      * Display the public version of a board
      * Access checked by a simple token, no user login, read only, auto-refresh
      *
@@ -122,10 +27,9 @@ class Board extends Base
         }
 
         // Display the board with a specific layout
-        $this->response->html($this->template->layout('board/public', array(
+        $this->response->html($this->template->layout('board/public_view', array(
             'project' => $project,
             'swimlanes' => $this->board->getBoard($project['id']),
-            'categories' => $this->category->getList($project['id'], false),
             'title' => $project['name'],
             'description' => $project['description'],
             'no_layout' => true,
@@ -137,194 +41,20 @@ class Board extends Base
     }
 
     /**
-     * Redirect the user to the default project
-     *
-     * @access public
-     */
-    public function index()
-    {
-        $last_seen_project_id = $this->userSession->getLastSeenProjectId();
-        $favorite_project_id = $this->userSession->getFavoriteProjectId();
-        $project_id = $last_seen_project_id ?: $favorite_project_id;
-
-        if (! $project_id) {
-            $projects = $this->projectPermission->getAllowedProjects($this->userSession->getId());
-
-            if (empty($projects)) {
-
-                if ($this->userSession->isAdmin()) {
-                    $this->redirectNoProject();
-                }
-
-                $this->forbidden();
-            }
-
-            $project_id = key($projects);
-        }
-
-        $this->show($project_id);
-    }
-
-    /**
      * Show a board for a given project
      *
      * @access public
-     * @param  integer   $project_id    Default project id
      */
-    public function show($project_id = 0)
+    public function show()
     {
-        $project = $this->getProject($project_id);
-        $projects = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params = $this->getProjectFilters('board', 'show');
 
-        $board_selector = $projects;
-        unset($board_selector[$project['id']]);
-
-        $this->userSession->storeLastSeenProjectId($project['id']);
-
-        $this->response->html($this->template->layout('board/index', array(
-            'users' => $this->projectPermission->getMemberList($project['id'], true, true),
-            'projects' => $projects,
-            'project' => $project,
-            'swimlanes' => $this->board->getBoard($project['id']),
-            'categories' => $this->category->getList($project['id'], true, true),
-            'title' => $project['name'],
-            'description' => $project['description'],
-            'board_selector' => $board_selector,
+        $this->response->html($this->template->layout('board/private_view', array(
+            'swimlanes' => $this->taskFilter->search($params['filters']['search'])->getBoard($params['project']['id']),
+            'description' => $params['project']['description'],
             'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
             'board_highlight_period' => $this->config->get('board_highlight_period'),
-        )));
-    }
-
-    /**
-     * Display a form to edit a board
-     *
-     * @access public
-     */
-    public function edit(array $values = array(), array $errors = array())
-    {
-        $project = $this->getProject();
-        $columns = $this->board->getColumns($project['id']);
-
-        foreach ($columns as $column) {
-            $values['title['.$column['id'].']'] = $column['title'];
-            $values['description['.$column['id'].']'] = $column['description'];
-            $values['task_limit['.$column['id'].']'] = $column['task_limit'] ?: null;
-        }
-
-        $this->response->html($this->projectLayout('board/edit', array(
-            'errors' => $errors,
-            'values' => $values + array('project_id' => $project['id']),
-            'columns' => $columns,
-            'project' => $project,
-            'title' => t('Edit board')
-        )));
-    }
-
-    /**
-     * Display a form to edit a board
-     *
-     * @access public
-     */
-    public function editColumn(array $values = array(), array $errors = array())
-    {
-        $project = $this->getProject();
-        $column = $this->board->getColumn($this->request->getIntegerParam('column_id'));
-
-        $this->response->html($this->projectLayout('board/edit_column', array(
-            'errors' => $errors,
-            'values' => $values ?: $column,
-            'project' => $project,
-            'column' => $column,
-            'title' => t('Edit column "%s"', $column['title'])
-        )));
-    }
-
-    /**
-     * Validate and update a column
-     *
-     * @access public
-     */
-    public function updateColumn()
-    {
-        $project = $this->getProject();
-        $values = $this->request->getValues();
-
-        list($valid, $errors) = $this->board->validateModification($values);
-
-        if ($valid) {
-
-            if ($this->board->updateColumn($values['id'], $values['title'], $values['task_limit'], $values['description'])) {
-                $this->session->flash(t('Board updated successfully.'));
-                $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
-            }
-            else {
-                $this->session->flashError(t('Unable to update this board.'));
-            }
-        }
-
-        $this->editcolumn($values, $errors);
-    }
-
-    /**
-     * Validate and add a new column
-     *
-     * @access public
-     */
-    public function add()
-    {
-        $project = $this->getProject();
-        $columns = $this->board->getColumnsList($project['id']);
-        $data = $this->request->getValues();
-        $values = array();
-
-        foreach ($columns as $column_id => $column_title) {
-            $values['title['.$column_id.']'] = $column_title;
-        }
-
-        list($valid, $errors) = $this->board->validateCreation($data);
-
-        if ($valid) {
-
-            if ($this->board->addColumn($project['id'], $data['title'], $data['task_limit'], $data['description'])) {
-                $this->session->flash(t('Board updated successfully.'));
-                $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
-            }
-            else {
-                $this->session->flashError(t('Unable to update this board.'));
-            }
-        }
-
-        $this->edit($values, $errors);
-    }
-
-    /**
-     * Remove a column
-     *
-     * @access public
-     */
-    public function remove()
-    {
-        $project = $this->getProject();
-
-        if ($this->request->getStringParam('remove') === 'yes') {
-
-            $this->checkCSRFParam();
-            $column = $this->board->getColumn($this->request->getIntegerParam('column_id'));
-
-            if (! empty($column) && $this->board->removeColumn($column['id'])) {
-                $this->session->flash(t('Column removed successfully.'));
-            } else {
-                $this->session->flashError(t('Unable to remove this column.'));
-            }
-
-            $this->response->redirect('?controller=board&action=edit&project_id='.$project['id']);
-        }
-
-        $this->response->html($this->projectLayout('board/remove', array(
-            'column' => $this->board->getColumn($this->request->getIntegerParam('column_id')),
-            'project' => $project,
-            'title' => t('Remove a column from a board')
-        )));
+        ) + $params));
     }
 
     /**
@@ -358,16 +88,7 @@ class Board extends Base
             return $this->response->status(400);
         }
 
-        $this->response->html(
-            $this->template->render('board/show', array(
-                'project' => $this->project->getById($project_id),
-                'swimlanes' => $this->board->getBoard($project_id),
-                'categories' => $this->category->getList($project_id, false),
-                'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
-                'board_highlight_period' => $this->config->get('board_highlight_period'),
-            )),
-            201
-        );
+        $this->response->html($this->renderBoard($project_id), 201);
     }
 
     /**
@@ -392,15 +113,7 @@ class Board extends Base
             return $this->response->status(304);
         }
 
-        $this->response->html(
-            $this->template->render('board/show', array(
-                'project' => $this->project->getById($project_id),
-                'swimlanes' => $this->board->getBoard($project_id),
-                'categories' => $this->category->getList($project_id, false),
-                'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
-                'board_highlight_period' => $this->config->get('board_highlight_period'),
-            ))
-        );
+        $this->response->html($this->renderBoard($project_id));
     }
 
     /**
@@ -411,8 +124,8 @@ class Board extends Base
     public function tasklinks()
     {
         $task = $this->getTask();
-        $this->response->html($this->template->render('board/tasklinks', array(
-            'links' => $this->taskLink->getLinks($task['id']),
+        $this->response->html($this->template->render('board/tooltip_tasklinks', array(
+            'links' => $this->taskLink->getAll($task['id']),
             'task' => $task,
         )));
     }
@@ -425,7 +138,7 @@ class Board extends Base
     public function subtasks()
     {
         $task = $this->getTask();
-        $this->response->html($this->template->render('board/subtasks', array(
+        $this->response->html($this->template->render('board/tooltip_subtasks', array(
             'subtasks' => $this->subtask->getAll($task['id']),
             'task' => $task,
         )));
@@ -440,7 +153,7 @@ class Board extends Base
     {
         $task = $this->getTask();
 
-        $this->response->html($this->template->render('board/files', array(
+        $this->response->html($this->template->render('board/tooltip_files', array(
             'files' => $this->file->getAllDocuments($task['id']),
             'images' => $this->file->getAllImages($task['id']),
             'task' => $task,
@@ -456,7 +169,7 @@ class Board extends Base
     {
         $task = $this->getTask();
 
-        $this->response->html($this->template->render('board/comments', array(
+        $this->response->html($this->template->render('board/tooltip_comments', array(
             'comments' => $this->comment->getAll($task['id'])
         )));
     }
@@ -470,8 +183,169 @@ class Board extends Base
     {
         $task = $this->getTask();
 
-        $this->response->html($this->template->render('board/description', array(
+        $this->response->html($this->template->render('board/tooltip_description', array(
             'task' => $task
         )));
+    }
+
+    /**
+     * Change a task assignee directly from the board
+     *
+     * @access public
+     */
+    public function changeAssignee()
+    {
+        $task = $this->getTask();
+        $project = $this->project->getById($task['project_id']);
+
+        $this->response->html($this->template->render('board/popover_assignee', array(
+            'values' => $task,
+            'users_list' => $this->projectPermission->getMemberList($project['id']),
+            'project' => $project,
+        )));
+    }
+
+    /**
+     * Validate an assignee modification
+     *
+     * @access public
+     */
+    public function updateAssignee()
+    {
+        $values = $this->request->getValues();
+
+        list($valid,) = $this->taskValidator->validateAssigneeModification($values);
+
+        if ($valid && $this->taskModification->update($values)) {
+            $this->session->flash(t('Task updated successfully.'));
+        }
+        else {
+            $this->session->flashError(t('Unable to update your task.'));
+        }
+
+        $this->response->redirect($this->helper->url->to('board', 'show', array('project_id' => $values['project_id'])));
+    }
+
+    /**
+     * Change a task category directly from the board
+     *
+     * @access public
+     */
+    public function changeCategory()
+    {
+        $task = $this->getTask();
+        $project = $this->project->getById($task['project_id']);
+
+        $this->response->html($this->template->render('board/popover_category', array(
+            'values' => $task,
+            'categories_list' => $this->category->getList($project['id']),
+            'project' => $project,
+        )));
+    }
+
+    /**
+     * Validate a category modification
+     *
+     * @access public
+     */
+    public function updateCategory()
+    {
+        $values = $this->request->getValues();
+
+        list($valid,) = $this->taskValidator->validateCategoryModification($values);
+
+        if ($valid && $this->taskModification->update($values)) {
+            $this->session->flash(t('Task updated successfully.'));
+        }
+        else {
+            $this->session->flashError(t('Unable to update your task.'));
+        }
+
+        $this->response->redirect($this->helper->url->to('board', 'show', array('project_id' => $values['project_id'])));
+    }
+
+    /**
+     * Screenshot popover
+     *
+     * @access public
+     */
+    public function screenshot()
+    {
+        $task = $this->getTask();
+
+        $this->response->html($this->template->render('file/screenshot', array(
+            'task' => $task,
+            'redirect' => 'board',
+        )));
+    }
+
+    /**
+     * Get recurrence information on mouseover
+     *
+     * @access public
+     */
+    public function recurrence()
+    {
+        $task = $this->getTask();
+
+        $this->response->html($this->template->render('task/recurring_info', array(
+            'task' => $task,
+            'recurrence_trigger_list' => $this->task->getRecurrenceTriggerList(),
+            'recurrence_timeframe_list' => $this->task->getRecurrenceTimeframeList(),
+            'recurrence_basedate_list' => $this->task->getRecurrenceBasedateList(),
+        )));
+    }
+
+    /**
+     * Enable collapsed mode
+     *
+     * @access public
+     */
+    public function collapse()
+    {
+        $this->changeDisplayMode(true);
+    }
+
+    /**
+     * Enable expanded mode
+     *
+     * @access public
+     */
+    public function expand()
+    {
+        $this->changeDisplayMode(false);
+    }
+
+    /**
+     * Change display mode
+     *
+     * @access private
+     */
+    private function changeDisplayMode($mode)
+    {
+        $project_id = $this->request->getIntegerParam('project_id');
+        $this->userSession->setBoardDisplayMode($project_id, $mode);
+
+        if ($this->request->isAjax()) {
+            $this->response->html($this->renderBoard($project_id));
+        }
+        else {
+            $this->response->redirect($this->helper->url->to('board', 'show', array('project_id' => $project_id)));
+        }
+    }
+
+    /**
+     * Render board
+     *
+     * @access private
+     */
+    private function renderBoard($project_id)
+    {
+        return $this->template->render('board/table_container', array(
+            'project' => $this->project->getById($project_id),
+            'swimlanes' => $this->taskFilter->search($this->userSession->getFilters($project_id))->getBoard($project_id),
+            'board_private_refresh_interval' => $this->config->get('board_private_refresh_interval'),
+            'board_highlight_period' => $this->config->get('board_highlight_period'),
+        ));
     }
 }

@@ -3,7 +3,7 @@
 namespace Controller;
 
 /**
- * Project Anaytic controller
+ * Project Analytic controller
  *
  * @package  controller
  * @author   Frederic Guillot
@@ -21,9 +21,59 @@ class Analytic extends Base
     private function layout($template, array $params)
     {
         $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
-        $params['analytic_content_for_layout'] = $this->template->render($template, $params);
+        $params['content_for_sublayout'] = $this->template->render($template, $params);
 
         return $this->template->layout('analytic/layout', $params);
+    }
+
+    /**
+     * Show average Lead and Cycle time
+     *
+     * @access public
+     */
+    public function leadAndCycleTime()
+    {
+        $project = $this->getProject();
+        $values = $this->request->getValues();
+
+        $this->projectDailyStats->updateTotals($project['id'], date('Y-m-d'));
+
+        $from = $this->request->getStringParam('from', date('Y-m-d', strtotime('-1week')));
+        $to = $this->request->getStringParam('to', date('Y-m-d'));
+
+        if (! empty($values)) {
+            $from = $values['from'];
+            $to = $values['to'];
+        }
+
+        $this->response->html($this->layout('analytic/lead_cycle_time', array(
+            'values' => array(
+                'from' => $from,
+                'to' => $to,
+            ),
+            'project' => $project,
+            'average' => $this->projectAnalytic->getAverageLeadAndCycleTime($project['id']),
+            'metrics' => $this->projectDailyStats->getRawMetrics($project['id'], $from, $to),
+            'date_format' => $this->config->get('application_date_format'),
+            'date_formats' => $this->dateParser->getAvailableFormats(),
+            'title' => t('Lead and Cycle time for "%s"', $project['name']),
+        )));
+    }
+
+    /**
+     * Show average time spent by column
+     *
+     * @access public
+     */
+    public function averageTimeByColumn()
+    {
+        $project = $this->getProject();
+
+        $this->response->html($this->layout('analytic/avg_time_columns', array(
+            'project' => $project,
+            'metrics' => $this->projectAnalytic->getAverageTimeSpentByColumn($project['id']),
+            'title' => t('Average time spent into each column for "%s"', $project['name']),
+        )));
     }
 
     /**
@@ -34,24 +84,12 @@ class Analytic extends Base
     public function tasks()
     {
         $project = $this->getProject();
-        $metrics = $this->projectAnalytic->getTaskRepartition($project['id']);
 
-        if ($this->request->isAjax()) {
-            $this->response->json(array(
-                'metrics' => $metrics,
-                'labels' => array(
-                    'column_title' => t('Column'),
-                    'nb_tasks' => t('Number of tasks'),
-                )
-            ));
-        }
-        else {
-            $this->response->html($this->layout('analytic/tasks', array(
-                'project' => $project,
-                'metrics' => $metrics,
-                'title' => t('Task repartition for "%s"', $project['name']),
-            )));
-        }
+        $this->response->html($this->layout('analytic/tasks', array(
+            'project' => $project,
+            'metrics' => $this->projectAnalytic->getTaskRepartition($project['id']),
+            'title' => t('Task repartition for "%s"', $project['name']),
+        )));
     }
 
     /**
@@ -62,24 +100,12 @@ class Analytic extends Base
     public function users()
     {
         $project = $this->getProject();
-        $metrics = $this->projectAnalytic->getUserRepartition($project['id']);
 
-        if ($this->request->isAjax()) {
-            $this->response->json(array(
-                'metrics' => $metrics,
-                'labels' => array(
-                    'user' => t('User'),
-                    'nb_tasks' => t('Number of tasks'),
-                )
-            ));
-        }
-        else {
-            $this->response->html($this->layout('analytic/users', array(
-                'project' => $project,
-                'metrics' => $metrics,
-                'title' => t('User repartition for "%s"', $project['name']),
-            )));
-        }
+        $this->response->html($this->layout('analytic/users', array(
+            'project' => $project,
+            'metrics' => $this->projectAnalytic->getUserRepartition($project['id']),
+            'title' => t('User repartition for "%s"', $project['name']),
+        )));
     }
 
     /**
@@ -89,8 +115,30 @@ class Analytic extends Base
      */
     public function cfd()
     {
+        $this->commonAggregateMetrics('analytic/cfd', 'total', 'Cumulative flow diagram for "%s"');
+    }
+
+    /**
+     * Show burndown chart
+     *
+     * @access public
+     */
+    public function burndown()
+    {
+        $this->commonAggregateMetrics('analytic/burndown', 'score', 'Burndown chart for "%s"');
+    }
+
+    /**
+     * Common method for CFD and Burdown chart
+     *
+     * @access private
+     */
+    private function commonAggregateMetrics($template, $column, $title)
+    {
         $project = $this->getProject();
         $values = $this->request->getValues();
+
+        $this->projectDailyColumnStats->updateTotals($project['id'], date('Y-m-d'));
 
         $from = $this->request->getStringParam('from', date('Y-m-d', strtotime('-1week')));
         $to = $this->request->getStringParam('to', date('Y-m-d'));
@@ -100,29 +148,19 @@ class Analytic extends Base
             $to = $values['to'];
         }
 
-        if ($this->request->isAjax()) {
-            $this->response->json(array(
-                'columns' => array_values($this->board->getColumnsList($project['id'])),
-                'metrics' => $this->projectDailySummary->getRawMetrics($project['id'], $from, $to),
-                'labels' => array(
-                    'column' => t('Column'),
-                    'day' => t('Date'),
-                    'total' => t('Tasks'),
-                )
-            ));
-        }
-        else {
-            $this->response->html($this->layout('analytic/cfd', array(
-                'values' => array(
-                    'from' => $from,
-                    'to' => $to,
-                ),
-                'display_graph' => $this->projectDailySummary->countDays($project['id'], $from, $to) >= 2,
-                'project' => $project,
-                'date_format' => $this->config->get('application_date_format'),
-                'date_formats' => $this->dateParser->getAvailableFormats(),
-                'title' => t('Cumulative flow diagram for "%s"', $project['name']),
-            )));
-        }
+        $display_graph = $this->projectDailyColumnStats->countDays($project['id'], $from, $to) >= 2;
+
+        $this->response->html($this->layout($template, array(
+            'values' => array(
+                'from' => $from,
+                'to' => $to,
+            ),
+            'display_graph' => $display_graph,
+            'metrics' => $display_graph ? $this->projectDailyColumnStats->getAggregatedMetrics($project['id'], $from, $to, $column) : array(),
+            'project' => $project,
+            'date_format' => $this->config->get('application_date_format'),
+            'date_formats' => $this->dateParser->getAvailableFormats(),
+            'title' => t($title, $project['name']),
+        )));
     }
 }

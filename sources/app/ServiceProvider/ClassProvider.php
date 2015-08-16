@@ -3,6 +3,7 @@
 namespace ServiceProvider;
 
 use Core\Paginator;
+use Core\OAuth2;
 use Model\Config;
 use Model\Project;
 use Model\Webhook;
@@ -33,7 +34,9 @@ class ClassProvider implements ServiceProviderInterface
             'ProjectActivity',
             'ProjectAnalytic',
             'ProjectDuplication',
-            'ProjectDailySummary',
+            'ProjectDailyColumnStats',
+            'ProjectDailyStats',
+            'ProjectIntegration',
             'ProjectPermission',
             'Subtask',
             'SubtaskExport',
@@ -41,6 +44,7 @@ class ClassProvider implements ServiceProviderInterface
             'SubtaskTimeTracking',
             'Swimlane',
             'Task',
+            'TaskAnalytic',
             'TaskCreation',
             'TaskDuplication',
             'TaskExport',
@@ -54,29 +58,36 @@ class ClassProvider implements ServiceProviderInterface
             'TaskValidator',
             'Timetable',
             'TimetableDay',
+            'TimetableExtra',
             'TimetableWeek',
             'TimetableOff',
-            'TimetableExtra',
             'Transition',
             'User',
             'UserSession',
             'Webhook',
         ),
         'Core' => array(
+            'EmailClient',
             'Helper',
-            'Template',
-            'Session',
-            'MemoryCache',
-            'FileCache',
-            'Request',
             'HttpClient',
+            'Lexer',
+            'MemoryCache',
+            'Request',
+            'Router',
+            'Session',
+            'Template',
         ),
         'Integration' => array(
-            'GitlabWebhook',
-            'GithubWebhook',
             'BitbucketWebhook',
-            'Hipchat',
+            'GithubWebhook',
+            'GitlabWebhook',
+            'HipchatWebhook',
+            'Jabber',
+            'Mailgun',
+            'Postmark',
+            'Sendgrid',
             'SlackWebhook',
+            'Smtp',
         )
     );
 
@@ -96,6 +107,10 @@ class ClassProvider implements ServiceProviderInterface
 
         $container['paginator'] = $container->factory(function ($c) {
             return new Paginator($c);
+        });
+
+        $container['oauth'] = $container->factory(function ($c) {
+            return new OAuth2($c);
         });
     }
 }

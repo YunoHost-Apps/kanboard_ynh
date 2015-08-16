@@ -1,4 +1,4 @@
-Kanboard.Board = (function() {
+(function() {
 
     var checkInterval = null;
 
@@ -13,7 +13,6 @@ Kanboard.Board = (function() {
     function keyboard_shortcuts()
     {
         Mousetrap.bind("n", function() {
-
             Kanboard.OpenPopover(
                 $("#board").data("task-creation-url"),
                 Kanboard.InitAfterAjax
@@ -21,80 +20,27 @@ Kanboard.Board = (function() {
         });
 
         Mousetrap.bind("s", function() {
-            stack_toggle();
+            Kanboard.ShowLoadingIcon();
+
+            $.ajax({
+                cache: false,
+                url: $('.filter-display-mode:not([style="display: none;"]) a').attr('href'),
+                success: function(data) {
+                    $("#board-container").remove();
+                    $("#main").append(data);
+                    Kanboard.InitAfterAjax();
+                    board_unload_events();
+                    board_load_events();
+                    compactview_reload();
+                    $('.filter-display-mode').toggle();
+                    Kanboard.HideLoadingIcon();
+                }
+            });
         });
 
         Mousetrap.bind("c", function() {
             compactview_toggle();
         });
-    }
-
-    // Collapse/Expand tasks
-    function stack_load_events()
-    {
-        $(".filter-expand-link").click(function(e) {
-            e.preventDefault();
-            stack_expand();
-            Kanboard.SetStorageItem(stack_key(), "expanded");
-        });
-
-        $(".filter-collapse-link").click(function(e) {
-            e.preventDefault();
-            stack_collapse();
-            Kanboard.SetStorageItem(stack_key(), "collapsed");
-        });
-
-        stack_show();
-    }
-
-    function stack_key()
-    {
-        var projectId = $('#board').data('project-id');
-        return "board_stacking_" + projectId;
-    }
-
-    function stack_collapse()
-    {
-        $(".filter-collapse").hide();
-        $(".task-board-collapsed").show();
-
-        $(".filter-expand").show();
-        $(".task-board-expanded").hide();
-    }
-
-    function stack_expand()
-    {
-        $(".filter-collapse").show();
-        $(".task-board-collapsed").hide();
-
-        $(".filter-expand").hide();
-        $(".task-board-expanded").show();
-    }
-
-    function stack_toggle()
-    {
-        var state = Kanboard.GetStorageItem(stack_key()) || "expanded";
-
-        if (state === "expanded") {
-            stack_collapse();
-            Kanboard.SetStorageItem(stack_key(), "collapsed");
-        }
-        else {
-            stack_expand();
-            Kanboard.SetStorageItem(stack_key(), "expanded");
-        }
-    }
-
-    function stack_show()
-    {
-        var state = Kanboard.GetStorageItem(stack_key()) || "expanded";
-
-        if (state === "expanded") {
-            stack_expand();
-        }
-        else {
-            stack_collapse();
-        }
     }
 
     // Setup the board
@@ -106,6 +52,7 @@ Kanboard.Board = (function() {
             distance: 5,
             connectWith: ".column",
             placeholder: "draggable-placeholder",
+            items: ".draggable-item",
             stop: function(event, ui) {
                 board_save(
                     ui.item.attr('data-task-id'),
@@ -139,7 +86,7 @@ Kanboard.Board = (function() {
                     $("<div>")
                         .addClass("tooltip-arrow")
                         .addClass(feedback.vertical)
-                        .addClass(arrow_pos == 0 ? "align-left" : "align-right")
+                        .addClass(arrow_pos < 1 ? "align-left" : "align-right")
                         .appendTo(this);
                 }
             },
@@ -184,7 +131,7 @@ Kanboard.Board = (function() {
                     });
                 });
 
-                return '<i class="fa fa-refresh fa-spin fa-2x"></i>';
+                return '<i class="fa fa-spinner fa-spin"></i>';
             }
         }).on("mouseenter", function() {
 
@@ -225,6 +172,7 @@ Kanboard.Board = (function() {
     function board_save(taskId, columnId, position, swimlaneId)
     {
         board_unload_events();
+        Kanboard.ShowLoadingIcon();
 
         $.ajax({
             cache: false,
@@ -243,9 +191,8 @@ Kanboard.Board = (function() {
                 $("#main").append(data);
                 Kanboard.InitAfterAjax();
                 board_load_events();
-                filter_apply();
-                stack_show();
                 compactview_reload();
+                Kanboard.HideLoadingIcon();
             }
         });
     }
@@ -264,100 +211,11 @@ Kanboard.Board = (function() {
                         Kanboard.InitAfterAjax();
                         board_unload_events();
                         board_load_events();
-                        filter_apply();
-                        stack_show();
                         compactview_reload();
                     }
                 }
             });
         }
-    }
-
-    // Apply user or date filter (change tasks opacity)
-    function filter_apply()
-    {
-        var selectedUserId = $("#form-user_id").val();
-        var selectedCategoryId = $("#form-category_id").val();
-        var filterDueDate = $("#more-filters option[value=filter-due-date]").is(":selected")
-        var filterRecent = $("#more-filters option[value=filter-recent]").is(":selected")
-        var projectId = $('#board').data('project-id');
-
-        $("[data-task-id]").each(function(index, item) {
-
-            var ownerId = item.getAttribute("data-owner-id");
-            var dueDate = item.getAttribute("data-due-date");
-            var categoryId = item.getAttribute("data-category-id");
-            var recent = $(item).hasClass("task-board-recent");
-
-            if (ownerId != selectedUserId && selectedUserId != -1) {
-                item.style.display = "none";
-            }
-            else {
-                item.style.display = "block";
-            }
-
-            if (filterDueDate && (dueDate == "" || dueDate == "0")) {
-                item.style.display = "none";
-            }
-
-            if (categoryId != selectedCategoryId && selectedCategoryId != -1) {
-                item.style.display = "none";
-            }
-
-            if (filterRecent && ! recent) {
-                item.style.display = "none";
-            }
-        });
-
-        // Save filter settings
-        Kanboard.SetStorageItem("board_filter_" + projectId + "_form-user_id", selectedUserId);
-        Kanboard.SetStorageItem("board_filter_" + projectId + "_form-category_id", selectedCategoryId);
-        Kanboard.SetStorageItem("board_filter_" + projectId + "_filter-due-date", ~~(filterDueDate));
-        Kanboard.SetStorageItem("board_filter_" + projectId + "_filter-recent", ~~(filterRecent));
-    }
-
-    // Load filter events
-    function filter_load_events()
-    {
-        var projectId = $('#board').data('project-id');
-
-        $("#form-user_id").chosen({
-            width: "180px",
-            no_results_text: $("#form-user_id").data("notfound")
-        });
-
-        $("#form-category_id").chosen({
-            width: "200px",
-            no_results_text: $("#form-category_id").data("notfound")
-        });
-
-        $("#more-filters").chosen({
-            width: "30%",
-            no_results_text: $("#more-filters").data("notfound")
-        });
-
-        $(".apply-filters").change(function(e) {
-            filter_apply();
-        });
-
-        // Get and set filters from localStorage
-        $("#form-user_id").val(Kanboard.GetStorageItem("board_filter_" + projectId + "_form-user_id") || -1);
-        $("#form-user_id").trigger("chosen:updated");
-
-        $("#form-category_id").val(Kanboard.GetStorageItem("board_filter_" + projectId + "_form-category_id") || -1);
-        $("#form-category_id").trigger("chosen:updated");
-
-        if (+Kanboard.GetStorageItem("board_filter_" + projectId + "_filter-due-date")) {
-            $("#more-filters option[value=filter-due-date]").attr("selected", true);
-        }
-
-        if (+Kanboard.GetStorageItem("board_filter_" + projectId + "_filter-recent")) {
-            $("#more-filters option[value=filter-recent]").attr("selected", true);
-        }
-
-        $("#more-filters").trigger("chosen:updated");
-
-        filter_apply();
     }
 
     function compactview_load_events()
@@ -401,8 +259,6 @@ Kanboard.Board = (function() {
 
         if (Kanboard.Exists("board")) {
             board_load_events();
-            filter_load_events();
-            stack_load_events();
             compactview_load_events();
             keyboard_shortcuts();
         }

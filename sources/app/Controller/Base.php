@@ -16,63 +16,8 @@ use Symfony\Component\EventDispatcher\Event;
  *
  * @package  controller
  * @author   Frederic Guillot
- *
- * @property \Core\Helper                  $helper
- * @property \Core\Session                 $session
- * @property \Core\Template                $template
- * @property \Core\Paginator               $paginator
- * @property \Integration\GithubWebhook    $githubWebhook
- * @property \Integration\GitlabWebhook    $gitlabWebhook
- * @property \Integration\BitbucketWebhook $bitbucketWebhook
- * @property \Model\Acl                    $acl
- * @property \Model\Authentication         $authentication
- * @property \Model\Action                 $action
- * @property \Model\Board                  $board
- * @property \Model\Category               $category
- * @property \Model\Color                  $color
- * @property \Model\Comment                $comment
- * @property \Model\Config                 $config
- * @property \Model\DateParser             $dateParser
- * @property \Model\File                   $file
- * @property \Model\HourlyRate             $hourlyRate
- * @property \Model\LastLogin              $lastLogin
- * @property \Model\Notification           $notification
- * @property \Model\Project                $project
- * @property \Model\ProjectPermission      $projectPermission
- * @property \Model\ProjectDuplication     $projectDuplication
- * @property \Model\ProjectAnalytic        $projectAnalytic
- * @property \Model\ProjectActivity        $projectActivity
- * @property \Model\ProjectDailySummary    $projectDailySummary
- * @property \Model\Subtask                $subtask
- * @property \Model\SubtaskForecast        $subtaskForecast
- * @property \Model\Swimlane               $swimlane
- * @property \Model\Task                   $task
- * @property \Model\Link                   $link
- * @property \Model\TaskCreation           $taskCreation
- * @property \Model\TaskModification       $taskModification
- * @property \Model\TaskDuplication        $taskDuplication
- * @property \Model\TaskHistory            $taskHistory
- * @property \Model\TaskExport             $taskExport
- * @property \Model\TaskFinder             $taskFinder
- * @property \Model\TaskFilter             $taskFilter
- * @property \Model\TaskPosition           $taskPosition
- * @property \Model\TaskPermission         $taskPermission
- * @property \Model\TaskStatus             $taskStatus
- * @property \Model\Timetable              $timetable
- * @property \Model\TimetableDay           $timetableDay
- * @property \Model\TimetableWeek          $timetableWeek
- * @property \Model\TimetableExtra         $timetableExtra
- * @property \Model\TimetableOff           $timetableOff
- * @property \Model\TaskValidator          $taskValidator
- * @property \Model\TaskLink               $taskLink
- * @property \Model\CommentHistory         $commentHistory
- * @property \Model\SubtaskHistory         $subtaskHistory
- * @property \Model\SubtaskTimeTracking    $subtaskTimeTracking
- * @property \Model\User                   $user
- * @property \Model\UserSession            $userSession
- * @property \Model\Webhook                $webhook
  */
-abstract class Base
+abstract class Base extends \Core\Base
 {
     /**
      * Request instance
@@ -91,14 +36,6 @@ abstract class Base
     protected $response;
 
     /**
-     * Container instance
-     *
-     * @access private
-     * @var \Pimple\Container
-     */
-    private $container;
-
-    /**
      * Constructor
      *
      * @access public
@@ -109,6 +46,10 @@ abstract class Base
         $this->container = $container;
         $this->request = new Request;
         $this->response = new Response;
+
+        if (DEBUG) {
+            $this->container['logger']->debug('START_REQUEST='.$_SERVER['REQUEST_URI']);
+        }
     }
 
     /**
@@ -124,21 +65,11 @@ abstract class Base
                 $this->container['logger']->debug($message);
             }
 
-            $this->container['logger']->debug('SQL_QUERIES={nb}', array('nb' => $this->container['db']->nb_queries));
+            $this->container['logger']->debug('SQL_QUERIES={nb}', array('nb' => $this->container['db']->nbQueries));
             $this->container['logger']->debug('RENDERING={time}', array('time' => microtime(true) - @$_SERVER['REQUEST_TIME_FLOAT']));
+            $this->container['logger']->debug('MEMORY='.$this->helper->text->bytes(memory_get_usage()));
+            $this->container['logger']->debug('END_REQUEST='.$_SERVER['REQUEST_URI']);
         }
-    }
-
-    /**
-     * Load automatically models
-     *
-     * @access public
-     * @param  string    $name    Model name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->container[$name];
     }
 
     /**
@@ -171,7 +102,7 @@ abstract class Base
     public function beforeAction($controller, $action)
     {
         // Start the session
-        $this->session->open(BASE_URL_DIRECTORY);
+        $this->session->open($this->helper->url->dir());
         $this->sendHeaders($action);
         $this->container['dispatcher']->dispatch('session.bootstrap', new Event);
 
@@ -197,7 +128,8 @@ abstract class Base
                 $this->response->text('Not Authorized', 401);
             }
 
-            $this->response->redirect('?controller=user&action=login&redirect_query='.urlencode($this->request->getQueryString()));
+            $this->session['login_redirect'] = $this->request->getUri();
+            $this->response->redirect($this->helper->url->to('auth', 'login'));
         }
     }
 
@@ -208,7 +140,7 @@ abstract class Base
      */
     public function handle2FA($controller, $action)
     {
-        $ignore = ($controller === 'twofactor' && in_array($action, array('code', 'check'))) || ($controller === 'user' && $action === 'logout');
+        $ignore = ($controller === 'twofactor' && in_array($action, array('code', 'check'))) || ($controller === 'auth' && $action === 'logout');
 
         if ($ignore === false && $this->userSession->has2FA() && ! $this->userSession->check2FA()) {
 
@@ -216,7 +148,7 @@ abstract class Base
                 $this->response->text('Not Authorized', 401);
             }
 
-            $this->response->redirect($this->helper->url('twofactor', 'code'));
+            $this->response->redirect($this->helper->url->to('twofactor', 'code'));
         }
     }
 
@@ -281,14 +213,15 @@ abstract class Base
     }
 
     /**
-     * Redirection when there is no project in the database
+     * Check webhook token
      *
      * @access protected
      */
-    protected function redirectNoProject()
+    protected function checkWebhookToken()
     {
-        $this->session->flash(t('There is no active project, the first step is to create a new project.'));
-        $this->response->redirect('?controller=project&action=create');
+        if ($this->config->get('webhook_token') !== $this->request->getStringParam('token')) {
+            $this->response->text('Not Authorized', 401);
+        }
     }
 
     /**
@@ -317,12 +250,13 @@ abstract class Base
      * @param  array     $params     Template parameters
      * @return string
      */
-    protected function projectLayout($template, array $params)
+    protected function projectLayout($template, array $params, $sidebar_template = 'project/sidebar')
     {
         $content = $this->template->render($template, $params);
         $params['project_content_for_layout'] = $content;
         $params['title'] = $params['project']['name'] === $params['title'] ? $params['title'] : $params['project']['name'].' &gt; '.$params['title'];
         $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params['sidebar_template'] = $sidebar_template;
 
         return $this->template->layout('project/layout', $params);
     }
@@ -358,9 +292,59 @@ abstract class Base
 
         if (empty($project)) {
             $this->session->flashError(t('Project not found.'));
-            $this->response->redirect('?controller=project');
+            $this->response->redirect($this->helper->url->to('project', 'index'));
         }
 
         return $project;
+    }
+
+    /**
+     * Common method to get the user
+     *
+     * @access protected
+     * @return array
+     */
+    protected function getUser()
+    {
+        $user = $this->user->getById($this->request->getIntegerParam('user_id', $this->userSession->getId()));
+
+        if (empty($user)) {
+            $this->notfound();
+        }
+
+        if (! $this->userSession->isAdmin() && $this->userSession->getId() != $user['id']) {
+            $this->forbidden();
+        }
+
+        return $user;
+    }
+
+    /**
+     * Common method to get project filters
+     *
+     * @access protected
+     */
+    protected function getProjectFilters($controller, $action)
+    {
+        $project = $this->getProject();
+        $search = $this->request->getStringParam('search', $this->userSession->getFilters($project['id']));
+        $board_selector = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        unset($board_selector[$project['id']]);
+
+        $filters = array(
+            'controller' => $controller,
+            'action' => $action,
+            'project_id' => $project['id'],
+            'search' => urldecode($search),
+        );
+
+        $this->userSession->setFilters($project['id'], $filters['search']);
+
+        return array(
+            'project' => $project,
+            'board_selector' => $board_selector,
+            'filters' => $filters,
+            'title' => $project['name'],
+        );
     }
 }

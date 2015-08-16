@@ -3,88 +3,170 @@
 namespace PicoDb\Driver;
 
 use PDO;
-use LogicException;
+use PDOException;
 
-class Postgres extends PDO
+/**
+ * Postgres Driver
+ *
+ * @author   Frederic Guillot
+ */
+class Postgres extends Base
 {
-    private $schema_table = 'schema_version';
+    /**
+     * List of required settings options
+     *
+     * @access protected
+     * @var array
+     */
+    protected $requiredAtttributes = array(
+        'hostname',
+        'username',
+        'password',
+        'database',
+    );
 
-    public function __construct(array $settings)
+    /**
+     * Table to store the schema version
+     *
+     * @access private
+     * @var array
+     */
+    private $schemaTable = 'schema_version';
+
+    /**
+     * Create a new PDO connection
+     *
+     * @access public
+     * @param  array   $settings
+     */
+    public function createConnection(array $settings)
     {
-        $required_atttributes = array(
-            'hostname',
-            'username',
-            'password',
-            'database',
-        );
-
-        foreach ($required_atttributes as $attribute) {
-            if (! isset($settings[$attribute])) {
-                throw new LogicException('This configuration parameter is missing: "'.$attribute.'"');
-            }
-        }
-
         $dsn = 'pgsql:host='.$settings['hostname'].';dbname='.$settings['database'];
 
         if (! empty($settings['port'])) {
             $dsn .= ';port='.$settings['port'];
         }
 
-        parent::__construct($dsn, $settings['username'], $settings['password']);
+        $this->pdo = new PDO($dsn, $settings['username'], $settings['password']);
 
         if (isset($settings['schema_table'])) {
-            $this->schema_table = $settings['schema_table'];
+            $this->schemaTable = $settings['schema_table'];
         }
     }
 
+    /**
+     * Enable foreign keys
+     *
+     * @access public
+     */
+    public function enableForeignKeys()
+    {
+    }
+
+    /**
+     * Disable foreign keys
+     *
+     * @access public
+     */
+    public function disableForeignKeys()
+    {
+    }
+
+    /**
+     * Return true if the error code is a duplicate key
+     *
+     * @access public
+     * @param  integer  $code
+     * @return boolean
+     */
+    public function isDuplicateKeyError($code)
+    {
+        return $code == 23505 || $code == 23503;
+    }
+
+    /**
+     * Escape identifier
+     *
+     * @access public
+     * @param  string  $identifier
+     * @return string
+     */
+    public function escape($identifier)
+    {
+        return '"'.$identifier.'"';
+    }
+
+    /**
+     * Get non standard operator
+     *
+     * @access public
+     * @param  string  $operator
+     * @return string
+     */
+    public function getOperator($operator)
+    {
+        if ($operator === 'LIKE') {
+            return 'LIKE';
+        }
+        else if ($operator === 'ILIKE') {
+            return 'ILIKE';
+        }
+
+        return '';
+    }
+
+    /**
+     * Get last inserted id
+     *
+     * @access public
+     * @return integer
+     */
+    public function getLastId()
+    {
+        try {
+            $rq = $this->pdo->prepare('SELECT LASTVAL()');
+            $rq->execute();
+
+            return $rq->fetchColumn();
+        }
+        catch (PDOException $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Get current schema version
+     *
+     * @access public
+     * @return integer
+     */
     public function getSchemaVersion()
     {
-        $this->exec("CREATE TABLE IF NOT EXISTS ".$this->schema_table." (version SMALLINT DEFAULT 0)");
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS ".$this->schemaTable." (version INTEGER DEFAULT 0)");
 
-        $rq = $this->prepare('SELECT version FROM '.$this->schema_table.'');
+        $rq = $this->pdo->prepare('SELECT "version" FROM "'.$this->schemaTable.'"');
         $rq->execute();
-        $result = $rq->fetch(PDO::FETCH_ASSOC);
+        $result = $rq->fetchColumn();
 
-        if (isset($result['version'])) {
-            return (int) $result['version'];
+        if ($result !== false) {
+            return (int) $result;
         }
         else {
-            $this->exec('INSERT INTO '.$this->schema_table.' VALUES(0)');
+            $this->pdo->exec('INSERT INTO '.$this->schemaTable.' VALUES(0)');
         }
 
         return 0;
     }
 
+    /**
+     * Set current schema version
+     *
+     * @access public
+     * @param  integer  $version
+     */
     public function setSchemaVersion($version)
     {
-        $rq = $this->prepare('UPDATE '.$this->schema_table.' SET version=?');
+        $rq = $this->pdo->prepare('UPDATE '.$this->schemaTable.' SET version=?');
         $rq->execute(array($version));
-    }
-
-    public function getLastId()
-    {
-        $rq = $this->prepare('SELECT LASTVAL()');
-        $rq->execute();
-        return $rq->fetchColumn();
-    }
-
-    public function escapeIdentifier($value)
-    {
-        return '"'.$value.'"';
-    }
-
-    public function operatorLikeCaseSensitive()
-    {
-        return 'LIKE';
-    }
-
-    public function operatorLikeNotCaseSensitive()
-    {
-        return 'ILIKE';
-    }
-
-    public function getDuplicateKeyErrorCode()
-    {
-        return array(23505, 23503);
     }
 }

@@ -40,6 +40,7 @@ class Config extends Base
             'INR' => t('INR - Indian Rupee'),
             'JPY' => t('JPY - Japanese Yen'),
             'RSD' => t('RSD - Serbian dinar'),
+            'SEK' => t('SEK - Swedish Krona'),
         );
     }
 
@@ -73,6 +74,7 @@ class Config extends Base
     {
         // Sorted by value
         $languages = array(
+            'cs_CZ' => 'Čeština',
             'da_DK' => 'Dansk',
             'de_DE' => 'Deutsch',
             'en_US' => 'English',
@@ -109,6 +111,7 @@ class Config extends Base
     public function getJsLanguageCode()
     {
         $languages = array(
+            'cs_CZ' => 'cz',
             'da_DK' => 'da',
             'de_DE' => 'de',
             'en_US' => 'en',
@@ -116,15 +119,17 @@ class Config extends Base
             'fr_FR' => 'fr',
             'it_IT' => 'it',
             'hu_HU' => 'hu',
+            'nl_NL' => 'nl',
             'pl_PL' => 'pl',
             'pt_BR' => 'pt-br',
             'ru_RU' => 'ru',
+            'sr_Latn_RS' => 'sr',
             'fi_FI' => 'fi',
             'sv_SE' => 'sv',
+            'tr_TR' => 'tr',
             'zh_CN' => 'zh-cn',
             'ja_JP' => 'ja',
             'th_TH' => 'th',
-            'tr_TR' => 'tr',
         );
 
         $lang = $this->getCurrentLanguage();

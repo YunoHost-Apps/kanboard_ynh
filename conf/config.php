@@ -12,7 +12,7 @@ define('FILES_DIR', 'data/files/');
 // E-mail address for the "From" header (notifications)
 define('MAIL_FROM', 'yuno_email');
 
-// Mail transport to use: "smtp", "sendmail" or "mail" (PHP mail function)
+// Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
 define('MAIL_TRANSPORT', 'mail');
 
 // SMTP configuration to use when the "smtp" transport is chosen
@@ -24,6 +24,19 @@ define('MAIL_SMTP_ENCRYPTION', null); // Valid values are "null", "ssl" or "tls"
 
 // Sendmail command to use when the transport is "sendmail"
 define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
+
+// Postmark API token (used to send emails through their API)
+define('POSTMARK_API_TOKEN', '');
+
+// Mailgun API key (used to send emails through their API)
+define('MAILGUN_API_TOKEN', '');
+
+// Mailgun domain name
+define('MAILGUN_DOMAIN', '');
+
+// Sendgrid API configuration
+define('SENDGRID_API_USER', '');
+define('SENDGRID_API_KEY', '');
 
 // Database driver: sqlite, mysql or postgres (sqlite by default)
 define('DB_DRIVER', 'mysql');
@@ -92,6 +105,9 @@ define('LDAP_ACCOUNT_ID', 'samaccountname');
 // Set to true if you want to preserve the case
 define('LDAP_USERNAME_CASE_SENSITIVE', false);
 
+// Automatically create user account
+define('LDAP_ACCOUNT_CREATION', true);
+
 // Enable/disable Google authentication
 define('GOOGLE_AUTH', false);
 
@@ -130,3 +146,12 @@ define('ENABLE_XFRAME', true);
 
 // Escape html inside markdown text
 define('MARKDOWN_ESCAPE_HTML', true);
+
+// API alternative authentication header, the default is HTTP Basic Authentication defined in RFC2617
+define('API_AUTHENTICATION_HEADER', '');
+
+// Enable/disable url rewrite
+define('ENABLE_URL_REWRITE', false);
+
+// Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
+define('HIDE_LOGIN_FORM', true);

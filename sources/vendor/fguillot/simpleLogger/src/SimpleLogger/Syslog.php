@@ -30,7 +30,7 @@ class Syslog extends Base
      * Get syslog priority according to Psr\LogLevel
      *
      * @param  mixed  $level
-     * @return int
+     * @return integer
      */
     public function getSyslogPriority($level)
     {

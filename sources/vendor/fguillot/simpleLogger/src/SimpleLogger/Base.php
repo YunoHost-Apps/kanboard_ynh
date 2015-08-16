@@ -14,10 +14,40 @@ use Psr\Log\LogLevel;
 abstract class Base extends AbstractLogger
 {
     /**
+     * Minimum log level for the logger
+     *
+     * @access private
+     * @var    string
+     */
+    private $level = LogLevel::DEBUG;
+
+    /**
+     * Set minimum log level
+     *
+     * @access public
+     * @param  string  $level
+     */
+    public function setLevel($level)
+    {
+        $this->level = $level;
+    }
+
+    /**
+     * Get minimum log level
+     *
+     * @access public
+     * @return string
+     */
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    /**
      * Dump to log a variable (by example an array)
      *
      * @param mixed $variable
-    */
+     */
     public function dump($variable)
     {
         $this->log(LogLevel::DEBUG, var_export($variable, true));
@@ -30,7 +60,7 @@ abstract class Base extends AbstractLogger
      * @param  string $message
      * @param  array $context
      * @return string
-    */
+     */
     protected function interpolate($message, array $context = array())
     {
         // build a replacement array with braces around the context keys
