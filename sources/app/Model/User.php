@@ -57,6 +57,7 @@ class User extends Base
                         'name',
                         'email',
                         'is_admin',
+                        'is_project_admin',
                         'is_ldap_user',
                         'notifications_enabled',
                         'google_id',
@@ -138,6 +139,22 @@ class User extends Base
     }
 
     /**
+     * Get a specific user by the Gitlab id
+     *
+     * @access public
+     * @param  string  $gitlab_id  Gitlab user id
+     * @return array|boolean
+     */
+    public function getByGitlabId($gitlab_id)
+    {
+        if (empty($gitlab_id)) {
+            return false;
+        }
+
+        return $this->db->table(self::TABLE)->eq('gitlab_id', $gitlab_id)->findOne();
+    }
+
+    /**
      * Get a specific user by the username
      *
      * @access public
@@ -207,12 +224,19 @@ class User extends Base
      * List all users (key-value pairs with id/username)
      *
      * @access public
+     * @param  boolean  $prepend  Prepend "All users"
      * @return array
      */
-    public function getList()
+    public function getList($prepend = false)
     {
         $users = $this->db->table(self::TABLE)->columns('id', 'username', 'name')->findAll();
-        return $this->prepareList($users);
+        $listing = $this->prepareList($users);
+
+        if ($prepend) {
+            return array(User::EVERYBODY_ID => t('Everybody')) + $listing;
+        }
+
+        return $listing;
     }
 
     /**
@@ -254,7 +278,7 @@ class User extends Base
         }
 
         $this->removeFields($values, array('confirmation', 'current_password'));
-        $this->resetFields($values, array('is_admin', 'is_ldap_user'));
+        $this->resetFields($values, array('is_admin', 'is_ldap_user', 'is_project_admin'));
     }
 
     /**
@@ -365,6 +389,71 @@ class User extends Base
     }
 
     /**
+     * Get the number of failed login for the user
+     *
+     * @access public
+     * @param  string  $username
+     * @return integer
+     */
+    public function getFailedLogin($username)
+    {
+        return (int) $this->db->table(self::TABLE)->eq('username', $username)->findOneColumn('nb_failed_login');
+    }
+
+    /**
+     * Reset to 0 the counter of failed login
+     *
+     * @access public
+     * @param  string  $username
+     * @return boolean
+     */
+    public function resetFailedLogin($username)
+    {
+        return $this->db->table(self::TABLE)->eq('username', $username)->update(array('nb_failed_login' => 0, 'lock_expiration_date' => 0));
+    }
+
+    /**
+     * Increment failed login counter
+     *
+     * @access public
+     * @param  string  $username
+     * @return boolean
+     */
+    public function incrementFailedLogin($username)
+    {
+        return $this->db->execute('UPDATE '.self::TABLE.' SET nb_failed_login=nb_failed_login+1 WHERE username=?', array($username)) !== false;
+    }
+
+    /**
+     * Check if the account is locked
+     *
+     * @access public
+     * @param  string  $username
+     * @return boolean
+     */
+    public function isLocked($username)
+    {
+        return $this->db->table(self::TABLE)
+            ->eq('username', $username)
+            ->neq('lock_expiration_date', 0)
+            ->gte('lock_expiration_date', time())
+            ->exists();
+    }
+
+    /**
+     * Lock the account for the specified duration
+     *
+     * @access public
+     * @param  string   $username   Username
+     * @param  integer  $duration   Duration in minutes
+     * @return boolean
+     */
+    public function lock($username, $duration = 15)
+    {
+        return $this->db->table(self::TABLE)->eq('username', $username)->update(array('lock_expiration_date' => time() + $duration * 60));
+    }
+
+    /**
      * Common validation rules
      *
      * @access private
@@ -377,6 +466,7 @@ class User extends Base
             new Validators\Unique('username', t('The username must be unique'), $this->db->getConnection(), self::TABLE, 'id'),
             new Validators\Email('email', t('Email address invalid')),
             new Validators\Integer('is_admin', t('This value must be an integer')),
+            new Validators\Integer('is_project_admin', t('This value must be an integer')),
             new Validators\Integer('is_ldap_user', t('This value must be an integer')),
         );
     }

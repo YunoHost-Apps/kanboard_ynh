@@ -113,18 +113,19 @@ if (ENABLE_URL_REWRITE) {
     // Board routes
     $container['router']->addRoute('board/:project_id', 'board', 'show', array('project_id'));
     $container['router']->addRoute('b/:project_id', 'board', 'show', array('project_id'));
-    $container['router']->addRoute('board/:project_id/filter/:search', 'board', 'show', array('project_id', 'search'));
     $container['router']->addRoute('public/board/:token', 'board', 'readonly', array('token'));
 
     // Calendar routes
     $container['router']->addRoute('calendar/:project_id', 'calendar', 'show', array('project_id'));
     $container['router']->addRoute('c/:project_id', 'calendar', 'show', array('project_id'));
-    $container['router']->addRoute('calendar/:project_id/:search', 'calendar', 'show', array('project_id', 'search'));
 
     // Listing routes
     $container['router']->addRoute('list/:project_id', 'listing', 'show', array('project_id'));
     $container['router']->addRoute('l/:project_id', 'listing', 'show', array('project_id'));
-    $container['router']->addRoute('list/:project_id/:search', 'listing', 'show', array('project_id', 'search'));
+
+    // Gantt routes
+    $container['router']->addRoute('gantt/:project_id', 'gantt', 'project', array('project_id'));
+    $container['router']->addRoute('gantt/:project_id/sort/:sorting', 'gantt', 'project', array('project_id', 'sorting'));
 
     // Subtask routes
     $container['router']->addRoute('project/:project_id/task/:task_id/subtask/create', 'subtask', 'create', array('project_id', 'task_id'));
@@ -142,6 +143,7 @@ if (ENABLE_URL_REWRITE) {
     // Auth routes
     $container['router']->addRoute('oauth/google', 'oauth', 'google');
     $container['router']->addRoute('oauth/github', 'oauth', 'github');
+    $container['router']->addRoute('oauth/gitlab', 'oauth', 'gitlab');
     $container['router']->addRoute('login', 'auth', 'login');
     $container['router']->addRoute('logout', 'auth', 'logout');
 }

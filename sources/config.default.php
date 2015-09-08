@@ -130,6 +130,33 @@ define('GITHUB_CLIENT_ID', '');
 // GitHub client secret key (Copy it from your settings -> Applications -> Developer applications)
 define('GITHUB_CLIENT_SECRET', '');
 
+// Github oauth2 authorize url
+define('GITHUB_OAUTH_AUTHORIZE_URL', 'https://github.com/login/oauth/authorize');
+
+// Github oauth2 token url
+define('GITHUB_OAUTH_TOKEN_URL', 'https://github.com/login/oauth/access_token');
+
+// Github API url (don't forget the slash at the end)
+define('GITHUB_API_URL', 'https://api.github.com/');
+
+// Enable/disable Gitlab authentication
+define('GITLAB_AUTH', false);
+
+// Gitlab application id
+define('GITLAB_CLIENT_ID', '');
+
+// Gitlab application secret
+define('GITLAB_CLIENT_SECRET', '');
+
+// Gitlab oauth2 authorize url
+define('GITLAB_OAUTH_AUTHORIZE_URL', 'https://gitlab.com/oauth/authorize');
+
+// Gitlab oauth2 token url
+define('GITLAB_OAUTH_TOKEN_URL', 'https://gitlab.com/oauth/token');
+
+// Gitlab API url endpoint (don't forget the slash at the end)
+define('GITLAB_API_URL', 'https://gitlab.com/api/v3/');
+
 // Enable/disable the reverse proxy authentication
 define('REVERSE_PROXY_AUTH', false);
 
@@ -141,6 +168,9 @@ define('REVERSE_PROXY_DEFAULT_ADMIN', '');
 
 // Default domain to use for setting the email address
 define('REVERSE_PROXY_DEFAULT_DOMAIN', '');
+
+// Enable/disable remember me authentication
+define('REMEMBER_ME_AUTH', true);
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 define('ENABLE_HSTS', true);
@@ -159,3 +189,16 @@ define('ENABLE_URL_REWRITE', false);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
 define('HIDE_LOGIN_FORM', false);
+
+// Enable captcha after 3 authentication failure
+define('BRUTEFORCE_CAPTCHA', 3);
+
+// Lock the account after 6 authentication failure
+define('BRUTEFORCE_LOCKDOWN', 6);
+
+// Lock account duration in minute
+define('BRUTEFORCE_LOCKDOWN_DURATION', 15);
+
+// Session duration in second (0 = until the browser is closed)
+// See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
+define('SESSION_DURATION', 0);

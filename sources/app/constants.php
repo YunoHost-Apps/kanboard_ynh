@@ -5,7 +5,7 @@ defined('DEBUG') or define('DEBUG', false);
 defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.'/../data/debug.log');
 
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.17');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.18');
 
 // Database driver: sqlite, mysql or postgres
 defined('DB_DRIVER') or define('DB_DRIVER', 'sqlite');
@@ -46,12 +46,26 @@ defined('GOOGLE_CLIENT_SECRET') or define('GOOGLE_CLIENT_SECRET', '');
 defined('GITHUB_AUTH') or define('GITHUB_AUTH', false);
 defined('GITHUB_CLIENT_ID') or define('GITHUB_CLIENT_ID', '');
 defined('GITHUB_CLIENT_SECRET') or define('GITHUB_CLIENT_SECRET', '');
+defined('GITHUB_OAUTH_AUTHORIZE_URL') or define('GITHUB_OAUTH_AUTHORIZE_URL', 'https://github.com/login/oauth/authorize');
+defined('GITHUB_OAUTH_TOKEN_URL') or define('GITHUB_OAUTH_TOKEN_URL', 'https://github.com/login/oauth/access_token');
+defined('GITHUB_API_URL') or define('GITHUB_API_URL', 'https://api.github.com/');
+
+// Gitlab authentication
+defined('GITLAB_AUTH') or define('GITLAB_AUTH', false);
+defined('GITLAB_CLIENT_ID') or define('GITLAB_CLIENT_ID', '');
+defined('GITLAB_CLIENT_SECRET') or define('GITLAB_CLIENT_SECRET', '');
+defined('GITLAB_OAUTH_AUTHORIZE_URL') or define('GITLAB_OAUTH_AUTHORIZE_URL', 'https://gitlab.com/oauth/authorize');
+defined('GITLAB_OAUTH_TOKEN_URL') or define('GITLAB_OAUTH_TOKEN_URL', 'https://gitlab.com/oauth/token');
+defined('GITLAB_API_URL') or define('GITLAB_API_URL', 'https://gitlab.com/api/v3/');
 
 // Proxy authentication
 defined('REVERSE_PROXY_AUTH') or define('REVERSE_PROXY_AUTH', false);
 defined('REVERSE_PROXY_USER_HEADER') or define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
 defined('REVERSE_PROXY_DEFAULT_ADMIN') or define('REVERSE_PROXY_DEFAULT_ADMIN', '');
 defined('REVERSE_PROXY_DEFAULT_DOMAIN') or define('REVERSE_PROXY_DEFAULT_DOMAIN', '');
+
+// Remember me authentication
+defined('REMEMBER_ME_AUTH') or define('REMEMBER_ME_AUTH', true);
 
 // Mail configuration
 defined('MAIL_FROM') or define('MAIL_FROM', 'notifications@kanboard.local');
@@ -88,3 +102,12 @@ defined('ENABLE_URL_REWRITE') or define('ENABLE_URL_REWRITE', isset($_SERVER['HT
 
 // Hide login form
 defined('HIDE_LOGIN_FORM') or define('HIDE_LOGIN_FORM', false);
+
+// Bruteforce protection
+defined('BRUTEFORCE_CAPTCHA') or define('BRUTEFORCE_CAPTCHA', 3);
+defined('BRUTEFORCE_LOCKDOWN') or define('BRUTEFORCE_LOCKDOWN', 6);
+defined('BRUTEFORCE_LOCKDOWN_DURATION') or define('BRUTEFORCE_LOCKDOWN_DURATION', 15);
+
+// Session duration in second (0 = until the browser is closed)
+// See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
+defined('SESSION_DURATION') or define('SESSION_DURATION', 0);

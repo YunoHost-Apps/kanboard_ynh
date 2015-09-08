@@ -7,7 +7,6 @@ use RuntimeException;
 use BadFunctionCallException;
 use InvalidArgumentException;
 
-class AccessDeniedException extends Exception {};
 class ConnectionFailureException extends Exception {};
 class ServerErrorException extends Exception {};
 
@@ -100,7 +99,7 @@ class Client
     /**
      * SSL certificates verification
      *
-     * @access private
+     * @access public
      * @var boolean
      */
     public $ssl_verify_peer = true;
@@ -346,8 +345,11 @@ class Client
                 'max_redirects' => 2,
                 'header' => implode("\r\n", $headers),
                 'content' => json_encode($payload),
-                'verify_peer' => $this->ssl_verify_peer,
                 'ignore_errors' => true,
+            ),
+            "ssl" => array(
+                "verify_peer" => $this->ssl_verify_peer,
+                "verify_peer_name" => $this->ssl_verify_peer,
             )
         ));
     }

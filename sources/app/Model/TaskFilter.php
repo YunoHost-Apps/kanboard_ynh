@@ -36,7 +36,7 @@ class TaskFilter extends Base
         $this->query = $this->taskFinder->getExtendedQuery();
 
         if (empty($tree)) {
-            $this->query->addCondition('1 = 0');
+            $this->filterByTitle($input);
         }
 
         foreach ($tree as $filter => $value) {
@@ -101,6 +101,7 @@ class TaskFilter extends Base
         $this->query->columns(
             Task::TABLE.'.*',
             'ua.email AS assignee_email',
+            'ua.name AS assignee_name',
             'ua.username AS assignee_username',
             'uc.email AS creator_email',
             'uc.username AS creator_username'
@@ -209,11 +210,11 @@ class TaskFilter extends Base
      */
     public function filterByTitle($title)
     {
-        if (strlen($title) > 1 && $title{0} === '#' && ctype_digit(substr($title, 1))) {
-            $this->query->eq(Task::TABLE.'.id', substr($title, 1));
-        }
-        else if (ctype_digit($title)) {
-            $this->query->eq(Task::TABLE.'.id', $title);
+        if (ctype_digit($title) || (strlen($title) > 1 && $title{0} === '#' && ctype_digit(substr($title, 1)))) {
+            $this->query->beginOr();
+            $this->query->eq(Task::TABLE.'.id', str_replace('#', '', $title));
+            $this->query->ilike(Task::TABLE.'.title', '%'.$title.'%');
+            $this->query->closeOr();
         }
         else {
             $this->query->ilike(Task::TABLE.'.title', '%'.$title.'%');
@@ -674,6 +675,51 @@ class TaskFilter extends Base
     }
 
     /**
+     * Format tasks to be displayed in the Gantt chart
+     *
+     * @access public
+     * @return array
+     */
+    public function toGanttBars()
+    {
+        $bars = array();
+        $columns = array();
+
+        foreach ($this->query->findAll() as $task) {
+            if (! isset($column_count[$task['project_id']])) {
+                $columns[$task['project_id']] = $this->board->getColumnsList($task['project_id']);
+            }
+
+            $start = $task['date_started'] ?: time();
+            $end = $task['date_due'] ?: $start;
+
+            $bars[] = array(
+                'type' => 'task',
+                'id' => $task['id'],
+                'title' => $task['title'],
+                'start' => array(
+                    (int) date('Y', $start),
+                    (int) date('n', $start),
+                    (int) date('j', $start),
+                ),
+                'end' => array(
+                    (int) date('Y', $end),
+                    (int) date('n', $end),
+                    (int) date('j', $end),
+                ),
+                'column_title' => $task['column_name'],
+                'assignee' => $task['assignee_name'] ?: $task['assignee_username'],
+                'progress' => $this->task->getProgress($task, $columns[$task['project_id']]).'%',
+                'link' => $this->helper->url->href('task', 'show', array('project_id' => $task['project_id'], 'task_id' => $task['id'])),
+                'color' => $this->color->getColorProperties($task['color_id']),
+                'not_defined' => empty($task['date_due']) || empty($task['date_started']),
+            );
+        }
+
+        return $bars;
+    }
+
+    /**
      * Format the results to the ajax autocompletion
      *
      * @access public
@@ -833,7 +879,7 @@ class TaskFilter extends Base
         $vEvent->setUrl($this->helper->url->base().$this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])));
 
         if (! empty($task['owner_id'])) {
-            $vEvent->setOrganizer('MAILTO:'.($task['assignee_email'] ?: $task['assignee_username'].'@kanboard.local'));
+            $vEvent->setOrganizer($task['assignee_name'] ?: $task['assignee_username'], $task['assignee_email']);
         }
 
         if (! empty($task['creator_id'])) {

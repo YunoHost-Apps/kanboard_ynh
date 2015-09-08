@@ -1,49 +1,49 @@
 <div class="sidebar">
     <h2><?= t('Actions') ?></h2>
     <ul>
-        <li>
+        <li <?= $this->app->getRouterAction() === 'show' ? 'class="active"' : '' ?>>
             <?= $this->url->link(t('Summary'), 'project', 'show', array('project_id' => $project['id'])) ?>
         </li>
 
-        <?php if ($this->user->isManager($project['id'])): ?>
-            <li>
+        <?php if ($this->user->isProjectManagementAllowed($project['id'])): ?>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'share' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Public access'), 'project', 'share', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'integration' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Integrations'), 'project', 'integration', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'edit' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Edit project'), 'project', 'edit', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'column' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Columns'), 'column', 'index', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'swimlane' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Swimlanes'), 'swimlane', 'index', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'category' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Categories'), 'category', 'index', array('project_id' => $project['id'])) ?>
             </li>
             <?php if ($this->user->isAdmin() || $project['is_private'] == 0): ?>
-            <li>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'users' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Users'), 'project', 'users', array('project_id' => $project['id'])) ?>
             </li>
             <?php endif ?>
-            <li>
+            <li <?= $this->app->getRouterController() === 'action' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Automatic actions'), 'action', 'index', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'duplicate' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Duplicate'), 'project', 'duplicate', array('project_id' => $project['id'])) ?>
             </li>
-            <li>
+            <li <?= $this->app->getRouterController() === 'project' && ($this->app->getRouterAction() === 'disable' || $this->app->getRouterAction() === 'enable') ? 'class="active"' : '' ?>>
                 <?php if ($project['is_active']): ?>
                     <?= $this->url->link(t('Disable'), 'project', 'disable', array('project_id' => $project['id']), true) ?>
                 <?php else: ?>
                     <?= $this->url->link(t('Enable'), 'project', 'enable', array('project_id' => $project['id']), true) ?>
                 <?php endif ?>
             </li>
-            <?php if ($this->user->isAdmin()): ?>
-                <li>
+            <?php if ($this->user->isProjectAdministrationAllowed($project['id'])): ?>
+                <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'remove' ? 'class="active"' : '' ?>>
                     <?= $this->url->link(t('Remove'), 'project', 'remove', array('project_id' => $project['id'])) ?>
                 </li>
             <?php endif ?>

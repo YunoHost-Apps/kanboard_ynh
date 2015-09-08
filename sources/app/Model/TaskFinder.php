@@ -13,6 +13,43 @@ use PDO;
 class TaskFinder extends Base
 {
     /**
+     * Get query for project user overview
+     *
+     * @access public
+     * @param array    $project_ids
+     * @param integer  $is_active
+     * @return \PicoDb\Table
+     */
+    public function getProjectUserOverviewQuery(array $project_ids, $is_active)
+    {
+        if (empty($project_ids)) {
+            $project_ids = array(-1);
+        }
+
+        return $this->db
+                    ->table(Task::TABLE)
+                    ->columns(
+                        Task::TABLE.'.id',
+                        Task::TABLE.'.title',
+                        Task::TABLE.'.date_due',
+                        Task::TABLE.'.date_started',
+                        Task::TABLE.'.project_id',
+                        Task::TABLE.'.color_id',
+                        Task::TABLE.'.time_spent',
+                        Task::TABLE.'.time_estimated',
+                        Project::TABLE.'.name AS project_name',
+                        Board::TABLE.'.title AS column_name',
+                        User::TABLE.'.username AS assignee_username',
+                        User::TABLE.'.name AS assignee_name'
+                    )
+                    ->eq(Task::TABLE.'.is_active', $is_active)
+                    ->in(Project::TABLE.'.id', $project_ids)
+                    ->join(Project::TABLE, 'id', 'project_id')
+                    ->join(Board::TABLE, 'id', 'column_id', Task::TABLE)
+                    ->join(User::TABLE, 'id', 'owner_id', Task::TABLE);
+    }
+
+    /**
      * Get query for assigned user tasks
      *
      * @access public
@@ -56,6 +93,7 @@ class TaskFinder extends Base
                 '(SELECT count(*) FROM '.Subtask::TABLE.' WHERE '.Subtask::TABLE.'.task_id=tasks.id) AS nb_subtasks',
                 '(SELECT count(*) FROM '.Subtask::TABLE.' WHERE '.Subtask::TABLE.'.task_id=tasks.id AND status=2) AS nb_completed_subtasks',
                 '(SELECT count(*) FROM '.TaskLink::TABLE.' WHERE '.TaskLink::TABLE.'.task_id = tasks.id) AS nb_links',
+                '(SELECT 1 FROM '.TaskLink::TABLE.' WHERE '.TaskLink::TABLE.'.task_id = tasks.id AND '.TaskLink::TABLE.'.link_id = 9) AS is_milestone',
                 'tasks.id',
                 'tasks.reference',
                 'tasks.title',
@@ -89,6 +127,7 @@ class TaskFinder extends Base
                 Category::TABLE.'.name AS category_name',
                 Category::TABLE.'.description AS category_description',
                 Board::TABLE.'.title AS column_name',
+                Board::TABLE.'.position AS column_position',
                 Swimlane::TABLE.'.name AS swimlane_name',
                 Project::TABLE.'.default_swimlane',
                 Project::TABLE.'.name AS project_name'

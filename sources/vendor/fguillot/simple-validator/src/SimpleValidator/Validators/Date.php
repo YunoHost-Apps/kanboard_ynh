@@ -2,7 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
 use DateTime;
 
 class Date extends Base
@@ -17,10 +16,9 @@ class Date extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             foreach ($this->formats as $format) {
-                if ($this->isValidDate($data[$this->field], $format) === true) {
+                if ($this->isValidDate($data[$this->field], $format)) {
                     return true;
                 }
             }
@@ -38,8 +36,7 @@ class Date extends Base
         if ($date !== false) {
             $errors = DateTime::getLastErrors();
             if ($errors['error_count'] === 0 && $errors['warning_count'] === 0) {
-                $timestamp = $date->getTimestamp();
-                return $timestamp > 0 ? true : false;
+                return $date->getTimestamp() > 0;
             }
         }
 

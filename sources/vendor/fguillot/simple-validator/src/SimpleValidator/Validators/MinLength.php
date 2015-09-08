@@ -2,8 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class MinLength extends Base
 {
     private $min;
@@ -16,13 +14,9 @@ class MinLength extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             $length = mb_strlen($data[$this->field], 'UTF-8');
-
-            if ($length < $this->min) {
-                return false;
-            }
+            return $length >= $this->min;
         }
 
         return true;

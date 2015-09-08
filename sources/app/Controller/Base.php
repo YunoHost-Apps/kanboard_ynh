@@ -80,7 +80,7 @@ abstract class Base extends \Core\Base
     private function sendHeaders($action)
     {
         // HTTP secure headers
-        $this->response->csp(array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '*'));
+        $this->response->csp(array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '* data:'));
         $this->response->nosniff();
         $this->response->xss();
 
@@ -269,10 +269,15 @@ abstract class Base extends \Core\Base
      */
     protected function getTask()
     {
+        $project_id = $this->request->getIntegerParam('project_id');
         $task = $this->taskFinder->getDetails($this->request->getIntegerParam('task_id'));
 
         if (empty($task)) {
             $this->notfound();
+        }
+
+        if ($project_id !== 0 && $project_id != $task['project_id']) {
+            $this->forbidden();
         }
 
         return $task;

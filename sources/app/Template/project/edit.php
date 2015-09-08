@@ -13,7 +13,13 @@
     <?= $this->form->text('identifier', $values, $errors, array('maxlength="50"')) ?>
     <p class="form-help"><?= t('The project identifier is an optional alphanumeric code used to identify your project.') ?></p>
 
-    <?php if ($this->user->isAdmin()): ?>
+    <?= $this->form->label(t('Start date'), 'start_date') ?>
+    <?= $this->form->text('start_date', $values, $errors, array('maxlength="10"'), 'form-date') ?>
+
+    <?= $this->form->label(t('End date'), 'end_date') ?>
+    <?= $this->form->text('end_date', $values, $errors, array('maxlength="10"'), 'form-date') ?>
+
+    <?php if ($this->user->isAdmin() || $this->user->isProjectAdministrationAllowed($project['id'])): ?>
         <?= $this->form->checkbox('is_private', t('Private project'), 1, $project['is_private'] == 1) ?>
     <?php endif ?>
 
@@ -36,7 +42,7 @@
             </li>
         </ul>
     </div>
-    <div class="form-help"><a href="http://kanboard.net/documentation/syntax-guide" target="_blank" rel="noreferrer"><?= t('Write your text in Markdown') ?></a></div>
+    <div class="form-help"><?= $this->url->doc(t('Write your text in Markdown'), 'syntax-guide') ?></div>
 
     <div class="form-actions">
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue"/>

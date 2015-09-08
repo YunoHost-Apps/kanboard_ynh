@@ -176,9 +176,10 @@ class Mysql extends Base
      * @param  string  $table
      * @param  string  $keyColumn
      * @param  string  $valueColumn
-     * @param  array   $dictionnary
+     * @param  array   $dictionary
+     * @return bool    False on failure
      */
-    public function upsert($table, $keyColumn, $valueColumn, array $dictionnary)
+    public function upsert($table, $keyColumn, $valueColumn, array $dictionary)
     {
         try {
 
@@ -187,12 +188,12 @@ class Mysql extends Base
                 $this->escape($table),
                 $this->escape($keyColumn),
                 $this->escape($valueColumn),
-                implode(', ', array_fill(0, count($dictionnary), '(?, ?)'))
+                implode(', ', array_fill(0, count($dictionary), '(?, ?)'))
             );
 
             $values = array();
 
-            foreach ($dictionnary as $key => $value) {
+            foreach ($dictionary as $key => $value) {
                 $values[] = $key;
                 $values[] = $value;
             }

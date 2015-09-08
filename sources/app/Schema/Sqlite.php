@@ -6,7 +6,29 @@ use Core\Security;
 use PDO;
 use Model\Link;
 
-const VERSION = 77;
+const VERSION = 81;
+
+function version_81($pdo)
+{
+    $pdo->exec("ALTER TABLE users ADD COLUMN gitlab_id INTEGER");
+}
+
+function version_80($pdo)
+{
+    $pdo->exec("ALTER TABLE projects ADD COLUMN start_date TEXT DEFAULT ''");
+    $pdo->exec("ALTER TABLE projects ADD COLUMN end_date TEXT DEFAULT ''");
+}
+
+function version_79($pdo)
+{
+    $pdo->exec("ALTER TABLE users ADD COLUMN is_project_admin INTEGER DEFAULT 0");
+}
+
+function version_78($pdo)
+{
+    $pdo->exec("ALTER TABLE users ADD COLUMN nb_failed_login INTEGER DEFAULT 0");
+    $pdo->exec("ALTER TABLE users ADD COLUMN lock_expiration_date INTEGER DEFAULT 0");
+}
 
 function version_77($pdo)
 {

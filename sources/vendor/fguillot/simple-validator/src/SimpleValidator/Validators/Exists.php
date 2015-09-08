@@ -3,17 +3,12 @@
 namespace SimpleValidator\Validators;
 
 use PDO;
-use SimpleValidator\Base;
 
-/**
- * @author Olivier Maridat
- */
 class Exists extends Base
 {
     private $pdo;
     private $key;
     private $table;
-
 
     public function __construct($field, $error_message, PDO $pdo, $table, $key = '')
     {
@@ -27,7 +22,7 @@ class Exists extends Base
 
     public function execute(array $data)
     {
-        if (! isset($data[$this->field]) || '' === $data[$this->field]) {
+        if (! $this->isFieldNotEmpty($data)) {
             return true;
         }
 
@@ -35,9 +30,9 @@ class Exists extends Base
             $this->key = $this->field;
         }
 
-        $rq = $this->pdo->prepare('SELECT COUNT(*) FROM '.$this->table.' WHERE '.$this->key.'=?');
+        $rq = $this->pdo->prepare('SELECT 1 FROM '.$this->table.' WHERE '.$this->key.'=?');
         $rq->execute(array($data[$this->field]));
 
-        return $rq->fetchColumn() >= 1;
+        return $rq->fetchColumn() == 1;
     }
 }

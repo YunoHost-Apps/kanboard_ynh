@@ -41,6 +41,7 @@ class Config extends Base
             'JPY' => t('JPY - Japanese Yen'),
             'RSD' => t('RSD - Serbian dinar'),
             'SEK' => t('SEK - Swedish Krona'),
+            'NOK' => t('NOK - Norwegian Krone'),
         );
     }
 
@@ -83,7 +84,9 @@ class Config extends Base
             'it_IT' => 'Italiano',
             'hu_HU' => 'Magyar',
             'nl_NL' => 'Nederlands',
+            'nb_NO' => 'Norsk',
             'pl_PL' => 'Polski',
+            'pt_PT' => 'Português',
             'pt_BR' => 'Português (Brasil)',
             'ru_RU' => 'Русский',
             'sr_Latn_RS' => 'Srpski',
@@ -120,7 +123,9 @@ class Config extends Base
             'it_IT' => 'it',
             'hu_HU' => 'hu',
             'nl_NL' => 'nl',
+            'nb_NO' => 'nb',
             'pl_PL' => 'pl',
+            'pt_PT' => 'pt',
             'pt_BR' => 'pt-br',
             'ru_RU' => 'ru',
             'sr_Latn_RS' => 'sr',

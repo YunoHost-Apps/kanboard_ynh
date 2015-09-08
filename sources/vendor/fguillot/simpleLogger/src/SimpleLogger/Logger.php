@@ -61,7 +61,7 @@ class Logger extends AbstractLogger implements LoggerAwareInterface
     }
 
     /**
-     * Proxy method to the real logger
+     * Proxy method to the real loggers
      *
      * @param  mixed   $level
      * @param  string  $message
@@ -74,6 +74,20 @@ class Logger extends AbstractLogger implements LoggerAwareInterface
             // Call the logger only if necessary
             if ($this->getLevelPriority($level) >= $this->getLevelPriority($logger->getLevel())) {
                 $logger->log($level, $message, $context);
+            }
+        }
+    }
+
+    /**
+     * Dump variables for debugging
+     *
+     * @param mixed $variable
+     */
+    public function dump($variable)
+    {
+        foreach ($this->loggers as $logger) {
+            if ($this->getLevelPriority(LogLevel::DEBUG) >= $this->getLevelPriority($logger->getLevel())) {
+                $logger->dump($variable);
             }
         }
     }

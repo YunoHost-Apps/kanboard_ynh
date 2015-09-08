@@ -2,8 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class MaxLength extends Base
 {
     private $max;
@@ -16,13 +14,9 @@ class MaxLength extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             $length = mb_strlen($data[$this->field], 'UTF-8');
-
-            if ($length > $this->max) {
-                return false;
-            }
+            return $length <= $this->max;
         }
 
         return true;

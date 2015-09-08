@@ -161,7 +161,7 @@ class Database
      * Get the PDO connection
      *
      * @access public
-     * @return PDO
+     * @return \PDO
      */
     public function getConnection()
     {
@@ -247,7 +247,7 @@ class Database
      * @access public
      * @param  string    $sql      SQL query
      * @param  array     $values   Values
-     * @return PDOStatement|false
+     * @return \PDOStatement|false
      */
     public function execute($sql, array $values = array())
     {
@@ -304,7 +304,8 @@ class Database
      *
      * @access private
      * @param  PDOException $e
-     * @return boolean
+     * @return bool
+     * @throws SQLException
      */
     private function handleSqlError(PDOException $e)
     {
@@ -358,6 +359,7 @@ class Database
      * Get a table instance
      *
      * @access public
+     * @param  string $table_name
      * @return Table
      */
     public function table($table_name)
@@ -369,6 +371,7 @@ class Database
      * Get a hashtable instance
      *
      * @access public
+     * @param  string    $table_name
      * @return Hashtable
      */
     public function hashtable($table_name)

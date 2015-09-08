@@ -2,8 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class GreaterThan extends Base
 {
     private $min;
@@ -16,7 +14,7 @@ class GreaterThan extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
+        if ($this->isFieldNotEmpty($data)) {
             return $data[$this->field] > $this->min;
         }
 

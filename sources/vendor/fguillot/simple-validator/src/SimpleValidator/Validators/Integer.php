@@ -2,14 +2,11 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class Integer extends Base
 {
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             if (is_string($data[$this->field])) {
 
                 if ($data[$this->field][0] === '-') {
@@ -19,7 +16,6 @@ class Integer extends Base
                 return ctype_digit($data[$this->field]);
             }
             else {
-
                 return is_int($data[$this->field]);
             }
         }

@@ -3,7 +3,6 @@
 namespace SimpleValidator\Validators;
 
 use PDO;
-use SimpleValidator\Base;
 
 class Unique extends Base
 {
@@ -22,18 +21,15 @@ class Unique extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             if (! isset($data[$this->primary_key])) {
-
-                $rq = $this->pdo->prepare('SELECT COUNT(*) FROM '.$this->table.' WHERE '.$this->field.'=?');
+                $rq = $this->pdo->prepare('SELECT 1 FROM '.$this->table.' WHERE '.$this->field.'=?');
                 $rq->execute(array($data[$this->field]));
-
             }
             else {
 
                 $rq = $this->pdo->prepare(
-                    'SELECT COUNT(*) FROM '.$this->table.'
+                    'SELECT 1 FROM '.$this->table.'
                     WHERE '.$this->field.'=? AND '.$this->primary_key.' != ?'
                 );
 

@@ -2,8 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class Length extends Base
 {
     private $min;
@@ -12,20 +10,15 @@ class Length extends Base
     public function __construct($field, $error_message, $min, $max)
     {
         parent::__construct($field, $error_message);
-
         $this->min = $min;
         $this->max = $max;
     }
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
-
+        if ($this->isFieldNotEmpty($data)) {
             $length = mb_strlen($data[$this->field], 'UTF-8');
-
-            if ($length < $this->min || $length > $this->max) {
-                return false;
-            }
+            return $length >= $this->min && $length <= $this->max;
         }
 
         return true;

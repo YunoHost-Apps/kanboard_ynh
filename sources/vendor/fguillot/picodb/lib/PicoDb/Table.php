@@ -70,6 +70,14 @@ class Table
     private $columns = array();
 
     /**
+     * Columns to sum during update
+     *
+     * @access private
+     * @var    array
+     */
+    private $sumColumns = array();
+
+    /**
      * SQL limit
      *
      * @access private
@@ -179,7 +187,7 @@ class Table
      * @param  array   $data
      * @return boolean
      */
-    public function update(array $data)
+    public function update(array $data = array())
     {
         $columns = array();
         $values = array();
@@ -187,6 +195,12 @@ class Table
         // Split columns and values
         foreach ($data as $column => $value) {
             $columns[] = $this->db->escapeIdentifier($column).'=?';
+            $values[] = $value;
+        }
+
+        // Sum columns
+        foreach ($this->sumColumns as $column => $value) {
+            $columns[] = $this->db->escapeIdentifier($column).'='.$this->db->escapeIdentifier($column).' + ?';
             $values[] = $value;
         }
 
@@ -528,6 +542,7 @@ class Table
      * Custom select
      *
      * @access public
+     * @param  string $select
      * @return Table
      */
     public function select($select)
@@ -545,6 +560,20 @@ class Table
     public function columns()
     {
         $this->columns = func_get_args();
+        return $this;
+    }
+
+    /**
+     * Sum column
+     *
+     * @access public
+     * @param  string  $column
+     * @param  mixed   $value
+     * @return Table
+     */
+    public function sumColumn($column, $value)
+    {
+        $this->sumColumns[$column] = $value;
         return $this;
     }
 

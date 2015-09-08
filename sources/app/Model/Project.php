@@ -115,6 +115,54 @@ class Project extends Base
     }
 
     /**
+     * Get all projects to generate the Gantt chart
+     *
+     * @access public
+     * @param  array   $project_ids
+     * @return array
+     */
+    public function getGanttBars(array $project_ids)
+    {
+        if (empty($project_ids)) {
+            return array();
+        }
+
+        $colors = $this->color->getDefaultColors();
+        $projects = $this->db->table(self::TABLE)->asc('start_date')->in('id', $project_ids)->eq('is_active', self::ACTIVE)->eq('is_private', 0)->findAll();
+        $bars = array();
+
+        foreach ($projects as $project) {
+            $start = empty($project['start_date']) ? time() : strtotime($project['start_date']);
+            $end = empty($project['end_date']) ? $start : strtotime($project['end_date']);
+            $color = next($colors) ?: reset($colors);
+
+            $bars[] = array(
+                'type' => 'project',
+                'id' => $project['id'],
+                'title' => $project['name'],
+                'start' => array(
+                    (int) date('Y', $start),
+                    (int) date('n', $start),
+                    (int) date('j', $start),
+                ),
+                'end' => array(
+                    (int) date('Y', $end),
+                    (int) date('n', $end),
+                    (int) date('j', $end),
+                ),
+                'link' => $this->helper->url->href('project', 'show', array('project_id' => $project['id'])),
+                'board_link' => $this->helper->url->href('board', 'show', array('project_id' => $project['id'])),
+                'gantt_link' => $this->helper->url->href('gantt', 'project', array('project_id' => $project['id'])),
+                'color' => $color,
+                'not_defined' => empty($project['start_date']) || empty($project['end_date']),
+                'users' => $this->projectPermission->getProjectUsers($project['id']),
+            );
+        }
+
+        return $bars;
+    }
+
+    /**
      * Get all projects
      *
      * @access public
@@ -261,6 +309,23 @@ class Project extends Base
     }
 
     /**
+     * Fetch more information for each project
+     *
+     * @access public
+     * @param  array    $projects
+     * @return array
+     */
+    public function applyProjectDetails(array $projects)
+    {
+        foreach ($projects as &$project) {
+            $this->getColumnStats($project);
+            $project = array_merge($project, $this->projectPermission->getProjectUsers($project['id']));
+        }
+
+        return $projects;
+    }
+
+    /**
      * Get project summary for a list of project
      *
      * @access public
@@ -277,6 +342,25 @@ class Project extends Base
                     ->table(Project::TABLE)
                     ->in('id', $project_ids)
                     ->callback(array($this, 'applyColumnStats'));
+    }
+
+    /**
+     * Get project details (users + columns) for a list of project
+     *
+     * @access public
+     * @param  array      $project_ids     List of project id
+     * @return \PicoDb\Table
+     */
+    public function getQueryProjectDetails(array $project_ids)
+    {
+        if (empty($project_ids)) {
+            return $this->db->table(Project::TABLE)->limit(0);
+        }
+
+        return $this->db
+                    ->table(Project::TABLE)
+                    ->in('id', $project_ids)
+                    ->callback(array($this, 'applyProjectDetails'));
     }
 
     /**
@@ -472,6 +556,8 @@ class Project extends Base
             new Validators\Required('name', t('The project name is required')),
             new Validators\MaxLength('name', t('The maximum length is %d characters', 50), 50),
             new Validators\MaxLength('identifier', t('The maximum length is %d characters', 50), 50),
+            new Validators\MaxLength('start_date', t('The maximum length is %d characters', 10), 10),
+            new Validators\MaxLength('end_date', t('The maximum length is %d characters', 10), 10),
             new Validators\AlphaNumeric('identifier', t('This value must be alphanumeric')) ,
             new Validators\Unique('name', t('This project must be unique'), $this->db->getConnection(), self::TABLE),
             new Validators\Unique('identifier', t('The identifier must be unique'), $this->db->getConnection(), self::TABLE),

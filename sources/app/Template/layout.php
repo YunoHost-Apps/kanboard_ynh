@@ -6,13 +6,14 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="robots" content="noindex,nofollow">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="referrer" content="no-referrer">
 
         <?php if (isset($board_public_refresh_interval)): ?>
             <meta http-equiv="refresh" content="<?= $board_public_refresh_interval ?>">
         <?php endif ?>
 
         <?php if (! isset($not_editable)): ?>
-            <?= $this->asset->js('assets/js/app.js', true) ?>
+            <?= $this->asset->js('assets/js/app.js') ?>
         <?php endif ?>
 
         <?= $this->asset->colorCss() ?>
@@ -48,7 +49,13 @@
                 <ul>
                     <?php if (isset($board_selector) && ! empty($board_selector)): ?>
                     <li>
-                        <select id="board-selector" tabindex="-1" data-notfound="<?= t('No results match:') ?>" data-placeholder="<?= t('Display another project') ?>" data-board-url="<?= $this->url->href('board', 'show', array('project_id' => 'PROJECT_ID')) ?>">
+                        <select id="board-selector"
+                                class="chosen-select select-auto-redirect"
+                                tabindex="-1"
+                                data-notfound="<?= t('No results match:') ?>"
+                                data-placeholder="<?= t('Display another project') ?>"
+                                data-redirect-regex="PROJECT_ID"
+                                data-redirect-url="<?= $this->url->href('board', 'show', array('project_id' => 'PROJECT_ID')) ?>">
                             <option value=""></option>
                             <?php foreach($board_selector as $board_id => $board_name): ?>
                                 <option value="<?= $board_id ?>"><?= $this->e($board_name) ?></option>

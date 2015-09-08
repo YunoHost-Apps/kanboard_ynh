@@ -8,6 +8,7 @@
      data-due-date="<?= $task['date_due'] ?>"
      data-task-url="<?= $this->url->href('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>">
 
+    <div class="task-board-sort-handle" style="display: none;"><i class="fa fa-arrows-alt"></i></div>
     <?= $this->render('board/task_menu', array('task' => $task)) ?>
 
     <?php if ($this->board->isCollapsed($project['id'])): ?>
@@ -17,9 +18,7 @@
                     <?= $this->e($this->user->getInitials($task['assignee_name'] ?: $task['assignee_username'])) ?>
                 </span> -
             <?php endif ?>
-            <span class="tooltip" title="<?= $this->e($task['title']) ?>"
-                <?= $this->url->link($this->e($task['title']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, 'task-board-collapsed-title') ?>
-            </span>
+            <?= $this->url->link($this->e($task['title']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, 'task-board-collapsed-title tooltip', $this->e($task['title'])) ?>
         </div>
     <?php else: ?>
         <div class="task-board-expanded">
@@ -37,7 +36,7 @@
                     'changeAssignee',
                     array('task_id' => $task['id'], 'project_id' => $task['project_id']),
                     false,
-                    'task-board-popover',
+                    'popover',
                     t('Change assignee')
                 ) ?>
             </span>

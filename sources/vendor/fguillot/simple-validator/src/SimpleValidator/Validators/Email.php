@@ -2,13 +2,11 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class Email extends Base
 {
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
+        if ($this->isFieldNotEmpty($data)) {
 
             // I use the same validation method as Firefox
             // http://hg.mozilla.org/mozilla-central/file/cf5da681d577/content/html/content/src/nsHTMLInputElement.cpp#l3967

@@ -77,7 +77,7 @@ class DateParser extends Base
     }
 
     /**
-     * Parse a date ad return a unix timestamp, try different date formats
+     * Parse a date and return a unix timestamp, try different date formats
      *
      * @access public
      * @param  string   $value   Date to parse
@@ -94,6 +94,18 @@ class DateParser extends Base
         }
 
         return 0;
+    }
+
+    /**
+     * Get ISO8601 date from user input
+     *
+     * @access public
+     * @param  string   $value   Date to parse
+     * @return string
+     */
+    public function getIsoDate($value)
+    {
+        return date('Y-m-d', ctype_digit($value) ? $value : $this->getTimestamp($value));
     }
 
     /**
@@ -157,6 +169,7 @@ class DateParser extends Base
             'm/d/Y' => date('m/d/Y'),
             'd/m/Y' => date('d/m/Y'),
             'Y/m/d' => date('Y/m/d'),
+            'd.m.Y' => date('d.m.Y'),
         );
     }
 

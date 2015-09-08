@@ -2,8 +2,6 @@
 
 namespace SimpleValidator\Validators;
 
-use SimpleValidator\Base;
-
 class Range extends Base
 {
     private $min;
@@ -19,7 +17,7 @@ class Range extends Base
 
     public function execute(array $data)
     {
-        if (isset($data[$this->field]) && $data[$this->field] !== '') {
+        if ($this->isFieldNotEmpty($data)) {
 
             if (! is_numeric($data[$this->field])) {
                 return false;

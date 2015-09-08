@@ -19,14 +19,8 @@ class Validator
         $result = true;
 
         foreach ($this->validators as $validator) {
-
             if (! $validator->execute($this->data)) {
-
-                $this->addError(
-                    $validator->getField(),
-                    $validator->getErrorMessage()
-                );
-
+                $this->addError($validator->getField(), $validator->getErrorMessage());
                 $result = false;
             }
         }
@@ -42,7 +36,6 @@ class Validator
 
         $this->errors[$field][] = $message;
     }
-
 
     public function getErrors()
     {
