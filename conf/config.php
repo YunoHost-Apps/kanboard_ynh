@@ -183,7 +183,7 @@ define('REVERSE_PROXY_DEFAULT_DOMAIN', 'yuno_domain');
 define('REMEMBER_ME_AUTH', false);
 
 // Enable or disable "Strict-Transport-Security" HTTP header
-define('ENABLE_HSTS', true);
+define('ENABLE_HSTS', false);
 
 // Enable or disable "X-Frame-Options: DENY" HTTP header
 define('ENABLE_XFRAME', true);
