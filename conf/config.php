@@ -166,7 +166,7 @@ define('REVERSE_PROXY_DEFAULT_ADMIN', 'yuno_admin');
 define('REVERSE_PROXY_DEFAULT_DOMAIN', 'yuno_domain');
 
 // Enable/disable remember me authentication
-define('REMEMBER_ME_AUTH', true);
+define('REMEMBER_ME_AUTH', false);
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 define('ENABLE_HSTS', true);
@@ -197,4 +197,4 @@ define('BRUTEFORCE_LOCKDOWN_DURATION', 15);
 
 // Session duration in second (0 = until the browser is closed)
 // See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
-define('SESSION_DURATION', 0);
+define('SESSION_DURATION', 1);
