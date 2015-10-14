@@ -36,3 +36,8 @@ Infos
 Kanboard v1.0.18
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
+
+Kanboard and SSOwat
+-------------------
+Kanboard use SSOwat for user authentification (it means it use the user that the web server (nginx) sent him throught SSOwat), but can't list all user of the system.
+If you wish to add a user, just log in with that user into Kanboard so the software knows him and displays it.
