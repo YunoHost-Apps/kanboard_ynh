@@ -1,8 +1,7 @@
 <div class="page-header">
     <h2><?= t('Edit a task') ?></h2>
 </div>
-<section id="task-section">
-<form method="post" action="<?= $this->url->href('taskmodification', 'update', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'ajax' => $ajax)) ?>" autocomplete="off">
+<form id="task-form" method="post" action="<?= $this->url->href('taskmodification', 'update', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>" autocomplete="off">
 
     <?= $this->form->csrf() ?>
 
@@ -12,7 +11,6 @@
         <?= $this->form->text('title', $values, $errors, array('autofocus', 'required', 'maxlength="200"', 'tabindex="1"')) ?><br/>
 
         <?= $this->form->label(t('Description'), 'description') ?>
-
         <div class="form-tabs">
             <div class="write-area">
                 <?= $this->form->textarea('description', $values, $errors, array('placeholder="'.t('Leave a description').'"', 'tabindex="2"')) ?>
@@ -30,6 +28,7 @@
             </ul>
         </div>
 
+        <?= $this->render('task/color_picker', array('colors_list' => $colors_list, 'values' => $values)) ?>
     </div>
 
     <div class="form-column">
@@ -41,9 +40,6 @@
 
         <?= $this->form->label(t('Category'), 'category_id') ?>
         <?= $this->form->select('category_id', $categories_list, $values, $errors, array('tabindex="4"')) ?><br/>
-
-        <?= $this->form->label(t('Color'), 'color_id') ?>
-        <?= $this->form->select('color_id', $colors_list, $values, $errors, array('tabindex="5"')) ?><br/>
 
         <?= $this->form->label(t('Complexity'), 'score') ?>
         <?= $this->form->number('score', $values, $errors, array('tabindex="6"')) ?><br/>
@@ -63,4 +59,3 @@
         <?php endif ?>
     </div>
 </form>
-</section>

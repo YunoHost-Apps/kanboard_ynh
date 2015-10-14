@@ -4,8 +4,11 @@
 defined('DEBUG') or define('DEBUG', false);
 defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.'/../data/debug.log');
 
+// Plugin directory
+defined('PLUGINS_DIR') or define('PLUGINS_DIR', __DIR__.'/../plugins');
+
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.18');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.19');
 
 // Database driver: sqlite, mysql or postgres
 defined('DB_DRIVER') or define('DB_DRIVER', 'sqlite');
@@ -34,8 +37,11 @@ defined('LDAP_USER_PATTERN') or define('LDAP_USER_PATTERN', '');
 defined('LDAP_ACCOUNT_FULLNAME') or define('LDAP_ACCOUNT_FULLNAME', 'displayname');
 defined('LDAP_ACCOUNT_EMAIL') or define('LDAP_ACCOUNT_EMAIL', 'mail');
 defined('LDAP_ACCOUNT_ID') or define('LDAP_ACCOUNT_ID', '');
-defined('LDAP_USERNAME_CASE_SENSITIVE') or define('LDAP_USERNAME_CASE_SENSITIVE', false);
+defined('LDAP_ACCOUNT_MEMBEROF') or define('LDAP_ACCOUNT_MEMBEROF', 'memberof');
 defined('LDAP_ACCOUNT_CREATION') or define('LDAP_ACCOUNT_CREATION', true);
+defined('LDAP_GROUP_ADMIN_DN') or define('LDAP_GROUP_ADMIN_DN', '');
+defined('LDAP_GROUP_PROJECT_ADMIN_DN') or define('LDAP_GROUP_PROJECT_ADMIN_DN', '');
+defined('LDAP_USERNAME_CASE_SENSITIVE') or define('LDAP_USERNAME_CASE_SENSITIVE', false);
 
 // Google authentication
 defined('GOOGLE_AUTH') or define('GOOGLE_AUTH', false);
@@ -88,6 +94,9 @@ defined('ENABLE_HSTS') or define('ENABLE_HSTS', true);
 // Enable or disable "X-Frame-Options: DENY" HTTP header
 defined('ENABLE_XFRAME') or define('ENABLE_XFRAME', true);
 
+// Syslog
+defined('ENABLE_SYSLOG') or define('ENABLE_SYSLOG', true);
+
 // Default files directory
 defined('FILES_DIR') or define('FILES_DIR', 'data/files/');
 
@@ -111,3 +120,10 @@ defined('BRUTEFORCE_LOCKDOWN_DURATION') or define('BRUTEFORCE_LOCKDOWN_DURATION'
 // Session duration in second (0 = until the browser is closed)
 // See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
 defined('SESSION_DURATION') or define('SESSION_DURATION', 0);
+
+// HTTP client proxy
+defined('HTTP_PROXY_HOSTNAME') or define('HTTP_PROXY_HOSTNAME', '');
+defined('HTTP_PROXY_PORT') or define('HTTP_PROXY_PORT', '3128');
+defined('HTTP_PROXY_USERNAME') or define('HTTP_PROXY_USERNAME', '');
+defined('HTTP_PROXY_PASSWORD') or define('HTTP_PROXY_PASSWORD', '');
+

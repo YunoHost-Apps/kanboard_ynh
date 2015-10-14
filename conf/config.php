@@ -6,6 +6,9 @@ define('DEBUG', false);
 // Debug file path
 define('DEBUG_FILE', __DIR__.'/data/debug.log');
 
+// Plugins directory
+define('PLUGINS_DIR', 'data/plugins');
+
 // Folder for uploaded files, don't forget the trailing slash
 define('FILES_DIR', 'data/files/');
 
@@ -65,20 +68,20 @@ define('LDAP_SERVER', '');
 // LDAP server port (389 by default)
 define('LDAP_PORT', 389);
 
-// By default, require certificate to be verified for ldaps:// style URL. Set to false to skip the verification.
+// By default, require certificate to be verified for ldaps:// style URL. Set to false to skip the verification
 define('LDAP_SSL_VERIFY', true);
 
 // Enable LDAP START_TLS
 define('LDAP_START_TLS', false);
 
-// LDAP bind type: "anonymous", "user" (use the given user/password from the form) and "proxy" (a specific user to browse the LDAP directory)
+// LDAP bind type: "anonymous", "user" or "proxy"
 define('LDAP_BIND_TYPE', 'anonymous');
 
-// LDAP username to connect with. null for anonymous bind (by default).
-// Or for user bind type, you can use a pattern: %s@kanboard.local
+// LDAP username to use with proxy mode
+// LDAP username pattern to use with user mode
 define('LDAP_USERNAME', null);
 
-// LDAP password to connect with. null for anonymous bind (by default).
+// LDAP password to use for proxy mode
 define('LDAP_PASSWORD', null);
 
 // LDAP account base, i.e. root of all user account
@@ -90,16 +93,27 @@ define('LDAP_ACCOUNT_BASE', '');
 // Example for OpenLDAP: 'uid=%s'
 define('LDAP_USER_PATTERN', '');
 
-// Name of an attribute of the user account object which should be used as the full name of the user.
+// Name of an attribute of the user account object which should be used as the full name of the user
 define('LDAP_ACCOUNT_FULLNAME', 'displayname');
 
-// Name of an attribute of the user account object which should be used as the email of the user.
+// Name of an attribute of the user account object which should be used as the email of the user
 define('LDAP_ACCOUNT_EMAIL', 'mail');
 
-// Name of an attribute of the user account object which should be used as the id of the user.
+// Name of an attribute of the user account object which should be used as the id of the user. (optional)
 // Example for ActiveDirectory: 'samaccountname'
 // Example for OpenLDAP: 'uid'
-define('LDAP_ACCOUNT_ID', 'samaccountname');
+define('LDAP_ACCOUNT_ID', '');
+
+// LDAP Attribute for group membership
+define('LDAP_ACCOUNT_MEMBEROF', 'memberof');
+
+// DN for administrators
+// Example: CN=Kanboard Admins,CN=Users,DC=kanboard,DC=local
+define('LDAP_GROUP_ADMIN_DN', '');
+
+// DN for project administrators
+// Example: CN=Kanboard Project Admins,CN=Users,DC=kanboard,DC=local
+define('LDAP_GROUP_PROJECT_ADMIN_DN', '');
 
 // By default Kanboard lowercase the ldap username to avoid duplicate users (the database is case sensitive)
 // Set to true if you want to preserve the case
@@ -174,6 +188,9 @@ define('ENABLE_HSTS', true);
 // Enable or disable "X-Frame-Options: DENY" HTTP header
 define('ENABLE_XFRAME', true);
 
+// Enable syslog logging
+define('ENABLE_SYSLOG', true);
+
 // Escape html inside markdown text
 define('MARKDOWN_ESCAPE_HTML', true);
 
@@ -198,3 +215,10 @@ define('BRUTEFORCE_LOCKDOWN_DURATION', 15);
 // Session duration in second (0 = until the browser is closed)
 // See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
 define('SESSION_DURATION', 1);
+
+// HTTP client proxy
+define('HTTP_PROXY_HOSTNAME', '');
+define('HTTP_PROXY_PORT', '3128');
+define('HTTP_PROXY_USERNAME', '');
+define('HTTP_PROXY_PASSWORD', '');
+

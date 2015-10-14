@@ -4,6 +4,9 @@
         <li <?= $this->app->getRouterAction() === 'show' ? 'class="active"' : '' ?>>
             <?= $this->url->link(t('Summary'), 'project', 'show', array('project_id' => $project['id'])) ?>
         </li>
+        <li <?= $this->app->getRouterController() === 'customfilter' && $this->app->getRouterAction() === 'index' ? 'class="active"' : '' ?>>
+            <?= $this->url->link(t('Custom filters'), 'customfilter', 'index', array('project_id' => $project['id'])) ?>
+        </li>
 
         <?php if ($this->user->isProjectManagementAllowed($project['id'])): ?>
             <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'share' ? 'class="active"' : '' ?>>
@@ -48,6 +51,8 @@
                 </li>
             <?php endif ?>
         <?php endif ?>
+
+        <?= $this->hook->render('template:project:sidebar') ?>
     </ul>
     <div class="sidebar-collapse"><a href="#" title="<?= t('Hide sidebar') ?>"><i class="fa fa-chevron-left"></i></a></div>
     <div class="sidebar-expand" style="display: none"><a href="#" title="<?= t('Expand sidebar') ?>"><i class="fa fa-chevron-right"></i></a></div>

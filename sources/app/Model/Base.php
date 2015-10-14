@@ -13,26 +13,6 @@ use Pimple\Container;
 abstract class Base extends \Core\Base
 {
     /**
-     * Database instance
-     *
-     * @access protected
-     * @var \PicoDb\Database
-     */
-    protected $db;
-
-    /**
-     * Constructor
-     *
-     * @access public
-     * @param  \Pimple\Container   $container
-     */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-        $this->db = $this->container['db'];
-    }
-
-    /**
      * Save a record in the database
      *
      * @access public
@@ -62,14 +42,30 @@ abstract class Base extends \Core\Base
     public function removeFields(array &$values, array $keys)
     {
         foreach ($keys as $key) {
-            if (isset($values[$key])) {
+            if (array_key_exists($key, $values)) {
                 unset($values[$key]);
             }
         }
     }
 
     /**
-     * Force some fields to be at 0 if empty
+     * Remove keys from an array if empty
+     *
+     * @access public
+     * @param  array     $values    Input array
+     * @param  string[]  $keys      List of keys to remove
+     */
+    public function removeEmptyFields(array &$values, array $keys)
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $values) && empty($values[$key])) {
+                unset($values[$key]);
+            }
+        }
+    }
+
+    /**
+     * Force fields to be at 0 if empty
      *
      * @access public
      * @param  array        $values    Input array
@@ -101,6 +97,22 @@ abstract class Base extends \Core\Base
     }
 
     /**
+     * Force some fields to be null if empty
+     *
+     * @access public
+     * @param  array        $values    Input array
+     * @param  string[]     $keys      List of keys
+     */
+    public function convertNullFields(array &$values, array $keys)
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $values) && empty($values[$key])) {
+                $values[$key] = null;
+            }
+        }
+    }
+
+    /**
      * Build SQL condition for a given time range
      *
      * @access protected
@@ -122,26 +134,6 @@ abstract class Base extends \Core\Base
         );
 
         return $start_column.' IS NOT NULL AND '.$start_column.' > 0 AND ('.implode(' OR ', $conditions).')';
-    }
-
-    /**
-     * Get common properties for task calendar events
-     *
-     * @access protected
-     * @param  array  $task
-     * @return array
-     */
-    protected function getTaskCalendarProperties(array &$task)
-    {
-        return array(
-            'timezoneParam' => $this->config->getCurrentTimezone(),
-            'id' => $task['id'],
-            'title' => t('#%d', $task['id']).' '.$task['title'],
-            'backgroundColor' => $this->color->getBackgroundColor($task['color_id']),
-            'borderColor' => $this->color->getBorderColor($task['color_id']),
-            'textColor' => 'black',
-            'url' => $this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])),
-        );
     }
 
     /**

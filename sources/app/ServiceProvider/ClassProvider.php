@@ -2,13 +2,17 @@
 
 namespace ServiceProvider;
 
+use Core\Plugin\Loader;
+use Core\ObjectStorage\FileStorage;
 use Core\Paginator;
 use Core\OAuth2;
+use Core\Tool;
 use Model\Config;
 use Model\Project;
 use Model\Webhook;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use League\HTMLToMarkdown\HtmlConverter;
 
 class ClassProvider implements ServiceProviderInterface
 {
@@ -18,18 +22,22 @@ class ClassProvider implements ServiceProviderInterface
             'Action',
             'Authentication',
             'Board',
-            'Budget',
             'Category',
             'Color',
             'Comment',
             'Config',
             'Currency',
+            'CustomFilter',
             'DateParser',
             'File',
-            'HourlyRate',
             'LastLogin',
             'Link',
             'Notification',
+            'NotificationType',
+            'NotificationFilter',
+            'OverdueNotification',
+            'WebNotification',
+            'EmailNotification',
             'Project',
             'ProjectActivity',
             'ProjectAnalytic',
@@ -40,7 +48,6 @@ class ClassProvider implements ServiceProviderInterface
             'ProjectPermission',
             'Subtask',
             'SubtaskExport',
-            'SubtaskForecast',
             'SubtaskTimeTracking',
             'Swimlane',
             'Task',
@@ -56,26 +63,33 @@ class ClassProvider implements ServiceProviderInterface
             'TaskPosition',
             'TaskStatus',
             'TaskValidator',
-            'Timetable',
-            'TimetableDay',
-            'TimetableExtra',
-            'TimetableWeek',
-            'TimetableOff',
             'Transition',
             'User',
             'UserSession',
             'Webhook',
+        ),
+        'Formatter' => array(
+            'TaskFilterGanttFormatter',
+            'TaskFilterAutoCompleteFormatter',
+            'TaskFilterCalendarFormatter',
+            'TaskFilterICalendarFormatter',
+            'ProjectGanttFormatter',
         ),
         'Core' => array(
             'EmailClient',
             'Helper',
             'HttpClient',
             'Lexer',
-            'MemoryCache',
             'Request',
             'Router',
             'Session',
             'Template',
+        ),
+        'Core\Cache' => array(
+            'MemoryCache',
+        ),
+        'Core\Plugin' => array(
+            'Hook',
         ),
         'Integration' => array(
             'BitbucketWebhook',
@@ -93,17 +107,7 @@ class ClassProvider implements ServiceProviderInterface
 
     public function register(Container $container)
     {
-        foreach ($this->classes as $namespace => $classes) {
-
-            foreach ($classes as $name) {
-
-                $class = '\\'.$namespace.'\\'.$name;
-
-                $container[lcfirst($name)] = function ($c) use ($class) {
-                    return new $class($c);
-                };
-            }
-        }
+        Tool::buildDIC($container, $this->classes);
 
         $container['paginator'] = $container->factory(function ($c) {
             return new Paginator($c);
@@ -112,5 +116,17 @@ class ClassProvider implements ServiceProviderInterface
         $container['oauth'] = $container->factory(function ($c) {
             return new OAuth2($c);
         });
+
+        $container['htmlConverter'] = function() {
+            return new HtmlConverter(array('strip_tags' => true));
+        };
+
+        $container['objectStorage'] = function() {
+            return new FileStorage(FILES_DIR);
+        };
+
+        $container['pluginLoader'] = new Loader($container);
+
+        $container['cspRules'] = array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '* data:');
     }
 }

@@ -11,6 +11,17 @@ namespace Helper;
 class User extends \Core\Base
 {
     /**
+     * Return true if the logged user as unread notifications
+     *
+     * @access public
+     * @return boolean
+     */
+    public function hasNotifications()
+    {
+        return $this->webNotification->hasNotifications($this->userSession->getId());
+    }
+
+    /**
      * Get initials from a user
      *
      * @access public
@@ -99,7 +110,7 @@ class User extends \Core\Base
             return true;
         }
 
-        return $this->memoryCache->proxy('acl', 'handleProjectAdminPermissions', $project_id);
+        return $this->memoryCache->proxy($this->container['acl'], 'handleProjectAdminPermissions', $project_id);
     }
 
     /**
@@ -114,7 +125,7 @@ class User extends \Core\Base
             return true;
         }
 
-        return $this->memoryCache->proxy('acl', 'handleProjectManagerPermissions', $project_id);
+        return $this->memoryCache->proxy($this->container['acl'], 'handleProjectManagerPermissions', $project_id);
     }
 
     /**

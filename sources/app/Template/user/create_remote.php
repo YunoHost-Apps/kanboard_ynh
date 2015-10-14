@@ -21,13 +21,13 @@
             <?= $this->form->email('email', $values, $errors) ?><br/>
 
             <?= $this->form->label(t('Google Id'), 'google_id') ?>
-            <?= $this->form->password('google_id', $values, $errors) ?><br/>
+            <?= $this->form->text('google_id', $values, $errors) ?><br/>
 
             <?= $this->form->label(t('Github Id'), 'github_id') ?>
-            <?= $this->form->password('github_id', $values, $errors) ?><br/>
+            <?= $this->form->text('github_id', $values, $errors) ?><br/>
 
             <?= $this->form->label(t('Gitlab Id'), 'gitlab_id') ?>
-            <?= $this->form->password('gitlab_id', $values, $errors) ?><br/>
+            <?= $this->form->text('gitlab_id', $values, $errors) ?><br/>
         </div>
 
         <div class="form-column">
@@ -40,7 +40,7 @@
             <?= $this->form->label(t('Language'), 'language') ?>
             <?= $this->form->select('language', $languages, $values, $errors) ?><br/>
 
-            <?= $this->form->checkbox('notifications_enabled', t('Enable notifications'), 1, isset($values['notifications_enabled']) && $values['notifications_enabled'] == 1 ? true : false) ?>
+            <?= $this->form->checkbox('notifications_enabled', t('Enable email notifications'), 1, isset($values['notifications_enabled']) && $values['notifications_enabled'] == 1 ? true : false) ?>
             <?= $this->form->checkbox('is_admin', t('Administrator'), 1, isset($values['is_admin']) && $values['is_admin'] == 1 ? true : false) ?>
             <?= $this->form->checkbox('is_project_admin', t('Project Administrator'), 1, isset($values['is_project_admin']) && $values['is_project_admin'] == 1 ? true : false) ?>
             <?= $this->form->checkbox('disable_login_form', t('Disallow login form'), 1, isset($values['disable_login_form']) && $values['disable_login_form'] == 1) ?>

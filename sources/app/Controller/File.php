@@ -2,6 +2,8 @@
 
 namespace Controller;
 
+use Core\ObjectStorage\ObjectStorageException;
+
 /**
  * File controller
  *
@@ -60,7 +62,7 @@ class File extends Base
     {
         $task = $this->getTask();
 
-        if (! $this->file->upload($task['project_id'], $task['id'], 'files')) {
+        if (! $this->file->uploadFiles($task['project_id'], $task['id'], 'files')) {
             $this->session->flashError(t('Unable to upload the file.'));
         }
 
@@ -74,16 +76,21 @@ class File extends Base
      */
     public function download()
     {
-        $task = $this->getTask();
-        $file = $this->file->getById($this->request->getIntegerParam('file_id'));
-        $filename = FILES_DIR.$file['path'];
+        try {
 
-        if ($file['task_id'] == $task['id'] && file_exists($filename)) {
+            $task = $this->getTask();
+            $file = $this->file->getById($this->request->getIntegerParam('file_id'));
+
+            if ($file['task_id'] != $task['id']) {
+                $this->response->redirect($this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])));
+            }
+
             $this->response->forceDownload($file['name']);
-            $this->response->binary(file_get_contents($filename));
+            $this->objectStorage->output($file['path']);
         }
-
-        $this->response->redirect($this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])));
+        catch (ObjectStorageException $e) {
+            $this->logger->error($e->getMessage());
+        }
     }
 
     /**
@@ -111,17 +118,20 @@ class File extends Base
      */
     public function image()
     {
-        $task = $this->getTask();
-        $file = $this->file->getById($this->request->getIntegerParam('file_id'));
-        $filename = FILES_DIR.$file['path'];
+        try {
 
-        if ($file['task_id'] == $task['id'] && file_exists($filename)) {
-            $metadata = getimagesize($filename);
+            $task = $this->getTask();
+            $file = $this->file->getById($this->request->getIntegerParam('file_id'));
 
-            if (isset($metadata['mime'])) {
-                $this->response->contentType($metadata['mime']);
-                readfile($filename);
+            if ($file['task_id'] != $task['id']) {
+                $this->response->redirect($this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])));
             }
+
+            $this->response->contentType($this->file->getImageMimeType($file['name']));
+            $this->objectStorage->output($file['path']);
+        }
+        catch (ObjectStorageException $e) {
+            $this->logger->error($e->getMessage());
         }
     }
 
@@ -132,18 +142,20 @@ class File extends Base
      */
     public function thumbnail()
     {
-        $task = $this->getTask();
-        $file = $this->file->getById($this->request->getIntegerParam('file_id'));
-        $filename = FILES_DIR.$file['path'];
+        try {
 
-        if ($file['task_id'] == $task['id'] && file_exists($filename)) {
+            $task = $this->getTask();
+            $file = $this->file->getById($this->request->getIntegerParam('file_id'));
+
+            if ($file['task_id'] != $task['id']) {
+                $this->response->redirect($this->helper->url->to('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])));
+            }
 
             $this->response->contentType('image/jpeg');
-            $this->file->generateThumbnail(
-                $filename,
-                $this->request->getIntegerParam('width'),
-                $this->request->getIntegerParam('height')
-            );
+            $this->objectStorage->output($this->file->getThumbnailPath($file['path']));
+        }
+        catch (ObjectStorageException $e) {
+            $this->logger->error($e->getMessage());
         }
     }
 

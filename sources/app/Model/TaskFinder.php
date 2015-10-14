@@ -93,7 +93,7 @@ class TaskFinder extends Base
                 '(SELECT count(*) FROM '.Subtask::TABLE.' WHERE '.Subtask::TABLE.'.task_id=tasks.id) AS nb_subtasks',
                 '(SELECT count(*) FROM '.Subtask::TABLE.' WHERE '.Subtask::TABLE.'.task_id=tasks.id AND status=2) AS nb_completed_subtasks',
                 '(SELECT count(*) FROM '.TaskLink::TABLE.' WHERE '.TaskLink::TABLE.'.task_id = tasks.id) AS nb_links',
-                '(SELECT 1 FROM '.TaskLink::TABLE.' WHERE '.TaskLink::TABLE.'.task_id = tasks.id AND '.TaskLink::TABLE.'.link_id = 9) AS is_milestone',
+                '(SELECT DISTINCT 1 FROM '.TaskLink::TABLE.' WHERE '.TaskLink::TABLE.'.task_id = tasks.id AND '.TaskLink::TABLE.'.link_id = 9) AS is_milestone',
                 'tasks.id',
                 'tasks.reference',
                 'tasks.title',
@@ -177,14 +177,14 @@ class TaskFinder extends Base
     }
 
     /**
-     * Get a list of overdue tasks for all projects
+     * Get overdue tasks query
      *
      * @access public
-     * @return array
+     * @return \PicoDb\Table
      */
-    public function getOverdueTasks()
+    public function getOverdueTasksQuery()
     {
-        $tasks = $this->db->table(Task::TABLE)
+        return $this->db->table(Task::TABLE)
                     ->columns(
                         Task::TABLE.'.id',
                         Task::TABLE.'.title',
@@ -201,10 +201,42 @@ class TaskFinder extends Base
                     ->eq(Project::TABLE.'.is_active', 1)
                     ->eq(Task::TABLE.'.is_active', 1)
                     ->neq(Task::TABLE.'.date_due', 0)
-                    ->lte(Task::TABLE.'.date_due', mktime(23, 59, 59))
-                    ->findAll();
+                    ->lte(Task::TABLE.'.date_due', mktime(23, 59, 59));
+    }
 
-        return $tasks;
+    /**
+     * Get a list of overdue tasks for all projects
+     *
+     * @access public
+     * @return array
+     */
+    public function getOverdueTasks()
+    {
+        return $this->getOverdueTasksQuery()->findAll();
+    }
+
+     /**
+     * Get a list of overdue tasks by project
+     *
+     * @access public
+     * @param  integer $project_id
+     * @return array
+     */
+    public function getOverdueTasksByProject($project_id)
+    {
+        return $this->getOverdueTasksQuery()->eq(Task::TABLE.'.project_id', $project_id)->findAll();
+    }
+
+     /**
+     * Get a list of overdue tasks by user
+     *
+     * @access public
+     * @param  integer $user_id
+     * @return array
+     */
+    public function getOverdueTasksByUser($user_id)
+    {
+        return $this->getOverdueTasksQuery()->eq(Task::TABLE.'.owner_id', $user_id)->findAll();
     }
 
     /**

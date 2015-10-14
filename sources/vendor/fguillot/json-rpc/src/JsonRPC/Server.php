@@ -463,6 +463,16 @@ class Server
         catch (AccessDeniedException $e) {
             $this->sendForbiddenResponse();
         }
+        catch (ResponseException $e) {
+            return $this->getResponse(array(
+                'error' => array(
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                    'data' => $e->getData(),
+                )),
+                $this->payload
+            );
+        }
         catch (Exception $e) {
 
             foreach ($this->exceptions as $class) {

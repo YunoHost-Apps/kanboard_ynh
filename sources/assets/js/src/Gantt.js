@@ -71,7 +71,7 @@ Gantt.prototype.renderVerticalHeader = function() {
             .append("&nbsp;");
 
         if (this.data[i].type == "task") {
-            content.append(jQuery("<a>", {"href": this.data[i].link, "target": "_blank"}).append(this.data[i].title));
+            content.append(jQuery("<a>", {"href": this.data[i].link, "target": "_blank", "title": this.data[i].title}).append(this.data[i].title));
         }
         else {
             content
@@ -198,6 +198,19 @@ Gantt.prototype.addBlocks = function(slider, start) {
 
         block.data("record", this.data[i]);
         this.setBarColor(block, this.data[i]);
+
+        block.append(jQuery("<div>", {
+            "css": {
+                "z-index": 0,
+                "position": "absolute",
+                "top": 0,
+                "bottom": 0,
+                "background-color": series.color.border,
+                "width": series.progress,
+                "opacity": 0.4
+            }
+        }));
+
         jQuery(rows[rowIdx]).append(block);
         rowIdx = rowIdx + 1;
     }

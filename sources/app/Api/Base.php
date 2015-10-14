@@ -19,6 +19,8 @@ abstract class Base extends \Core\Base
         'getMyActivityStream',
         'createMyPrivateProject',
         'getMyProjectsList',
+        'getMyProjects',
+        'getMyOverdueTasks',
     );
 
     private $both_allowed_procedures = array(
@@ -37,6 +39,8 @@ abstract class Base extends \Core\Base
         'createTask',
         'updateTask',
         'getBoard',
+        'getProjectActivity',
+        'getOverdueTasksByProject',
     );
 
     public function checkProcedurePermission($is_user, $procedure)
@@ -50,6 +54,8 @@ abstract class Base extends \Core\Base
         else if (! $is_user && ! $is_both_procedure && $is_user_procedure) {
             throw new AccessDeniedException('Permission denied');
         }
+
+        $this->logger->debug('API call: '.$procedure);
     }
 
     public function checkProjectPermission($project_id)

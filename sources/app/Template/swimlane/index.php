@@ -14,7 +14,27 @@
     <?= $this->form->hidden('project_id', $values) ?>
 
     <?= $this->form->label(t('Name'), 'name') ?>
-    <?= $this->form->text('name', $values, $errors, array('autofocus', 'required', 'maxlength="50"')) ?>
+    <?= $this->form->text('name', $values, $errors, array('required', 'maxlength="50"')) ?>
+
+    <?= $this->form->label(t('Description'), 'description') ?>
+
+    <div class="form-tabs">
+        <div class="write-area">
+          <?= $this->form->textarea('description', $values, $errors) ?>
+        </div>
+        <div class="preview-area">
+            <div class="markdown"></div>
+        </div>
+        <ul class="form-tabs-nav">
+            <li class="form-tab form-tab-selected">
+                <i class="fa fa-pencil-square-o fa-fw"></i><a id="markdown-write" href="#"><?= t('Write') ?></a>
+            </li>
+            <li class="form-tab">
+                <a id="markdown-preview" href="#"><i class="fa fa-eye fa-fw"></i><?= t('Preview') ?></a>
+            </li>
+        </ul>
+    </div>
+    <div class="form-help"><?= $this->url->doc(t('Write your text in Markdown'), 'syntax-guide') ?></div>
 
     <div class="form-actions">
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue"/>
@@ -30,9 +50,11 @@
     <?= $this->form->hidden('id', $default_swimlane) ?>
 
     <?= $this->form->label(t('Rename'), 'default_swimlane') ?>
-    <?= $this->form->text('default_swimlane', $default_swimlane, array(), array('autofocus', 'required', 'maxlength="50"')) ?><br/>
+    <?= $this->form->text('default_swimlane', $default_swimlane, array(), array('required', 'maxlength="50"')) ?><br/>
 
-    <?= $this->form->checkbox('show_default_swimlane', t('Show default swimlane'), 1, isset($default_swimlane['show_default_swimlane']) && $default_swimlane['show_default_swimlane'] == 1) ?>
+    <?php if (! empty($active_swimlanes)): ?>
+        <?= $this->form->checkbox('show_default_swimlane', t('Show default swimlane'), 1, isset($default_swimlane['show_default_swimlane']) && $default_swimlane['show_default_swimlane'] == 1) ?>
+    <?php endif ?>
 
     <div class="form-actions">
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue"/>

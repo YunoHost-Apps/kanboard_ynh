@@ -80,7 +80,7 @@ class Router extends Base
             $path = substr($path, 0, - strlen($query_string) - 1);
         }
 
-        if ($path{0} === '/') {
+        if (! empty($path) && $path{0} === '/') {
             $path = substr($path, 1);
         }
 
@@ -206,56 +206,22 @@ class Router extends Base
      * @access public
      * @param  string  $uri
      * @param  string  $query_string
-     * @return boolean
      */
     public function dispatch($uri, $query_string = '')
     {
         if (! empty($_GET['controller']) && ! empty($_GET['action'])) {
-            $controller = $this->sanitize($_GET['controller'], 'app');
-            $action = $this->sanitize($_GET['action'], 'index');
+            $this->controller = $this->sanitize($_GET['controller'], 'app');
+            $this->action = $this->sanitize($_GET['action'], 'index');
+            $plugin = ! empty($_GET['plugin']) ? $this->sanitize($_GET['plugin'], '') : '';
         }
         else {
-            list($controller, $action) = $this->findRoute($this->getPath($uri, $query_string));
+            list($this->controller, $this->action) = $this->findRoute($this->getPath($uri, $query_string)); // TODO: add plugin for routes
+            $plugin = '';
         }
+        $class = empty($plugin) ? '\Controller\\'.ucfirst($this->controller) : '\Plugin\\'.ucfirst($plugin).'\Controller\\'.ucfirst($this->controller);
 
-        return $this->load(
-            __DIR__.'/../Controller/'.ucfirst($controller).'.php',
-            $controller,
-            '\Controller\\'.ucfirst($controller),
-            $action
-        );
-    }
-
-    /**
-     * Load a controller and execute the action
-     *
-     * @access private
-     * @param  string $filename
-     * @param  string $controller
-     * @param  string $class
-     * @param  string $method
-     * @return bool
-     */
-    private function load($filename, $controller, $class, $method)
-    {
-        if (file_exists($filename)) {
-
-            require $filename;
-
-            if (! method_exists($class, $method)) {
-                return false;
-            }
-
-            $this->action = $method;
-            $this->controller = $controller;
-
-            $instance = new $class($this->container);
-            $instance->beforeAction($controller, $method);
-            $instance->$method();
-
-            return true;
-        }
-
-        return false;
+        $instance = new $class($this->container);
+        $instance->beforeAction($this->controller, $this->action);
+        $instance->{$this->action}();
     }
 }

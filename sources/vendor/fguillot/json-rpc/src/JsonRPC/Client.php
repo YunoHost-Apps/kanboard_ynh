@@ -3,9 +3,9 @@
 namespace JsonRPC;
 
 use Exception;
-use RuntimeException;
 use BadFunctionCallException;
 use InvalidArgumentException;
+use RuntimeException;
 
 class ConnectionFailureException extends Exception {};
 class ServerErrorException extends Exception {};
@@ -255,16 +255,26 @@ class Client
      * @throws BadFunctionCallException
      * @throws InvalidArgumentException
      * @throws RuntimeException
+     * @throws ResponseException
      */
     public function handleRpcErrors(array $error)
     {
         switch ($error['code']) {
+            case -32700:
+                throw new RuntimeException('Parse error: '. $error['message']);
+            case -32600:
+                throw new RuntimeException('Invalid Request: '. $error['message']);
             case -32601:
                 throw new BadFunctionCallException('Procedure not found: '. $error['message']);
             case -32602:
                 throw new InvalidArgumentException('Invalid arguments: '. $error['message']);
             default:
-                throw new RuntimeException('Invalid request/response: '. $error['message'], $error['code']);
+                throw new ResponseException(
+                    $error['message'],
+                    $error['code'],
+                    null,
+                    isset($error['data']) ? $error['data'] : null
+                );
         }
     }
 

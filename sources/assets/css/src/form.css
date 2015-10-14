@@ -153,11 +153,8 @@ input.form-input-large {
 
 .form-column {
     float: left;
-    padding-right: 50px;
-}
-
-.form-column:first-child {
-    padding-left: 0;
+    margin-right: 3%;
+    max-width: 47%;
 }
 
 .form-column ul {
@@ -176,10 +173,6 @@ input.form-input-large {
     line-height: 25px;
 }
 
-.form-checkbox-group label {
-    display: inline;
-}
-
 /* preview tabs */
 label + .form-tabs {
     margin-top: 10px;
@@ -190,8 +183,9 @@ label + .form-tabs {
     max-width: 800px;
 }
 
-.form-tabs-nav {
+ul.form-tabs-nav {
     margin-bottom: 8px;
+    margin-top: 0;
 }
 
 .form-tabs-nav li {

@@ -3,7 +3,6 @@
 namespace Controller;
 
 use Model\Subtask as SubtaskModel;
-use Model\Task as TaskModel;
 
 /**
  * Application controller
@@ -189,6 +188,22 @@ class App extends Base
     }
 
     /**
+     * My notifications
+     *
+     * @access public
+     */
+    public function notifications()
+    {
+        $user = $this->getUser();
+
+        $this->response->html($this->layout('app/notifications', array(
+            'title' => t('My notifications'),
+            'notifications' => $this->webNotification->getAll($user['id']),
+            'user' => $user,
+        )));
+    }
+
+    /**
      * Render Markdown text and reply with the HTML Code
      *
      * @access public
@@ -213,7 +228,7 @@ class App extends Base
     {
         $search = $this->request->getStringParam('term');
 
-        $filter = $this->taskFilter
+        $filter = $this->taskFilterAutoCompleteFormatter
             ->create()
             ->filterByProjects($this->projectPermission->getActiveMemberProjectIds($this->userSession->getId()))
             ->excludeTasks(array($this->request->getIntegerParam('exclude_task_id')));
@@ -226,6 +241,6 @@ class App extends Base
             $filter->filterByTitle($search);
         }
 
-        $this->response->json($filter->toAutoCompletion());
+        $this->response->json($filter->format());
     }
 }

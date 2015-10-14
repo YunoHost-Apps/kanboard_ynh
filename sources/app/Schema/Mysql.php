@@ -6,7 +6,96 @@ use PDO;
 use Core\Security;
 use Model\Link;
 
-const VERSION = 85;
+const VERSION = 90;
+
+function version_90($pdo)
+{
+    $pdo->exec("ALTER TABLE tasks MODIFY date_due BIGINT");
+    $pdo->exec("ALTER TABLE tasks MODIFY date_creation BIGINT");
+    $pdo->exec("ALTER TABLE tasks MODIFY date_completed BIGINT");
+    $pdo->exec("ALTER TABLE tasks MODIFY date_started BIGINT");
+    $pdo->exec("ALTER TABLE tasks MODIFY date_moved BIGINT");
+    $pdo->exec("ALTER TABLE comments MODIFY date_creation BIGINT");
+    $pdo->exec("ALTER TABLE last_logins MODIFY date_creation BIGINT");
+    $pdo->exec("ALTER TABLE project_activities MODIFY date_creation BIGINT");
+    $pdo->exec("ALTER TABLE projects MODIFY last_modified BIGINT");
+    $pdo->exec("ALTER TABLE remember_me MODIFY date_creation BIGINT");
+    $pdo->exec('ALTER TABLE files MODIFY `date` BIGINT');
+    $pdo->exec('ALTER TABLE transitions MODIFY `date` BIGINT');
+    $pdo->exec('ALTER TABLE subtask_time_tracking MODIFY `start` BIGINT');
+    $pdo->exec('ALTER TABLE subtask_time_tracking MODIFY `end` BIGINT');
+    $pdo->exec('ALTER TABLE users MODIFY `lock_expiration_date` BIGINT');
+}
+
+function version_89($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE user_has_unread_notifications (
+            id INT NOT NULL AUTO_INCREMENT,
+            user_id INT NOT NULL,
+            date_creation BIGINT NOT NULL,
+            event_name VARCHAR(50) NOT NULL,
+            event_data TEXT NOT NULL,
+            PRIMARY KEY(id),
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec("
+        CREATE TABLE user_has_notification_types (
+            id INT NOT NULL AUTO_INCREMENT,
+            user_id INT NOT NULL,
+            notification_type VARCHAR(50),
+            PRIMARY KEY(id),
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec('CREATE UNIQUE INDEX user_has_notification_types_user_idx ON user_has_notification_types(user_id, notification_type)');
+
+    // Migrate people who have notification enabled before
+    $rq = $pdo->prepare('SELECT id FROM users WHERE notifications_enabled=1');
+    $rq->execute();
+    $user_ids = $rq->fetchAll(PDO::FETCH_COLUMN, 0);
+
+    foreach ($user_ids as $user_id) {
+        $rq = $pdo->prepare('INSERT INTO user_has_notification_types (user_id, notification_type) VALUES (?, ?)');
+        $rq->execute(array($user_id, 'email'));
+    }
+}
+
+function version_88($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE custom_filters (
+            id INT NOT NULL AUTO_INCREMENT,
+            filter VARCHAR(100) NOT NULL,
+            project_id INT NOT NULL,
+            user_id INT NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            is_shared TINYINT(1) DEFAULT 0,
+            PRIMARY KEY(id),
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+}
+
+function version_87($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE plugin_schema_versions (
+            plugin VARCHAR(80) NOT NULL,
+            version INT NOT NULL DEFAULT 0,
+            PRIMARY KEY(plugin)
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+}
+
+function version_86($pdo)
+{
+    $pdo->exec("ALTER TABLE swimlanes ADD COLUMN description TEXT");
+}
 
 function version_85($pdo)
 {
@@ -150,7 +239,6 @@ function version_69($pdo)
     $result = $rq->fetch(PDO::FETCH_ASSOC);
 
     $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
-    $rq->execute(array('calendar_user_subtasks_forecast', isset($result['subtask_forecast']) && $result['subtask_forecast'] == 1 ? 1 : 0));
     $rq->execute(array('calendar_user_subtasks_time_tracking', 0));
     $rq->execute(array('calendar_user_tasks', 'date_started'));
     $rq->execute(array('calendar_project_tasks', 'date_started'));
@@ -304,78 +392,6 @@ function version_54($pdo)
 function version_53($pdo)
 {
     $pdo->exec("ALTER TABLE subtask_time_tracking ADD COLUMN time_spent FLOAT DEFAULT 0");
-}
-
-function version_52($pdo)
-{
-    $pdo->exec('CREATE TABLE budget_lines (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `project_id` INT NOT NULL,
-        `amount` FLOAT NOT NULL,
-        `date` VARCHAR(10) NOT NULL,
-        `comment` TEXT,
-        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8');
-}
-
-function version_51($pdo)
-{
-    $pdo->exec('CREATE TABLE timetable_day (
-        id INT NOT NULL AUTO_INCREMENT,
-        user_id INT NOT NULL,
-        start VARCHAR(5) NOT NULL,
-        end VARCHAR(5) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8');
-
-    $pdo->exec('CREATE TABLE timetable_week (
-        id INT NOT NULL AUTO_INCREMENT,
-        user_id INTEGER NOT NULL,
-        day INT NOT NULL,
-        start VARCHAR(5) NOT NULL,
-        end VARCHAR(5) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8');
-
-    $pdo->exec('CREATE TABLE timetable_off (
-        id INT NOT NULL AUTO_INCREMENT,
-        user_id INT NOT NULL,
-        date VARCHAR(10) NOT NULL,
-        all_day TINYINT(1) DEFAULT 0,
-        start VARCHAR(5) DEFAULT 0,
-        end VARCHAR(5) DEFAULT 0,
-        comment TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8');
-
-    $pdo->exec('CREATE TABLE timetable_extra (
-        id INT NOT NULL AUTO_INCREMENT,
-        user_id INT NOT NULL,
-        date VARCHAR(10) NOT NULL,
-        all_day TINYINT(1) DEFAULT 0,
-        start VARCHAR(5) DEFAULT 0,
-        end VARCHAR(5) DEFAULT 0,
-        comment TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8');
-}
-
-function version_50($pdo)
-{
-    $pdo->exec("CREATE TABLE hourly_rates (
-        id INT NOT NULL AUTO_INCREMENT,
-        user_id INT NOT NULL,
-        rate FLOAT DEFAULT 0,
-        date_effective INTEGER NOT NULL,
-        currency CHAR(3) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY(id)
-    ) ENGINE=InnoDB CHARSET=utf8");
 }
 
 function version_49($pdo)

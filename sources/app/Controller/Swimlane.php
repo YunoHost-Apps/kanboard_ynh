@@ -59,13 +59,12 @@ class Swimlane extends Base
     public function save()
     {
         $project = $this->getProject();
-
         $values = $this->request->getValues();
         list($valid, $errors) = $this->swimlane->validateCreation($values);
 
         if ($valid) {
 
-            if ($this->swimlane->create($project['id'], $values['name'])) {
+            if ($this->swimlane->create($values)) {
                 $this->session->flash(t('Your swimlane have been created successfully.'));
                 $this->response->redirect($this->helper->url->to('swimlane', 'index', array('project_id' => $project['id'])));
             }
@@ -134,8 +133,7 @@ class Swimlane extends Base
         list($valid, $errors) = $this->swimlane->validateModification($values);
 
         if ($valid) {
-
-            if ($this->swimlane->rename($values['id'], $values['name'])) {
+            if ($this->swimlane->update($values)) {
                 $this->session->flash(t('Swimlane updated successfully.'));
                 $this->response->redirect($this->helper->url->to('swimlane', 'index', array('project_id' => $project['id'])));
             }

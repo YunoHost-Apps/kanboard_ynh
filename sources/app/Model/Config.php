@@ -75,6 +75,7 @@ class Config extends Base
     {
         // Sorted by value
         $languages = array(
+            'id_ID' => 'Bahasa Indonesia',
             'cs_CZ' => 'Čeština',
             'da_DK' => 'Dansk',
             'de_DE' => 'Deutsch',
@@ -135,6 +136,7 @@ class Config extends Base
             'zh_CN' => 'zh-cn',
             'ja_JP' => 'ja',
             'th_TH' => 'th',
+            'id_ID' => 'id'
         );
 
         $lang = $this->getCurrentLanguage();
@@ -205,6 +207,11 @@ class Config extends Base
     public function save(array $values)
     {
         foreach ($values as $option => $value) {
+
+            // Be sure that a trailing slash is there for the url
+            if ($option === 'application_url' && ! empty($value) && substr($value, -1) !== '/') {
+                $value .= '/';
+            }
 
             $result = $this->db->table(self::TABLE)->eq('option', $option)->update(array('value' => $value));
 

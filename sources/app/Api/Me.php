@@ -33,7 +33,8 @@ class Me extends Base
 
     public function getMyActivityStream()
     {
-        return $this->projectActivity->getProjects($this->projectPermission->getActiveMemberProjectIds($this->userSession->getId()), 100);
+        $project_ids = $this->projectPermission->getActiveMemberProjectIds($this->userSession->getId());
+        return $this->projectActivity->getProjects($project_ids, 100);
     }
 
     public function createMyPrivateProject($name, $description = null)
@@ -51,5 +52,18 @@ class Me extends Base
     public function getMyProjectsList()
     {
         return $this->projectPermission->getMemberProjects($this->userSession->getId());
+    }
+
+    public function getMyOverdueTasks()
+    {
+        return $this->taskFinder->getOverdueTasksByUser($this->userSession->getId());
+    }
+
+    public function getMyProjects()
+    {
+        $project_ids = $this->projectPermission->getActiveMemberProjectIds($this->userSession->getId());
+        $projects = $this->project->getAllByIds($project_ids);
+
+        return $this->formatProjects($projects);
     }
 }

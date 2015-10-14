@@ -8,6 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     'Symfony\\Component\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher'),
     'Symfony\\Component\\Console\\' => array($vendorDir . '/symfony/console'),
+    'Plugin\\' => array($baseDir . '/plugins'),
+    'League\\HTMLToMarkdown\\' => array($vendorDir . '/league/html-to-markdown/src'),
     'Gregwar\\Captcha\\' => array($vendorDir . '/gregwar/captcha'),
     'Fabiang\\Xmpp\\' => array($vendorDir . '/fabiang/xmpp/src'),
     'Base32\\' => array($vendorDir . '/christian-riesen/base32/src'),

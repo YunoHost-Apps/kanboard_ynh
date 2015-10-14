@@ -6,7 +6,90 @@ use PDO;
 use Core\Security;
 use Model\Link;
 
-const VERSION = 65;
+const VERSION = 70;
+
+function version_70($pdo)
+{
+    $pdo->exec("ALTER TABLE tasks ALTER COLUMN date_due TYPE BIGINT");
+    $pdo->exec("ALTER TABLE tasks ALTER COLUMN date_creation TYPE BIGINT");
+    $pdo->exec("ALTER TABLE tasks ALTER COLUMN date_completed TYPE BIGINT");
+    $pdo->exec("ALTER TABLE tasks ALTER COLUMN date_started TYPE BIGINT");
+    $pdo->exec("ALTER TABLE tasks ALTER COLUMN date_moved TYPE BIGINT");
+    $pdo->exec("ALTER TABLE comments ALTER COLUMN date_creation TYPE BIGINT");
+    $pdo->exec("ALTER TABLE last_logins ALTER COLUMN date_creation TYPE BIGINT");
+    $pdo->exec("ALTER TABLE project_activities ALTER COLUMN date_creation TYPE BIGINT");
+    $pdo->exec("ALTER TABLE projects ALTER COLUMN last_modified TYPE BIGINT");
+    $pdo->exec("ALTER TABLE remember_me ALTER COLUMN date_creation TYPE BIGINT");
+    $pdo->exec('ALTER TABLE files ALTER COLUMN "date" TYPE BIGINT');
+    $pdo->exec('ALTER TABLE transitions ALTER COLUMN "date" TYPE BIGINT');
+    $pdo->exec('ALTER TABLE subtask_time_tracking ALTER COLUMN "start" TYPE BIGINT');
+    $pdo->exec('ALTER TABLE subtask_time_tracking ALTER COLUMN "end" TYPE BIGINT');
+    $pdo->exec('ALTER TABLE users ALTER COLUMN "lock_expiration_date" TYPE BIGINT');
+}
+
+function version_69($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE user_has_unread_notifications (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            date_creation BIGINT NOT NULL,
+            event_name VARCHAR(50) NOT NULL,
+            event_data TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+
+    $pdo->exec("
+        CREATE TABLE user_has_notification_types (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            notification_type VARCHAR(50),
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+
+    $pdo->exec('CREATE UNIQUE INDEX user_has_notification_types_user_idx ON user_has_notification_types(user_id, notification_type)');
+
+    // Migrate people who have notification enabled before
+    $rq = $pdo->prepare("SELECT id FROM users WHERE notifications_enabled='1'");
+    $rq->execute();
+    $user_ids = $rq->fetchAll(PDO::FETCH_COLUMN, 0);
+
+    foreach ($user_ids as $user_id) {
+        $rq = $pdo->prepare('INSERT INTO user_has_notification_types (user_id, notification_type) VALUES (?, ?)');
+        $rq->execute(array($user_id, 'email'));
+    }
+}
+
+function version_68($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE custom_filters (
+            id SERIAL PRIMARY KEY,
+            filter VARCHAR(100) NOT NULL,
+            project_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            is_shared BOOLEAN DEFAULT '0'
+        )
+    ");
+}
+
+function version_67($pdo)
+{
+    $pdo->exec("
+        CREATE TABLE plugin_schema_versions (
+            plugin VARCHAR(80) NOT NULL PRIMARY KEY,
+            version INTEGER NOT NULL DEFAULT 0
+        )
+    ");
+}
+
+function version_66($pdo)
+{
+    $pdo->exec("ALTER TABLE swimlanes ADD COLUMN description TEXT");
+}
 
 function version_65($pdo)
 {
@@ -146,7 +229,6 @@ function version_50($pdo)
     $result = $rq->fetch(PDO::FETCH_ASSOC);
 
     $rq = $pdo->prepare('INSERT INTO settings VALUES (?, ?)');
-    $rq->execute(array('calendar_user_subtasks_forecast', isset($result['subtask_forecast']) && $result['subtask_forecast'] == 1 ? 1 : 0));
     $rq->execute(array('calendar_user_subtasks_time_tracking', 0));
     $rq->execute(array('calendar_user_tasks', 'date_started'));
     $rq->execute(array('calendar_project_tasks', 'date_started'));
@@ -298,72 +380,6 @@ function version_35($pdo)
 function version_34($pdo)
 {
     $pdo->exec("ALTER TABLE subtask_time_tracking ADD COLUMN time_spent REAL DEFAULT 0");
-}
-
-function version_33($pdo)
-{
-    $pdo->exec('CREATE TABLE budget_lines (
-        "id" SERIAL PRIMARY KEY,
-        "project_id" INTEGER NOT NULL,
-        "amount" REAL NOT NULL,
-        "date" VARCHAR(10) NOT NULL,
-        "comment" TEXT,
-        FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
-    )');
-}
-
-function version_32($pdo)
-{
-    $pdo->exec('CREATE TABLE timetable_day (
-        "id" SERIAL PRIMARY KEY,
-        "user_id" INTEGER NOT NULL,
-        "start" VARCHAR(5) NOT NULL,
-        "end" VARCHAR(5) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-    )');
-
-    $pdo->exec('CREATE TABLE timetable_week (
-        "id" SERIAL PRIMARY KEY,
-        "user_id" INTEGER NOT NULL,
-        "day" INTEGER NOT NULL,
-        "start" VARCHAR(5) NOT NULL,
-        "end" VARCHAR(5) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-    )');
-
-    $pdo->exec('CREATE TABLE timetable_off (
-        "id" SERIAL PRIMARY KEY,
-        "user_id" INTEGER NOT NULL,
-        "date" VARCHAR(10) NOT NULL,
-        "all_day" BOOLEAN DEFAULT \'0\',
-        "start" VARCHAR(5) DEFAULT 0,
-        "end" VARCHAR(5) DEFAULT 0,
-        "comment" TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-    )');
-
-    $pdo->exec('CREATE TABLE timetable_extra (
-        "id" SERIAL PRIMARY KEY,
-        "user_id" INTEGER NOT NULL,
-        "date" VARCHAR(10) NOT NULL,
-        "all_day" BOOLEAN DEFAULT \'0\',
-        "start" VARCHAR(5) DEFAULT 0,
-        "end" VARCHAR(5) DEFAULT 0,
-        "comment" TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-    )');
-}
-
-function version_31($pdo)
-{
-    $pdo->exec("CREATE TABLE hourly_rates (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        rate REAL DEFAULT 0,
-        date_effective INTEGER NOT NULL,
-        currency CHAR(3) NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-    )");
 }
 
 function version_30($pdo)
