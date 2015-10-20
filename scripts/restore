@@ -15,6 +15,9 @@ sudo mysql -u $app -p$db_pwd $app < $backup_dir/$app.dmp
 sudo cp -a $backup_dir/yunohost/. /etc/yunohost/apps/$app
 domain=$(sudo yunohost app setting $app domain)
 sudo cp -a $backup_dir/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+sudo cp -a $backup_dir/php-fpm.conf /etc/php5/fpm/pool.d/$app.conf
 
-# Restart webserver
+# Reload Nginx, PHP5-FPM and regenerate SSOwat conf
+sudo service php5-fpm restart
 sudo service nginx reload
+sudo yunohost app ssowatconf

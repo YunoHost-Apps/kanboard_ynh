@@ -13,7 +13,9 @@ mysql -u root -p$root_pwd -e "DROP DATABASE $app ; DROP USER $app@localhost ;"
 
 # Remove configuration files
 sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+sudo rm -f /etc/php5/fpm/pool.d/$app.conf
 
 # Restart services
+sudo service php5-fpm restart
 sudo service nginx reload
 sudo yunohost app ssowatconf

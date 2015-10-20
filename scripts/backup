@@ -18,3 +18,4 @@ sudo mysqldump -u $app -p$db_pwd $app > $backup_dir/$app.dmp
 sudo cp -a /etc/yunohost/apps/$app/. $backup_dir/yunohost
 domain=$(sudo yunohost app setting $app domain)
 sudo cp -a /etc/nginx/conf.d/$domain.d/$app.conf $backup_dir/nginx.conf
+sudo cp -a /etc/php5/fpm/pool.d/$app.conf $backup_dir/php-fpm.conf
