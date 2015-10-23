@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -e
 app=kanboard
 
 # The parameter $1 is the backup directory location
