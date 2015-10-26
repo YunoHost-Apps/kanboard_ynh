@@ -1,8 +1,8 @@
 <?php
 
-namespace Action;
+namespace Kanboard\Action;
 
-use Model\Task;
+use Kanboard\Model\Task;
 
 /**
  * Email a task to someone
@@ -67,7 +67,6 @@ class TaskEmail extends Base
         $user = $this->user->getById($this->getParam('user_id'));
 
         if (! empty($user['email'])) {
-
             $task = $this->taskFinder->getDetails($data['task_id']);
 
             $this->emailClient->send(

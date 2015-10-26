@@ -1,6 +1,6 @@
 <?php
 
-namespace Core;
+namespace Kanboard\Core;
 
 use Pimple\Container;
 
@@ -12,27 +12,6 @@ use Pimple\Container;
  */
 class Tool
 {
-    /**
-     * Write a CSV file
-     *
-     * @static
-     * @access public
-     * @param  array    $rows       Array of rows
-     * @param  string   $filename   Output filename
-     */
-    public static function csv(array $rows, $filename = 'php://output')
-    {
-        $fp = fopen($filename, 'w');
-
-        if (is_resource($fp)) {
-            foreach ($rows as $fields) {
-                fputcsv($fp, $fields);
-            }
-
-            fclose($fp);
-        }
-    }
-
     /**
      * Get the mailbox hash from an email address
      *
@@ -47,8 +26,8 @@ class Tool
             return '';
         }
 
-        list($local_part,) = explode('@', $email);
-        list(,$identifier) = explode('+', $local_part);
+        list($local_part, ) = explode('@', $email);
+        list(, $identifier) = explode('+', $local_part);
 
         return $identifier;
     }
@@ -65,7 +44,7 @@ class Tool
     {
         foreach ($namespaces as $namespace => $classes) {
             foreach ($classes as $name) {
-                $class = '\\'.$namespace.'\\'.$name;
+                $class = '\\Kanboard\\'.$namespace.'\\'.$name;
                 $container[lcfirst($name)] = function ($c) use ($class) {
                     return new $class($c);
                 };
@@ -104,14 +83,11 @@ class Tool
             $dst_width = $resize_width;
             $dst_height = floor($src_height * ($resize_width / $src_width));
             $dst_image = imagecreatetruecolor($dst_width, $dst_height);
-        }
-        elseif ($resize_width == 0 && $resize_height > 0) {
+        } elseif ($resize_width == 0 && $resize_height > 0) {
             $dst_width = floor($src_width * ($resize_height / $src_height));
             $dst_height = $resize_height;
             $dst_image = imagecreatetruecolor($dst_width, $dst_height);
-        }
-        else {
-
+        } else {
             $src_ratio = $src_width / $src_height;
             $resize_ratio = $resize_width / $resize_height;
 
@@ -120,8 +96,7 @@ class Tool
                 $dst_height = floor($src_height * ($resize_width / $src_width));
 
                 $dst_y = ($dst_height - $resize_height) / 2 * (-1);
-            }
-            else {
+            } else {
                 $dst_width = floor($src_width * ($resize_height / $src_height));
                 $dst_height = $resize_height;
 

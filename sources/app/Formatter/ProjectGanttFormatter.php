@@ -1,8 +1,8 @@
 <?php
 
-namespace Formatter;
+namespace Kanboard\Formatter;
 
-use Model\Project;
+use Kanboard\Model\Project;
 
 /**
  * Gantt chart formatter for projects
@@ -31,9 +31,7 @@ class ProjectGanttFormatter extends Project implements FormatterInterface
     {
         if (empty($project_ids)) {
             $this->projects = array();
-        }
-        else {
-
+        } else {
             $this->projects = $this->db
                 ->table(self::TABLE)
                 ->asc('start_date')

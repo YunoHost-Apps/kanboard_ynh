@@ -1,9 +1,8 @@
 <?php
 
-namespace Integration;
+namespace Kanboard\Integration;
 
-use Event\GenericEvent;
-use Model\Task;
+use Kanboard\Event\GenericEvent;
 
 /**
  * Gitlab Webhook
@@ -11,7 +10,7 @@ use Model\Task;
  * @package  integration
  * @author   Frederic Guillot
  */
-class GitlabWebhook extends \Core\Base
+class GitlabWebhook extends \Kanboard\Core\Base
 {
     /**
      * Events
@@ -239,7 +238,6 @@ class GitlabWebhook extends \Core\Base
         $task = $this->taskFinder->getByReference($this->project_id, $payload['issue']['id']);
 
         if (! empty($task)) {
-
             $user = $this->user->getByUsername($payload['user']['username']);
 
             if (! empty($user) && ! $this->projectPermission->isMember($this->project_id, $user['id'])) {

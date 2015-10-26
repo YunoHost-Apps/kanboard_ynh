@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
 /**
  * Task Analytic
@@ -52,7 +52,6 @@ class TaskAnalytic extends Base
         $sums = $this->transition->getTimeSpentByTask($task['id']);
 
         foreach ($columns as $column_id => $column_title) {
-
             $time_spent = isset($sums[$column_id]) ? $sums[$column_id] : 0;
 
             if ($task['column_id'] == $column_id) {

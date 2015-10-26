@@ -1,8 +1,8 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
-use Core\Request;
+use Kanboard\Core\Request;
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
 use Gregwar\Captcha\CaptchaBuilder;
@@ -25,7 +25,7 @@ class Authentication extends Base
     public function backend($name)
     {
         if (! isset($this->container[$name])) {
-            $class = '\Auth\\'.ucfirst($name);
+            $class = '\Kanboard\Auth\\'.ucfirst($name);
             $this->container[$name] = new $class($this->container);
         }
 
@@ -44,7 +44,10 @@ class Authentication extends Base
         if ($this->userSession->isLogged()) {
 
             // Check if the user session match an existing user
-            if (! $this->user->exists($this->userSession->getId())) {
+            $userNotFound = ! $this->user->exists($this->userSession->getId());
+            $reverseProxyWrongUser = REVERSE_PROXY_AUTH && $this->backend('reverseProxy')->getUsername() !== $_SESSION['user']['username'];
+
+            if ($userNotFound || $reverseProxyWrongUser) {
                 $this->backend('rememberMe')->destroy($this->userSession->getId());
                 $this->session->close();
                 return false;
@@ -79,12 +82,10 @@ class Authentication extends Base
         if ($this->user->isLocked($username)) {
             $this->container['logger']->error('Account locked: '.$username);
             return false;
-        }
-        else if ($this->backend('database')->authenticate($username, $password)) {
+        } elseif ($this->backend('database')->authenticate($username, $password)) {
             $this->user->resetFailedLogin($username);
             return true;
-        }
-        else if (LDAP_AUTH && $this->backend('ldap')->authenticate($username, $password)) {
+        } elseif (LDAP_AUTH && $this->backend('ldap')->authenticate($username, $password)) {
             $this->user->resetFailedLogin($username);
             return true;
         }
@@ -133,11 +134,9 @@ class Authentication extends Base
         list($result, $errors) = $this->validateFormCredentials($values);
 
         if ($result) {
-
             if ($this->validateFormCaptcha($values) && $this->authenticate($values['username'], $values['password'])) {
                 $this->createRememberMeSession($values);
-            }
-            else {
+            } else {
                 $result = false;
                 $errors['login'] = t('Bad username or password');
             }
@@ -194,7 +193,6 @@ class Authentication extends Base
     private function createRememberMeSession(array $values)
     {
         if (REMEMBER_ME_AUTH && ! empty($values['remember_me'])) {
-
             $credentials = $this->backend('rememberMe')
                                 ->create($this->userSession->getId(), Request::getIpAddress(), Request::getUserAgent());
 

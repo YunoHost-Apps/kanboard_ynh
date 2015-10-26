@@ -5,7 +5,6 @@ function Board(app) {
 
 Board.prototype.execute = function() {
     this.app.swimlane.refresh();
-    this.app.swimlane.listen();
     this.restoreColumnViewMode();
     this.compactView();
     this.columnScrolling();
@@ -84,7 +83,6 @@ Board.prototype.refresh = function(data) {
 
     this.app.refresh();
     this.app.swimlane.refresh();
-    this.app.swimlane.listen();
     this.columnScrolling();
     this.app.hideLoadingIcon();
     this.listen();
@@ -97,8 +95,7 @@ Board.prototype.dragAndDrop = function() {
     var self = this;
     var params = {
         forcePlaceholderSize: true,
-        delay: 300,
-        distance: 5,
+        tolerance: "pointer",
         connectWith: ".board-task-list",
         placeholder: "draggable-placeholder",
         items: ".draggable-item",

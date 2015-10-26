@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
-use Model\TaskFilter;
+use Kanboard\Model\TaskFilter;
 use Eluceo\iCal\Component\Calendar as iCalendar;
 
 /**
@@ -89,8 +89,7 @@ class Ical extends Base
                 ->setColumns('date_creation', 'date_completed')
                 ->setCalendar($calendar)
                 ->addDateTimeEvents();
-        }
-        else {
+        } else {
             $filter
                 ->copy()
                 ->filterByStartDateRange($start, $end)

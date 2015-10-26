@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Task Status controller
@@ -37,7 +37,6 @@ class Taskstatus extends Base
     private function changeStatus(array $task, $method, $success_message, $failure_message)
     {
         if ($this->request->getStringParam('confirmation') === 'yes') {
-
             $this->checkCSRFParam();
 
             if ($this->taskStatus->$method($task['id'])) {

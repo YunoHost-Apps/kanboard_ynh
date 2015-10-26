@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
@@ -280,9 +280,9 @@ class ProjectPermission extends Base
                     ->eq('project_id', $project_id)
                     ->eq('user_id', $user_id)
                     ->exists();
-	}
+    }
 
-	/**
+    /**
      * Check if a specific user is manager of a given project
      *
      * @access public
@@ -439,7 +439,6 @@ class ProjectPermission extends Base
                      ->findAll();
 
         foreach ($rows as $row) {
-
             $result = $this->db
                            ->table(self::TABLE)
                            ->save(array(

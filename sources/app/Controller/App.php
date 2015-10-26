@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
-use Model\Subtask as SubtaskModel;
+use Kanboard\Model\Subtask as SubtaskModel;
 
 /**
  * Application controller
@@ -198,7 +198,7 @@ class App extends Base
 
         $this->response->html($this->layout('app/notifications', array(
             'title' => t('My notifications'),
-            'notifications' => $this->webNotification->getAll($user['id']),
+            'notifications' => $this->userUnreadNotification->getAll($user['id']),
             'user' => $user,
         )));
     }
@@ -227,17 +227,21 @@ class App extends Base
     public function autocomplete()
     {
         $search = $this->request->getStringParam('term');
+        $projects = $this->projectPermission->getActiveMemberProjectIds($this->userSession->getId());
+
+        if (empty($projects)) {
+            $this->response->json(array());
+        }
 
         $filter = $this->taskFilterAutoCompleteFormatter
             ->create()
-            ->filterByProjects($this->projectPermission->getActiveMemberProjectIds($this->userSession->getId()))
+            ->filterByProjects($projects)
             ->excludeTasks(array($this->request->getIntegerParam('exclude_task_id')));
 
         // Search by task id or by title
         if (ctype_digit($search)) {
             $filter->filterById($search);
-        }
-        else {
+        } else {
             $filter->filterByTitle($search);
         }
 

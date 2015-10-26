@@ -19,94 +19,19 @@ namespace Base32;
 class Base32
 {
     /**
-	 * Table for encoding base32
-	 *
-	 * @var array
-	 */
-    private static $encode = array(
-        0 => 'A',
-        1 => 'B',
-        2 => 'C',
-        3 => 'D',
-        4 => 'E',
-        5 => 'F',
-        6 => 'G',
-        7 => 'H',
-        8 => 'I',
-        9 => 'J',
-        10 => 'K',
-        11 => 'L',
-        12 => 'M',
-        13 => 'N',
-        14 => 'O',
-        15 => 'P',
-        16 => 'Q',
-        17 => 'R',
-        18 => 'S',
-        19 => 'T',
-        20 => 'U',
-        21 => 'V',
-        22 => 'W',
-        23 => 'X',
-        24 => 'Y',
-        25 => 'Z',
-        26 => 2,
-        27 => 3,
-        28 => 4,
-        29 => 5,
-        30 => 6,
-        31 => 7,
-        32 => '=',
-    );
+     * Alphabet for encoding and decoding base32
+     *
+     * @var array
+     */
+    private static $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=';
 
     /**
-	 * Table for decoding base32
-	 *
-	 * @var array
-	 */
-    private static $decode = array(
-        'A' => 0,
-        'B' => 1,
-        'C' => 2,
-        'D' => 3,
-        'E' => 4,
-        'F' => 5,
-        'G' => 6,
-        'H' => 7,
-        'I' => 8,
-        'J' => 9,
-        'K' => 10,
-        'L' => 11,
-        'M' => 12,
-        'N' => 13,
-        'O' => 14,
-        'P' => 15,
-        'Q' => 16,
-        'R' => 17,
-        'S' => 18,
-        'T' => 19,
-        'U' => 20,
-        'V' => 21,
-        'W' => 22,
-        'X' => 23,
-        'Y' => 24,
-        'Z' => 25,
-        2 => 26,
-        3 => 27,
-        4 => 28,
-        5 => 29,
-        6 => 30,
-        7 => 31,
-        '=' => 32,
-    );
-
-    /**
-	 * Creates an array from a binary string into a given chunk size
-	 *
-	 * @param string $binaryString String to chunk
-	 * @param integer $bits Number of bits per chunk
-	 * @return array
-	 */
+     * Creates an array from a binary string into a given chunk size
+     *
+     * @param string $binaryString String to chunk
+     * @param integer $bits Number of bits per chunk
+     * @return array
+     */
     private static function chunk($binaryString, $bits)
     {
         $binaryString = chunk_split($binaryString, $bits, ' ');
@@ -119,27 +44,27 @@ class Base32
     }
 
     /**
-	 * Encodes into base32
-	 *
-	 * @param string $string Clear text string
-	 * @return string Base32 encoded string
-	 */
+     * Encodes into base32
+     *
+     * @param string $string Clear text string
+     * @return string Base32 encoded string
+     */
     public static function encode($string)
     {
         if (strlen($string) == 0) {
-			// Gives an empty string
+            // Gives an empty string
 
             return '';
-		}
+        }
 
         // Convert string to binary
         $binaryString = '';
 
-		foreach (str_split($string) as $s) {
-			// Return each character as an 8-bit binary string
+        foreach (str_split($string) as $s) {
+            // Return each character as an 8-bit binary string
             $s = decbin(ord($s));
-			$binaryString .= str_pad($s, 8, 0, STR_PAD_LEFT);
-		}
+            $binaryString .= str_pad($s, 8, 0, STR_PAD_LEFT);
+        }
 
         // Break into 5-bit chunks, then break that into an array
         $binaryArray = self::chunk($binaryString, 5);
@@ -162,21 +87,20 @@ class Base32
             }
 
             // Base32 character
-            $base32String .= self::$encode[$char];
+            $base32String .= substr(self::$alphabet, $char, 1);
         }
 
         return $base32String;
     }
 
     /**
-	 * Decodes base32
-	 *
-	 * @param string $base32String Base32 encoded string
-	 * @return string Clear text string
-	 */
+     * Decodes base32
+     *
+     * @param string $base32String Base32 encoded string
+     * @return string Clear text string
+     */
     public static function decode($base32String)
     {
-
         // Only work in upper cases
         $base32String = strtoupper($base32String);
 
@@ -195,7 +119,7 @@ class Base32
         $string = '';
 
         foreach ($base32Array as $str) {
-            $char = self::$decode[$str];
+            $char = strpos(self::$alphabet, $str);
 
             // Ignore the padding character
             if ($char !== 32) {
@@ -210,15 +134,15 @@ class Base32
 
         $binaryArray = self::chunk($string, 8);
 
-		$realString = '';
+        $realString = '';
 
-		foreach ($binaryArray as $bin) {
-			// Pad each value to 8 bits
+        foreach ($binaryArray as $bin) {
+            // Pad each value to 8 bits
             $bin = str_pad($bin, 8, 0, STR_PAD_RIGHT);
-			// Convert binary strings to ASCII
+            // Convert binary strings to ASCII
             $realString .= chr(bindec($bin));
-		}
+        }
 
-		return $realString;
+        return $realString;
     }
 }

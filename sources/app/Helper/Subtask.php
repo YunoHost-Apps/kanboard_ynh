@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Kanboard\Helper;
 
 /**
  * Subtask helpers
@@ -8,7 +8,7 @@ namespace Helper;
  * @package helper
  * @author  Frederic Guillot
  */
-class Subtask extends \Core\Base
+class Subtask extends \Kanboard\Core\Base
 {
     /**
      * Get the link to toggle subtask status
@@ -21,7 +21,6 @@ class Subtask extends \Core\Base
     public function toggleStatus(array $subtask, $redirect)
     {
         if ($subtask['status'] == 0 && isset($this->session['has_subtask_inprogress']) && $this->session['has_subtask_inprogress'] === true) {
-
             return $this->helper->url->link(
                 trim($this->template->render('subtask/icons', array('subtask' => $subtask))) . $this->helper->e($subtask['title']),
                 'subtask',

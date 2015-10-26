@@ -1,8 +1,9 @@
 <?php
 
-namespace Auth;
+namespace Kanboard\Auth;
 
-use Event\AuthEvent;
+use Kanboard\Core\Base;
+use Kanboard\Event\AuthEvent;
 
 /**
  * ReverseProxy backend
@@ -18,6 +19,17 @@ class ReverseProxy extends Base
      * @var string
      */
     const AUTH_NAME = 'ReverseProxy';
+
+    /**
+     * Get username from the reverse proxy
+     *
+     * @access public
+     * @return string
+     */
+    public function getUsername()
+    {
+        return isset($_SERVER[REVERSE_PROXY_USER_HEADER]) ? $_SERVER[REVERSE_PROXY_USER_HEADER] : '';
+    }
 
     /**
      * Authenticate the user with the HTTP header

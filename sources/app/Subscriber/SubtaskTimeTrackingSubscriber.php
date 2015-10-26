@@ -1,12 +1,12 @@
 <?php
 
-namespace Subscriber;
+namespace Kanboard\Subscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Model\Subtask;
-use Event\SubtaskEvent;
+use Kanboard\Model\Subtask;
+use Kanboard\Event\SubtaskEvent;
 
-class SubtaskTimeTrackingSubscriber extends \Core\Base implements EventSubscriberInterface
+class SubtaskTimeTrackingSubscriber extends \Kanboard\Core\Base implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
@@ -30,7 +30,6 @@ class SubtaskTimeTrackingSubscriber extends \Core\Base implements EventSubscribe
     public function logStartEnd(SubtaskEvent $event)
     {
         if (isset($event['status']) && $this->config->get('subtask_time_tracking') == 1) {
-
             $subtask = $this->subtask->getById($event['id']);
 
             if (empty($subtask['user_id'])) {
@@ -39,8 +38,7 @@ class SubtaskTimeTrackingSubscriber extends \Core\Base implements EventSubscribe
 
             if ($subtask['status'] == Subtask::STATUS_INPROGRESS) {
                 return $this->subtaskTimeTracking->logStartTime($subtask['id'], $subtask['user_id']);
-            }
-            else {
+            } else {
                 return $this->subtaskTimeTracking->logEndTime($subtask['id'], $subtask['user_id']);
             }
         }

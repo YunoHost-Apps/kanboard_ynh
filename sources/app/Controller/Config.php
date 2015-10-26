@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Config controller
@@ -37,7 +37,6 @@ class Config extends Base
     private function common($redirect)
     {
         if ($this->request->isPost()) {
-
             $values =  $this->request->getValues();
 
             switch ($redirect) {
@@ -45,7 +44,7 @@ class Config extends Base
                     $values += array('subtask_restriction' => 0, 'subtask_time_tracking' => 0, 'cfd_include_closed_tasks' => 0);
                     break;
                 case 'integrations':
-                    $values += array('integration_slack_webhook' => 0, 'integration_hipchat' => 0, 'integration_gravatar' => 0, 'integration_jabber' => 0);
+                    $values += array('integration_gravatar' => 0);
                     break;
                 case 'calendar':
                     $values += array('calendar_user_subtasks_time_tracking' => 0);
@@ -55,8 +54,7 @@ class Config extends Base
             if ($this->config->save($values)) {
                 $this->config->reload();
                 $this->session->flash(t('Settings saved successfully.'));
-            }
-            else {
+            } else {
                 $this->session->flashError(t('Unable to save your settings.'));
             }
 

@@ -1,10 +1,11 @@
 <?php
 
-namespace Core\Plugin;
+namespace Kanboard\Core\Plugin;
 
 use DirectoryIterator;
 use PDOException;
-use Core\Tool;
+use RuntimeException;
+use Kanboard\Core\Tool;
 
 /**
  * Plugin Loader
@@ -12,7 +13,7 @@ use Core\Tool;
  * @package  plugin
  * @author   Frederic Guillot
  */
-class Loader extends \Core\Base
+class Loader extends \Kanboard\Core\Base
 {
     /**
      * Schema version table for plugins
@@ -57,7 +58,7 @@ class Loader extends \Core\Base
      */
     public function load($plugin)
     {
-        $class = '\Plugin\\'.$plugin.'\\Plugin';
+        $class = '\Kanboard\Plugin\\'.$plugin.'\\Plugin';
         $instance = new $class($this->container);
 
         Tool::buildDic($this->container, $instance->getClasses());
@@ -90,16 +91,15 @@ class Loader extends \Core\Base
      */
     public function migrateSchema($plugin)
     {
-        $last_version = constant('\Plugin\\'.$plugin.'\Schema\VERSION');
+        $last_version = constant('\Kanboard\Plugin\\'.$plugin.'\Schema\VERSION');
         $current_version = $this->getSchemaVersion($plugin);
 
         try {
-
             $this->db->startTransaction();
             $this->db->getDriver()->disableForeignKeys();
 
             for ($i = $current_version + 1; $i <= $last_version; $i++) {
-                $function_name = '\Plugin\\'.$plugin.'\Schema\version_'.$i;
+                $function_name = '\Kanboard\Plugin\\'.$plugin.'\Schema\version_'.$i;
 
                 if (function_exists($function_name)) {
                     call_user_func($function_name, $this->db->getConnection());
@@ -109,11 +109,10 @@ class Loader extends \Core\Base
             $this->db->getDriver()->enableForeignKeys();
             $this->db->closeTransaction();
             $this->setSchemaVersion($plugin, $i - 1);
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             $this->db->cancelTransaction();
             $this->db->getDriver()->enableForeignKeys();
-            die('Unable to migrate schema for the plugin: '.$plugin.' => '.$e->getMessage());
+            throw new RuntimeException('Unable to migrate schema for the plugin: '.$plugin.' => '.$e->getMessage());
         }
     }
 

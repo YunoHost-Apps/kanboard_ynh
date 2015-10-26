@@ -1,8 +1,9 @@
 <?php
 
-namespace Auth;
+namespace Kanboard\Auth;
 
-use Event\AuthEvent;
+use Kanboard\Core\Base;
+use Kanboard\Event\AuthEvent;
 
 /**
  * LDAP model
@@ -217,7 +218,6 @@ class Ldap extends Base
         $result = $this->findUser($username, $password);
 
         if (is_array($result)) {
-
             $user = $this->user->getByUsername($username);
 
             if (! empty($user)) {
@@ -226,14 +226,12 @@ class Ldap extends Base
                 if ($user['is_ldap_user'] == 0) {
                     return false;
                 }
-            }
-            else {
+            } else {
 
                 // We create automatically a new user
                 if ($this->isLdapAccountCreationEnabled() && $this->user->create($result) !== false) {
                     $user = $this->user->getByUsername($username);
-                }
-                else {
+                } else {
                     return false;
                 }
             }
@@ -319,12 +317,10 @@ class Ldap extends Base
         if ($this->getLdapBindType() === 'user') {
             $ldap_username = sprintf($this->getLdapUsername(), $username);
             $ldap_password = $password;
-        }
-        else if ($this->getLdapBindType() === 'proxy') {
+        } elseif ($this->getLdapBindType() === 'proxy') {
             $ldap_username = $this->getLdapUsername();
             $ldap_password = $this->getLdapPassword();
-        }
-        else {
+        } else {
             $ldap_username = null;
             $ldap_password = null;
         }
@@ -486,11 +482,9 @@ class Ldap extends Base
     {
         if (! empty($username) && ! empty($email)) {
             return '(&('.$this->getLdapUserPattern($username).')('.$this->getLdapAccountEmail().'='.$email.'))';
-        }
-        else if (! empty($username)) {
+        } elseif (! empty($username)) {
             return $this->getLdapUserPattern($username);
-        }
-        else if (! empty($email)) {
+        } elseif (! empty($email)) {
             return '('.$this->getLdapAccountEmail().'='.$email.')';
         }
 
@@ -508,7 +502,7 @@ class Ldap extends Base
      */
     private function getEntry(array $entries, $key, $default = '')
     {
-         return isset($entries[0][$key][0]) ? $entries[0][$key][0] : $default;
+        return isset($entries[0][$key][0]) ? $entries[0][$key][0] : $default;
     }
 
     /**
@@ -522,6 +516,6 @@ class Ldap extends Base
      */
     private function getEntries(array $entries, $key, $default = array())
     {
-         return isset($entries[0][$key]) ? $entries[0][$key] : $default;
+        return isset($entries[0][$key]) ? $entries[0][$key] : $default;
     }
 }

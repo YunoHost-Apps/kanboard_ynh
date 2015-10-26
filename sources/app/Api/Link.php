@@ -1,6 +1,6 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
 /**
  * Link API controller
@@ -8,7 +8,7 @@ namespace Api;
  * @package  api
  * @author   Frederic Guillot
  */
-class Link extends \Core\Base
+class Link extends \Kanboard\Core\Base
 {
     /**
      * Get a link by id
@@ -72,7 +72,7 @@ class Link extends \Core\Base
             'opposite_label' => $opposite_label,
         );
 
-        list($valid,) = $this->link->validateCreation($values);
+        list($valid, ) = $this->link->validateCreation($values);
         return $valid ? $this->link->create($label, $opposite_label) : false;
     }
 
@@ -93,7 +93,7 @@ class Link extends \Core\Base
             'label' => $label,
         );
 
-        list($valid,) = $this->link->validateModification($values);
+        list($valid, ) = $this->link->validateModification($values);
         return $valid && $this->link->update($values);
     }
 

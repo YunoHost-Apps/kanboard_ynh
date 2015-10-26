@@ -1,8 +1,7 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
-use JsonRPC\AuthenticationFailure;
 use JsonRPC\AccessDeniedException;
 
 /**
@@ -11,7 +10,7 @@ use JsonRPC\AccessDeniedException;
  * @package  api
  * @author   Frederic Guillot
  */
-abstract class Base extends \Core\Base
+abstract class Base extends \Kanboard\Core\Base
 {
     private $user_allowed_procedures = array(
         'getMe',
@@ -50,8 +49,7 @@ abstract class Base extends \Core\Base
 
         if ($is_user && ! $is_both_procedure && ! $is_user_procedure) {
             throw new AccessDeniedException('Permission denied');
-        }
-        else if (! $is_user && ! $is_both_procedure && $is_user_procedure) {
+        } elseif (! $is_user && ! $is_both_procedure && $is_user_procedure) {
             throw new AccessDeniedException('Permission denied');
         }
 

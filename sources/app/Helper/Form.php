@@ -1,8 +1,8 @@
 <?php
 
-namespace Helper;
+namespace Kanboard\Helper;
 
-use Core\Security;
+use Kanboard\Core\Security;
 
 /**
  * Form helpers
@@ -10,7 +10,7 @@ use Core\Security;
  * @package helper
  * @author  Frederic Guillot
  */
-class Form extends \Core\Base
+class Form extends \Kanboard\Core\Base
 {
     /**
      * Hidden CSRF token field
@@ -52,11 +52,14 @@ class Form extends \Core\Base
         $html = '<select name="'.$name.'" id="form-'.$name.'" class="'.$class.'" '.implode(' ', $attributes).'>';
 
         foreach ($options as $id => $value) {
-
             $html .= '<option value="'.$this->helper->e($id).'"';
 
-            if (isset($values->$name) && $id == $values->$name) $html .= ' selected="selected"';
-            if (isset($values[$name]) && $id == $values[$name]) $html .= ' selected="selected"';
+            if (isset($values->$name) && $id == $values->$name) {
+                $html .= ' selected="selected"';
+            }
+            if (isset($values[$name]) && $id == $values[$name]) {
+                $html .= ' selected="selected"';
+            }
 
             $html .= '>'.$this->helper->e($value).'</option>';
         }
@@ -172,6 +175,23 @@ class Form extends \Core\Base
         $html .= implode(' ', $attributes).'>';
         $html .= isset($values->$name) ? $this->helper->e($values->$name) : isset($values[$name]) ? $values[$name] : '';
         $html .= '</textarea>';
+        $html .= $this->errorList($errors, $name);
+
+        return $html;
+    }
+
+    /**
+     * Display file field
+     *
+     * @access public
+     * @param  string  $name
+     * @param  array   $errors
+     * @param  boolean $multiple
+     * @return string
+     */
+    public function file($name, array $errors = array(), $multiple = false)
+    {
+        $html = '<input type="file" name="'.$name.'" id="form-'.$name.'" '.($multiple ? 'multiple' : '').'>';
         $html .= $this->errorList($errors, $name);
 
         return $html;
@@ -311,7 +331,6 @@ class Form extends \Core\Base
         $html = '';
 
         if (isset($errors[$name])) {
-
             $html .= '<ul class="form-errors">';
 
             foreach ($errors[$name] as $error) {

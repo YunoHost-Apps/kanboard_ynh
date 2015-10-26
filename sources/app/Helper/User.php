@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Kanboard\Helper;
 
 /**
  * User helpers
@@ -8,7 +8,7 @@ namespace Helper;
  * @package helper
  * @author  Frederic Guillot
  */
-class User extends \Core\Base
+class User extends \Kanboard\Core\Base
 {
     /**
      * Return true if the logged user as unread notifications
@@ -18,7 +18,7 @@ class User extends \Core\Base
      */
     public function hasNotifications()
     {
-        return $this->webNotification->hasNotifications($this->userSession->getId());
+        return $this->userUnreadNotification->hasNotifications($this->userSession->getId());
     }
 
     /**

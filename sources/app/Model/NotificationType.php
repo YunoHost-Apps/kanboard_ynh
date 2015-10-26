@@ -1,73 +1,127 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
+
+use Pimple\Container;
 
 /**
- * Notification Type model
+ * Notification Type
  *
  * @package  model
  * @author   Frederic Guillot
  */
-class NotificationType extends Base
+abstract class NotificationType extends Base
 {
     /**
-     * SQL table name
+     * Container
      *
-     * @var string
+     * @access private
+     * @var \Pimple\Container
      */
-    const TABLE = 'user_has_notification_types';
+    private $classes;
 
     /**
-     * Types
+     * Notification type labels
      *
-     * @var string
+     * @access private
+     * @var array
      */
-    const TYPE_WEB = 'web';
-    const TYPE_EMAIL = 'email';
+    private $labels = array();
 
     /**
-     * Get all notification types
+     * Hidden notification types
+     *
+     * @access private
+     * @var array
+     */
+    private $hiddens = array();
+
+    /**
+     * Constructor
+     *
+     * @access public
+     * @param  \Pimple\Container   $container
+     */
+    public function __construct(Container $container)
+    {
+        parent::__construct($container);
+        $this->classes = new Container;
+    }
+
+    /**
+     * Add a new notification type
+     *
+     * @access public
+     * @param  string  $type
+     * @param  string  $label
+     * @param  string  $class
+     * @param  boolean $hidden
+     * @return NotificationType
+     */
+    public function setType($type, $label, $class, $hidden = false)
+    {
+        $container = $this->container;
+
+        if ($hidden) {
+            $this->hiddens[] = $type;
+        } else {
+            $this->labels[$type] = $label;
+        }
+
+        $this->classes[$type] = function () use ($class, $container) {
+            return new $class($container);
+        };
+
+        return $this;
+    }
+
+    /**
+     * Get mail notification type instance
+     *
+     * @access public
+     * @param  string  $type
+     * @return NotificationInterface
+     */
+    public function getType($type)
+    {
+        return $this->classes[$type];
+    }
+
+    /**
+     * Get all notification types with labels
      *
      * @access public
      * @return array
      */
     public function getTypes()
     {
-        return array(
-            self::TYPE_EMAIL => t('Email'),
-            self::TYPE_WEB => t('Web'),
-        );
+        return $this->labels;
     }
 
     /**
-     * Get selected notification types for a given user
+     * Get all hidden notification types
      *
      * @access public
-     * @param integer  $user_id
      * @return array
      */
-    public function getUserSelectedTypes($user_id)
+    public function getHiddenTypes()
     {
-        return $this->db->table(self::TABLE)->eq('user_id', $user_id)->asc('notification_type')->findAllByColumn('notification_type');
+        return $this->hiddens;
     }
 
     /**
-     * Save notification types for a given user
+     * Keep only loaded notification types
      *
      * @access public
-     * @param  integer  $user_id
      * @param  string[] $types
-     * @return boolean
+     * @return array
      */
-    public function saveUserSelectedTypes($user_id, array $types)
+    public function filterTypes(array $types)
     {
-        $results = array();
-        $this->db->table(self::TABLE)->eq('user_id', $user_id)->remove();
+        $classes = $this->classes;
 
-        foreach ($types as $type) {
-            $results[] = $this->db->table(self::TABLE)->insert(array('user_id' => $user_id, 'notification_type' => $type));
-        }
-
-        return ! in_array(false, $results);
+        return array_filter($types, function ($type) use ($classes) {
+            return isset($classes[$type]);
+        });
     }
 }

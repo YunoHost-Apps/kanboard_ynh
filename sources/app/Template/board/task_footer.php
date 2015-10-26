@@ -26,11 +26,11 @@
         </span>
     <?php endif ?>
 
-    <?php if ($task['recurrence_status'] == \Model\Task::RECURRING_STATUS_PENDING): ?>
+    <?php if ($task['recurrence_status'] == \Kanboard\Model\Task::RECURRING_STATUS_PENDING): ?>
         <span title="<?= t('Recurrence') ?>" class="tooltip" data-href="<?= $this->url->href('board', 'recurrence', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>"><i class="fa fa-refresh fa-rotate-90"></i></span>
     <?php endif ?>
 
-    <?php if ($task['recurrence_status'] == \Model\Task::RECURRING_STATUS_PROCESSED): ?>
+    <?php if ($task['recurrence_status'] == \Kanboard\Model\Task::RECURRING_STATUS_PROCESSED): ?>
         <span title="<?= t('Recurrence') ?>" class="tooltip" data-href="<?= $this->url->href('board', 'recurrence', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>"><i class="fa fa-refresh fa-rotate-90 fa-inverse"></i></span>
     <?php endif ?>
 
@@ -47,7 +47,7 @@
     <?php endif ?>
 
     <?php if (! empty($task['nb_comments'])): ?>
-        <span title="<?= p($task['nb_comments'], t('%d comment', $task['nb_comments']), t('%d comments', $task['nb_comments'])) ?>" class="tooltip" data-href="<?= $this->url->href('board', 'comments', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>"><i class="fa fa-comment-o"></i>&nbsp;<?= $task['nb_comments'] ?></span>
+        <span title="<?= $task['nb_comments'] == 1 ? t('%d comment', $task['nb_comments']) : t('%d comments', $task['nb_comments']) ?>" class="tooltip" data-href="<?= $this->url->href('board', 'comments', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>"><i class="fa fa-comment-o"></i>&nbsp;<?= $task['nb_comments'] ?></span>
     <?php endif ?>
 
     <?php if (! empty($task['description'])): ?>

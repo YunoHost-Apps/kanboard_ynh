@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 use Parsedown;
 
@@ -16,7 +16,7 @@ class Doc extends Base
     {
         $url = $this->helper->url;
         $data = file_get_contents($filename);
-        list($title,) = explode("\n", $data, 2);
+        list($title, ) = explode("\n", $data, 2);
 
         $replaceUrl = function (array $matches) use ($url) {
             return '('.$url->to('doc', 'show', array('file' => str_replace('.markdown', '', $matches[1]))).')';

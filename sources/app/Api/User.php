@@ -1,8 +1,8 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
-use Auth\Ldap;
+use Kanboard\Auth\Ldap;
 
 /**
  * User API controller
@@ -10,7 +10,7 @@ use Auth\Ldap;
  * @package  api
  * @author   Frederic Guillot
  */
-class User extends \Core\Base
+class User extends \Kanboard\Core\Base
 {
     public function getUser($user_id)
     {
@@ -39,7 +39,7 @@ class User extends \Core\Base
             'is_project_admin' => $is_project_admin,
         );
 
-        list($valid,) = $this->user->validateCreation($values);
+        list($valid, ) = $this->user->validateCreation($values);
         return $valid ? $this->user->create($values) : false;
     }
 
@@ -81,7 +81,7 @@ class User extends \Core\Base
             }
         }
 
-        list($valid,) = $this->user->validateApiModification($values);
+        list($valid, ) = $this->user->validateApiModification($values);
         return $valid && $this->user->update($values);
     }
 }

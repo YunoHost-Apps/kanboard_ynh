@@ -1,6 +1,6 @@
 <?php
 
-namespace Formatter;
+namespace Kanboard\Formatter;
 
 use DateTime;
 use Eluceo\iCal\Component\Calendar;
@@ -56,7 +56,6 @@ class TaskFilterICalendarFormatter extends TaskFilterCalendarEvent implements Fo
     public function addDateTimeEvents()
     {
         foreach ($this->query->findAll() as $task) {
-
             $start = new DateTime;
             $start->setTimestamp($task[$this->startColumn]);
 
@@ -82,7 +81,6 @@ class TaskFilterICalendarFormatter extends TaskFilterCalendarEvent implements Fo
     public function addFullDayEvents()
     {
         foreach ($this->query->findAll() as $task) {
-
             $date = new DateTime;
             $date->setTimestamp($task[$this->startColumn]);
 

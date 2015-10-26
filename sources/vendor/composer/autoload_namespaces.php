@@ -15,5 +15,4 @@ return array(
     'Otp' => array($vendorDir . '/christian-riesen/otp/src'),
     'JsonRPC' => array($vendorDir . '/fguillot/json-rpc/src'),
     'Eluceo\\iCal' => array($vendorDir . '/eluceo/ical/src'),
-    '' => array($baseDir . '/app'),
 );

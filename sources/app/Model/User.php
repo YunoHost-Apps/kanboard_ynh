@@ -1,11 +1,12 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
+use PicoDb\Database;
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
-use Core\Session;
-use Core\Security;
+use Kanboard\Core\Session;
+use Kanboard\Core\Security;
 
 /**
  * User model
@@ -167,6 +168,18 @@ class User extends Base
     }
 
     /**
+     * Get user_id by username
+     *
+     * @access public
+     * @param  string  $username  Username
+     * @return array
+     */
+    public function getIdByUsername($username)
+    {
+        return $this->db->table(self::TABLE)->eq('username', $username)->findOneColumn('id');
+    }
+
+    /**
      * Get a specific user by the email address
      *
      * @access public
@@ -268,11 +281,9 @@ class User extends Base
     public function prepare(array &$values)
     {
         if (isset($values['password'])) {
-
             if (! empty($values['password'])) {
                 $values['password'] = \password_hash($values['password'], PASSWORD_BCRYPT);
-            }
-            else {
+            } else {
                 unset($values['password']);
             }
         }
@@ -325,7 +336,7 @@ class User extends Base
      */
     public function remove($user_id)
     {
-        return $this->db->transaction(function ($db) use ($user_id) {
+        return $this->db->transaction(function (Database $db) use ($user_id) {
 
             // All assigned tasks are now unassigned (no foreign key)
             if (! $db->table(Task::TABLE)->eq('owner_id', $user_id)->update(array('owner_id' => 0))) {
@@ -504,8 +515,7 @@ class User extends Base
 
         if (isset($values['is_ldap_user']) && $values['is_ldap_user'] == 1) {
             $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
-        }
-        else {
+        } else {
             $v = new Validator($values, array_merge($rules, $this->commonValidationRules(), $this->commonPasswordValidationRules()));
         }
 
@@ -579,8 +589,7 @@ class User extends Base
             // Check password
             if ($this->authentication->authenticate($this->session['user']['username'], $values['current_password'])) {
                 return array(true, array());
-            }
-            else {
+            } else {
                 return array(false, array('current_password' => array(t('Wrong password'))));
             }
         }

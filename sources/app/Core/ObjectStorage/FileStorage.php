@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\ObjectStorage;
+namespace Kanboard\Core\ObjectStorage;
 
 /**
  * Local File Storage
@@ -140,7 +140,7 @@ class FileStorage implements ObjectStorageInterface
      */
     private function createFolder($key)
     {
-        $folder = strpos($key, '/') !== false ? $this->path.DIRECTORY_SEPARATOR.dirname($key) : $this->path;
+        $folder = strpos($key, DIRECTORY_SEPARATOR) !== false ? $this->path.DIRECTORY_SEPARATOR.dirname($key) : $this->path;
 
         if (! is_dir($folder) && ! mkdir($folder, 0755, true)) {
             throw new ObjectStorageException('Unable to create folder: '.$folder);

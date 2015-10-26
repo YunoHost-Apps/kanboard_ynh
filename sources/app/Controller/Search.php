@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Search controller
@@ -22,8 +22,7 @@ class Search extends Base
                 ->setOrder('tasks.id')
                 ->setDirection('DESC');
 
-        if ($search !== '') {
-
+        if ($search !== '' && ! empty($projects)) {
             $query = $this
                 ->taskFilter
                 ->search($search)

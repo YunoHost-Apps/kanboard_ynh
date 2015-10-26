@@ -1,8 +1,8 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
-use Model\NotificationType;
+use Kanboard\Model\NotificationType;
 
 /**
  * User controller
@@ -86,7 +86,6 @@ class User extends Base
         list($valid, $errors) = $this->user->validateCreation($values);
 
         if ($valid) {
-
             $project_id = empty($values['project_id']) ? 0 : $values['project_id'];
             unset($values['project_id']);
 
@@ -96,13 +95,12 @@ class User extends Base
                 $this->projectPermission->addMember($project_id, $user_id);
 
                 if (! empty($values['notifications_enabled'])) {
-                    $this->notificationType->saveUserSelectedTypes($user_id, array(NotificationType::TYPE_EMAIL));
+                    $this->userNotificationType->saveSelectedTypes($user_id, array(NotificationType::TYPE_EMAIL));
                 }
 
                 $this->session->flash(t('User created successfully.'));
                 $this->response->redirect($this->helper->url->to('user', 'show', array('user_id' => $user_id)));
-            }
-            else {
+            } else {
                 $this->session->flashError(t('Unable to create your user.'));
                 $values['project_id'] = $project_id;
             }
@@ -201,17 +199,39 @@ class User extends Base
 
         if ($this->request->isPost()) {
             $values = $this->request->getValues();
-            $this->notification->saveSettings($user['id'], $values);
+            $this->userNotification->saveSettings($user['id'], $values);
             $this->session->flash(t('User updated successfully.'));
             $this->response->redirect($this->helper->url->to('user', 'notifications', array('user_id' => $user['id'])));
         }
 
         $this->response->html($this->layout('user/notifications', array(
             'projects' => $this->projectPermission->getMemberProjects($user['id']),
-            'notifications' => $this->notification->readSettings($user['id']),
-            'types' => $this->notificationType->getTypes(),
-            'filters' => $this->notificationFilter->getFilters(),
+            'notifications' => $this->userNotification->readSettings($user['id']),
+            'types' => $this->userNotificationType->getTypes(),
+            'filters' => $this->userNotificationFilter->getFilters(),
             'user' => $user,
+        )));
+    }
+
+    /**
+     * Display user integrations
+     *
+     * @access public
+     */
+    public function integrations()
+    {
+        $user = $this->getUser();
+
+        if ($this->request->isPost()) {
+            $values = $this->request->getValues();
+            $this->userMetadata->save($user['id'], $values);
+            $this->session->flash(t('User updated successfully.'));
+            $this->response->redirect($this->helper->url->to('user', 'integrations', array('user_id' => $user['id'])));
+        }
+
+        $this->response->html($this->layout('user/integrations', array(
+            'user' => $user,
+            'values' => $this->userMetadata->getall($user['id']),
         )));
     }
 
@@ -240,7 +260,6 @@ class User extends Base
         $switch = $this->request->getStringParam('switch');
 
         if ($switch === 'enable' || $switch === 'disable') {
-
             $this->checkCSRFParam();
 
             if ($this->user->{$switch.'PublicAccess'}($user['id'])) {
@@ -270,16 +289,13 @@ class User extends Base
         $errors = array();
 
         if ($this->request->isPost()) {
-
             $values = $this->request->getValues();
             list($valid, $errors) = $this->user->validatePasswordModification($values);
 
             if ($valid) {
-
                 if ($this->user->update($values)) {
                     $this->session->flash(t('Password modified successfully.'));
-                }
-                else {
+                } else {
                     $this->session->flashError(t('Unable to change the password.'));
                 }
 
@@ -308,13 +324,11 @@ class User extends Base
         unset($values['password']);
 
         if ($this->request->isPost()) {
-
             $values = $this->request->getValues();
 
             if ($this->userSession->isAdmin()) {
                 $values += array('is_admin' => 0, 'is_project_admin' => 0);
-            }
-            else {
+            } else {
                 // Regular users can't be admin
                 if (isset($values['is_admin'])) {
                     unset($values['is_admin']);
@@ -328,11 +342,9 @@ class User extends Base
             list($valid, $errors) = $this->user->validateModification($values);
 
             if ($valid) {
-
                 if ($this->user->update($values)) {
                     $this->session->flash(t('User updated successfully.'));
-                }
-                else {
+                } else {
                     $this->session->flashError(t('Unable to update your user.'));
                 }
 
@@ -363,16 +375,13 @@ class User extends Base
         unset($values['password']);
 
         if ($this->request->isPost()) {
-
             $values = $this->request->getValues() + array('disable_login_form' => 0, 'is_ldap_user' => 0);
             list($valid, $errors) = $this->user->validateModification($values);
 
             if ($valid) {
-
                 if ($this->user->update($values)) {
                     $this->session->flash(t('User updated successfully.'));
-                }
-                else {
+                } else {
                     $this->session->flashError(t('Unable to update your user.'));
                 }
 
@@ -397,7 +406,6 @@ class User extends Base
         $user = $this->getUser();
 
         if ($this->request->getStringParam('confirmation') === 'yes') {
-
             $this->checkCSRFParam();
 
             if ($this->user->remove($user['id'])) {
