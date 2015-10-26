@@ -9,6 +9,10 @@ backup_dir=$1/apps/$app
 # Restore sources & data
 sudo cp -a $backup_dir/sources/. /var/www/$app
 
+# Restore permissions
+sudo chown -R root:root $final_path
+sudo chown -R www-data:www-data $final_path/data
+
 # Restore mysql dump
 db_pwd=$(sudo yunohost app setting $app mysqlpwd)
 sudo mysql -u $app -p$db_pwd $app < $backup_dir/$app.dmp
