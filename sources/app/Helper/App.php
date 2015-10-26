@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Kanboard\Helper;
 
 /**
  * Application helpers
@@ -8,7 +8,7 @@ namespace Helper;
  * @package helper
  * @author  Frederic Guillot
  */
-class App extends \Core\Base
+class App extends \Kanboard\Core\Base
 {
     /**
      * Get router controller
@@ -68,8 +68,7 @@ class App extends \Core\Base
             $html = '<div class="alert alert-success alert-fade-out">'.$this->helper->e($this->session['flash_message']).'</div>';
             unset($this->session['flash_message']);
             unset($this->session['flash_error_message']);
-        }
-        else if (isset($this->session['flash_error_message'])) {
+        } elseif (isset($this->session['flash_error_message'])) {
             $html = '<div class="alert alert-error">'.$this->helper->e($this->session['flash_error_message']).'</div>';
             unset($this->session['flash_message']);
             unset($this->session['flash_error_message']);

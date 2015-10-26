@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
@@ -40,7 +40,8 @@ class CustomFilter extends Base
                 self::TABLE.'.project_id',
                 self::TABLE.'.filter',
                 self::TABLE.'.name',
-                self::TABLE.'.is_shared'
+                self::TABLE.'.is_shared',
+                self::TABLE.'.append'
             )
             ->asc(self::TABLE.'.name')
             ->join(User::TABLE, 'id', 'user_id')

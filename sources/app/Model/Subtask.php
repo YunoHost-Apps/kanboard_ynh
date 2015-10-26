@@ -1,8 +1,9 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
-use Event\SubtaskEvent;
+use PicoDb\Database;
+use Kanboard\Event\SubtaskEvent;
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
 
@@ -148,7 +149,6 @@ class Subtask extends Base
     public function getById($subtask_id, $more = false)
     {
         if ($more) {
-
             return $this->db
                         ->table(self::TABLE)
                         ->eq(self::TABLE.'.id', $subtask_id)
@@ -294,7 +294,7 @@ class Subtask extends Base
      */
     public function savePositions(array $subtasks)
     {
-        return $this->db->transaction(function ($db) use ($subtasks) {
+        return $this->db->transaction(function (Database $db) use ($subtasks) {
 
             foreach ($subtasks as $subtask_id => $position) {
                 if (! $db->table(Subtask::TABLE)->eq('id', $subtask_id)->update(array('position' => $position))) {
@@ -341,7 +341,6 @@ class Subtask extends Base
         $positions = array_flip($subtasks);
 
         if (isset($subtasks[$subtask_id]) && $subtasks[$subtask_id] > 1) {
-
             $position = --$subtasks[$subtask_id];
             $subtasks[$positions[$position]]++;
 
@@ -353,8 +352,6 @@ class Subtask extends Base
 
     /**
      * Change the status of subtask
-     *
-     * Todo -> In progress -> Done -> Todo -> etc...
      *
      * @access public
      * @param  integer  $subtask_id
@@ -437,7 +434,7 @@ class Subtask extends Base
      */
     public function duplicate($src_task_id, $dst_task_id)
     {
-        return $this->db->transaction(function ($db) use ($src_task_id, $dst_task_id) {
+        return $this->db->transaction(function (Database $db) use ($src_task_id, $dst_task_id) {
 
             $subtasks = $db->table(Subtask::TABLE)
                                  ->columns('title', 'time_estimated', 'position')
@@ -446,7 +443,6 @@ class Subtask extends Base
                                  ->findAll();
 
             foreach ($subtasks as &$subtask) {
-
                 $subtask['task_id'] = $dst_task_id;
 
                 if (! $db->table(Subtask::TABLE)->save($subtask)) {

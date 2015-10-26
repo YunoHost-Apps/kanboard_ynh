@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Custom Filter management
@@ -46,8 +46,7 @@ class Customfilter extends Base
             if ($this->customFilter->create($values)) {
                 $this->session->flash(t('Your custom filter have been created successfully.'));
                 $this->response->redirect($this->helper->url->to('customfilter', 'index', array('project_id' => $project['id'])));
-            }
-            else {
+            } else {
                 $this->session->flashError(t('Unable to create your custom filter.'));
             }
         }
@@ -116,14 +115,17 @@ class Customfilter extends Base
             $values += array('is_shared' => 0);
         }
 
+        if (! isset($values['append'])) {
+            $values += array('append' => 0);
+        }
+
         list($valid, $errors) = $this->customFilter->validateModification($values);
 
         if ($valid) {
             if ($this->customFilter->update($values)) {
                 $this->session->flash(t('Your custom filter have been updated successfully.'));
                 $this->response->redirect($this->helper->url->to('customfilter', 'index', array('project_id' => $project['id'])));
-            }
-            else {
+            } else {
                 $this->session->flashError(t('Unable to update custom filter.'));
             }
         }

@@ -1,14 +1,11 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 use Pimple\Container;
-use Core\Security;
-use Core\Request;
-use Core\Response;
-use Core\Template;
-use Core\Session;
-use Model\LastLogin;
+use Kanboard\Core\Security;
+use Kanboard\Core\Request;
+use Kanboard\Core\Response;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -17,13 +14,13 @@ use Symfony\Component\EventDispatcher\Event;
  * @package  controller
  * @author   Frederic Guillot
  */
-abstract class Base extends \Core\Base
+abstract class Base extends \Kanboard\Core\Base
 {
     /**
      * Request instance
      *
      * @accesss protected
-     * @var \Core\Request
+     * @var \Kanboard\Core\Request
      */
     protected $request;
 
@@ -31,7 +28,7 @@ abstract class Base extends \Core\Base
      * Response instance
      *
      * @accesss protected
-     * @var \Core\Response
+     * @var \Kanboard\Core\Response
      */
     protected $response;
 
@@ -60,7 +57,6 @@ abstract class Base extends \Core\Base
     public function __destruct()
     {
         if (DEBUG) {
-
             foreach ($this->container['db']->getLogMessages() as $message) {
                 $this->container['logger']->debug($message);
             }
@@ -123,7 +119,6 @@ abstract class Base extends \Core\Base
     public function handleAuthentication()
     {
         if (! $this->authentication->isAuthenticated()) {
-
             if ($this->request->isAjax()) {
                 $this->response->text('Not Authorized', 401);
             }
@@ -143,7 +138,6 @@ abstract class Base extends \Core\Base
         $ignore = ($controller === 'twofactor' && in_array($action, array('code', 'check'))) || ($controller === 'auth' && $action === 'logout');
 
         if ($ignore === false && $this->userSession->has2FA() && ! $this->userSession->check2FA()) {
-
             if ($this->request->isAjax()) {
                 $this->response->text('Not Authorized', 401);
             }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
 /**
  * Access List
@@ -63,7 +63,8 @@ class Acl extends Base
         'category' => '*',
         'column' => '*',
         'export' => '*',
-        'project' => array('edit', 'update', 'share', 'integration', 'users', 'alloweverybody', 'allow', 'setowner', 'revoke', 'duplicate', 'disable', 'enable'),
+        'taskimport' => '*',
+        'project' => array('edit', 'update', 'share', 'integrations', 'notifications', 'users', 'alloweverybody', 'allow', 'setowner', 'revoke', 'duplicate', 'disable', 'enable'),
         'swimlane' => '*',
         'gantt' => array('project', 'savetaskdate', 'task', 'savetask'),
     );
@@ -88,6 +89,7 @@ class Acl extends Base
      */
     private $admin_acl = array(
         'user' => array('index', 'create', 'save', 'remove', 'authentication'),
+        'userimport' => '*',
         'config' => '*',
         'link' => '*',
         'currency' => '*',
@@ -117,6 +119,7 @@ class Acl extends Base
      */
     public function matchAcl(array $acl, $controller, $action)
     {
+        $controller = strtolower($controller);
         $action = strtolower($action);
         return isset($acl[$controller]) && $this->hasAction($action, $acl[$controller]);
     }

@@ -8,13 +8,13 @@
 define('DEBUG', false);
 
 // Debug file path
-define('DEBUG_FILE', __DIR__.'/data/debug.log');
+define('DEBUG_FILE', __DIR__.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'debug.log');
 
 // Plugins directory
-define('PLUGINS_DIR', 'data/plugins');
+define('PLUGINS_DIR', 'data'.DIRECTORY_SEPARATOR.'plugins');
 
-// Folder for uploaded files, don't forget the trailing slash
-define('FILES_DIR', 'data/files/');
+// Folder for uploaded files
+define('FILES_DIR', 'data'.DIRECTORY_SEPARATOR.'files');
 
 // E-mail address for the "From" header (notifications)
 define('MAIL_FROM', 'notifications@kanboard.local');
@@ -150,7 +150,7 @@ define('GITHUB_OAUTH_AUTHORIZE_URL', 'https://github.com/login/oauth/authorize')
 // Github oauth2 token url
 define('GITHUB_OAUTH_TOKEN_URL', 'https://github.com/login/oauth/access_token');
 
-// Github API url (don't forget the slash at the end)
+// Github API url (don't forget the trailing slash)
 define('GITHUB_API_URL', 'https://api.github.com/');
 
 // Enable/disable Gitlab authentication
@@ -168,7 +168,7 @@ define('GITLAB_OAUTH_AUTHORIZE_URL', 'https://gitlab.com/oauth/authorize');
 // Gitlab oauth2 token url
 define('GITLAB_OAUTH_TOKEN_URL', 'https://gitlab.com/oauth/token');
 
-// Gitlab API url endpoint (don't forget the slash at the end)
+// Gitlab API url endpoint (don't forget the trailing slash)
 define('GITLAB_API_URL', 'https://gitlab.com/api/v3/');
 
 // Enable/disable the reverse proxy authentication
@@ -225,4 +225,3 @@ define('HTTP_PROXY_HOSTNAME', '');
 define('HTTP_PROXY_PORT', '3128');
 define('HTTP_PROXY_USERNAME', '');
 define('HTTP_PROXY_PASSWORD', '');
-

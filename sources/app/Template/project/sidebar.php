@@ -12,8 +12,11 @@
             <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'share' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Public access'), 'project', 'share', array('project_id' => $project['id'])) ?>
             </li>
-            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'integration' ? 'class="active"' : '' ?>>
-                <?= $this->url->link(t('Integrations'), 'project', 'integration', array('project_id' => $project['id'])) ?>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'notifications' ? 'class="active"' : '' ?>>
+                <?= $this->url->link(t('Notifications'), 'project', 'notifications', array('project_id' => $project['id'])) ?>
+            </li>
+            <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'integrations' ? 'class="active"' : '' ?>>
+                <?= $this->url->link(t('Integrations'), 'project', 'integrations', array('project_id' => $project['id'])) ?>
             </li>
             <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'edit' ? 'class="active"' : '' ?>>
                 <?= $this->url->link(t('Edit project'), 'project', 'edit', array('project_id' => $project['id'])) ?>
@@ -44,6 +47,9 @@
                 <?php else: ?>
                     <?= $this->url->link(t('Enable'), 'project', 'enable', array('project_id' => $project['id']), true) ?>
                 <?php endif ?>
+            </li>
+            <li <?= $this->app->getRouterController() === 'taskImport' && $this->app->getRouterAction() === 'step1' ? 'class="active"' : '' ?>>
+                <?= $this->url->link(t('Import'), 'taskImport', 'step1', array('project_id' => $project['id'])) ?>
             </li>
             <?php if ($this->user->isProjectAdministrationAllowed($project['id'])): ?>
                 <li <?= $this->app->getRouterController() === 'project' && $this->app->getRouterAction() === 'remove' ? 'class="active"' : '' ?>>

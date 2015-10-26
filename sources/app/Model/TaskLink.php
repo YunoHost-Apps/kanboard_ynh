@@ -1,10 +1,10 @@
 <?php
 
-namespace Model;
+namespace Kanboard\Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
-use Event\TaskLinkEvent;
+use Kanboard\Event\TaskLinkEvent;
 
 /**
  * TaskLink model
@@ -112,7 +112,6 @@ class TaskLink extends Base
         $result = array();
 
         foreach ($links as $link) {
-
             if (! isset($result[$link['label']])) {
                 $result[$link['label']] = array();
             }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Kanboard\Helper;
 
 /**
  * File helpers
@@ -8,7 +8,7 @@ namespace Helper;
  * @package helper
  * @author  Frederic Guillot
  */
-class File extends \Core\Base
+class File extends \Kanboard\Core\Base
 {
     /**
      * Get file icon
@@ -17,8 +17,8 @@ class File extends \Core\Base
      * @param  string   $filename   Filename
      * @return string               Font-Awesome-Icon-Name
      */
-    public function icon($filename){
-
+    public function icon($filename)
+    {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
         switch ($extension) {

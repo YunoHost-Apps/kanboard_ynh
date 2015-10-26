@@ -26,9 +26,9 @@ sudo sed -i "s/yuno_admin/$admin/g" $final_path/config.php
 sudo sed -i "s/yuno_email/$email/g" $final_path/config.php
 sudo sed -i "s/yuno_domain/$domain/g" $final_path/config.php
 
-# Set permissions to data directory and config file
+# Set permissions to kanboard and data directory
+sudo chown -R root:root $final_path
 sudo chown -R www-data:www-data $final_path/data
-sudo chown www-data:www-data $final_path/config.php
 
 # Use dedicated php pool
 sed -i "s@NAMETOCHANGE@$app@g" ../conf/php-fpm.conf

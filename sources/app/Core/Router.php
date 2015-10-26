@@ -1,6 +1,8 @@
 <?php
 
-namespace Core;
+namespace Kanboard\Core;
+
+use RuntimeException;
 
 /**
  * Router class
@@ -127,17 +129,13 @@ class Router extends Base
         $count = count($parts);
 
         foreach ($this->paths as $route) {
-
             if ($count === $route['count']) {
-
                 $params = array();
 
                 for ($i = 0; $i < $count; $i++) {
-
                     if ($route['pattern'][$i]{0} === ':') {
                         $params[substr($route['pattern'][$i], 1)] = $parts[$i];
-                    }
-                    else if ($route['pattern'][$i] !== $parts[$i]) {
+                    } elseif ($route['pattern'][$i] !== $parts[$i]) {
                         break;
                     }
                 }
@@ -168,7 +166,6 @@ class Router extends Base
         }
 
         foreach ($this->urls[$controller][$action] as $pattern) {
-
             if (array_diff_key($params, $pattern['params']) === array()) {
                 $url = $pattern['path'];
                 $i = 0;
@@ -197,7 +194,7 @@ class Router extends Base
      */
     public function sanitize($value, $default_value)
     {
-        return ! ctype_alpha($value) || empty($value) ? $default_value : strtolower($value);
+        return ! preg_match('/^[a-zA-Z_0-9]+$/', $value) ? $default_value : $value;
     }
 
     /**
@@ -213,12 +210,17 @@ class Router extends Base
             $this->controller = $this->sanitize($_GET['controller'], 'app');
             $this->action = $this->sanitize($_GET['action'], 'index');
             $plugin = ! empty($_GET['plugin']) ? $this->sanitize($_GET['plugin'], '') : '';
-        }
-        else {
+        } else {
             list($this->controller, $this->action) = $this->findRoute($this->getPath($uri, $query_string)); // TODO: add plugin for routes
             $plugin = '';
         }
-        $class = empty($plugin) ? '\Controller\\'.ucfirst($this->controller) : '\Plugin\\'.ucfirst($plugin).'\Controller\\'.ucfirst($this->controller);
+
+        $class = '\Kanboard\\';
+        $class .= empty($plugin) ? 'Controller\\'.ucfirst($this->controller) : 'Plugin\\'.ucfirst($plugin).'\Controller\\'.ucfirst($this->controller);
+
+        if (! class_exists($class) || ! method_exists($class, $this->action)) {
+            throw new RuntimeException('Controller or method not found for the given url!');
+        }
 
         $instance = new $class($this->container);
         $instance->beforeAction($this->controller, $this->action);

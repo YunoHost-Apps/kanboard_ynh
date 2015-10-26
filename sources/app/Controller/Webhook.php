@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Webhook controller
@@ -31,7 +31,7 @@ class Webhook extends Base
             'category_id' => $this->request->getIntegerParam('category_id'),
         );
 
-        list($valid,) = $this->taskValidator->validateCreation($values);
+        list($valid, ) = $this->taskValidator->validateCreation($values);
 
         if ($valid && $this->taskCreation->create($values)) {
             $this->response->text('OK');
@@ -91,38 +91,5 @@ class Webhook extends Base
         );
 
         echo $result ? 'PARSED' : 'IGNORED';
-    }
-
-    /**
-     * Handle Postmark webhooks
-     *
-     * @access public
-     */
-    public function postmark()
-    {
-        $this->checkWebhookToken();
-        echo $this->postmark->receiveEmail($this->request->getJson()) ? 'PARSED' : 'IGNORED';
-    }
-
-    /**
-     * Handle Mailgun webhooks
-     *
-     * @access public
-     */
-    public function mailgun()
-    {
-        $this->checkWebhookToken();
-        echo $this->mailgun->receiveEmail($_POST) ? 'PARSED' : 'IGNORED';
-    }
-
-    /**
-     * Handle Sendgrid webhooks
-     *
-     * @access public
-     */
-    public function sendgrid()
-    {
-        $this->checkWebhookToken();
-        echo $this->sendgrid->receiveEmail($_POST) ? 'PARSED' : 'IGNORED';
     }
 }

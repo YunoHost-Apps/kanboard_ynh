@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
 /**
  * Task controller
@@ -68,7 +68,7 @@ class Task extends Base
             'project' => $this->project->getById($task['project_id']),
             'files' => $this->file->getAllDocuments($task['id']),
             'images' => $this->file->getAllImages($task['id']),
-            'comments' => $this->comment->getAll($task['id']),
+            'comments' => $this->comment->getAll($task['id'], $this->userSession->getCommentSorting()),
             'subtasks' => $subtasks,
             'links' => $this->taskLink->getAllGroupedByLabel($task['id']),
             'task' => $task,
@@ -156,7 +156,6 @@ class Task extends Base
         }
 
         if ($this->request->getStringParam('confirmation') === 'yes') {
-
             $this->checkCSRFParam();
 
             if ($this->task->remove($task['id'])) {

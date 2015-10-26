@@ -1,8 +1,8 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
-use Core\ObjectStorage\ObjectStorageException;
+use Kanboard\Core\ObjectStorage\ObjectStorageException;
 
 /**
  * File API controller
@@ -10,7 +10,7 @@ use Core\ObjectStorage\ObjectStorageException;
  * @package  api
  * @author   Frederic Guillot
  */
-class File extends \Core\Base
+class File extends \Kanboard\Core\Base
 {
     public function getFile($file_id)
     {
@@ -25,14 +25,12 @@ class File extends \Core\Base
     public function downloadFile($file_id)
     {
         try {
-
             $file = $this->file->getById($file_id);
 
             if (! empty($file)) {
                 return base64_encode($this->objectStorage->get($file['path']));
             }
-        }
-        catch (ObjectStorageException $e) {
+        } catch (ObjectStorageException $e) {
             $this->logger->error($e->getMessage());
         }
 

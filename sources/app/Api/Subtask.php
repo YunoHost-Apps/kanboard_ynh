@@ -1,6 +1,6 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
 /**
  * Subtask API controller
@@ -8,7 +8,7 @@ namespace Api;
  * @package  api
  * @author   Frederic Guillot
  */
-class Subtask extends \Core\Base
+class Subtask extends \Kanboard\Core\Base
 {
     public function getSubtask($subtask_id)
     {
@@ -36,7 +36,7 @@ class Subtask extends \Core\Base
             'status' => $status,
         );
 
-        list($valid,) = $this->subtask->validateCreation($values);
+        list($valid, ) = $this->subtask->validateCreation($values);
         return $valid ? $this->subtask->create($values) : false;
     }
 
@@ -58,7 +58,7 @@ class Subtask extends \Core\Base
             }
         }
 
-        list($valid,) = $this->subtask->validateApiModification($values);
+        list($valid, ) = $this->subtask->validateApiModification($values);
         return $valid && $this->subtask->update($values);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Console;
+namespace Kanboard\Console;
 
-use Core\Tool;
+use Kanboard\Core\Csv;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,7 +28,7 @@ class SubtaskExport extends Base
         );
 
         if (is_array($data)) {
-            Tool::csv($data);
+            Csv::output($data);
         }
     }
 }

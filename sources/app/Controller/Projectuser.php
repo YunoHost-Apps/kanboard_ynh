@@ -1,9 +1,9 @@
 <?php
 
-namespace Controller;
+namespace Kanboard\Controller;
 
-use Model\User as UserModel;
-use Model\Task as TaskModel;
+use Kanboard\Model\User as UserModel;
+use Kanboard\Model\Task as TaskModel;
 
 /**
  * Project User overview
@@ -36,8 +36,7 @@ class Projectuser extends Base
 
         if ($this->userSession->isAdmin()) {
             $project_ids = $this->project->getAllIds();
-        }
-        else {
+        } else {
             $project_ids = $this->projectPermission->getMemberProjectIds($this->userSession->getId());
         }
 

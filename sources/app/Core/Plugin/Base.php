@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Plugin;
+namespace Kanboard\Core\Plugin;
 
 /**
  * Plugin Base class
@@ -8,7 +8,7 @@ namespace Core\Plugin;
  * @package  plugin
  * @author   Frederic Guillot
  */
-abstract class Base extends \Core\Base
+abstract class Base extends \Kanboard\Core\Base
 {
     /**
      * Method called for each request
@@ -51,7 +51,7 @@ abstract class Base extends \Core\Base
     {
         $container = $this->container;
 
-        $this->container['dispatcher']->addListener($event, function() use ($container, $callback) {
+        $this->container['dispatcher']->addListener($event, function () use ($container, $callback) {
             call_user_func($callback, $container);
         });
     }
@@ -66,7 +66,7 @@ abstract class Base extends \Core\Base
      */
     public function getPluginName()
     {
-        return ucfirst(substr(get_called_class(), 7, -7));
+        return ucfirst(substr(get_called_class(), 16, -7));
     }
 
     /**

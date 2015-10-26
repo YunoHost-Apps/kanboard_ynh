@@ -1,10 +1,11 @@
 <?php
 
-namespace Auth;
+namespace Kanboard\Auth;
 
-use Core\Request;
-use Event\AuthEvent;
-use Core\Security;
+use Kanboard\Core\Base;
+use Kanboard\Core\Request;
+use Kanboard\Event\AuthEvent;
+use Kanboard\Core\Security;
 
 /**
  * RememberMe model
@@ -88,7 +89,6 @@ class RememberMe extends Base
         $credentials = $this->readCookie();
 
         if ($credentials !== false) {
-
             $record = $this->find($credentials['token'], $credentials['sequence']);
 
             if ($record) {
@@ -144,7 +144,6 @@ class RememberMe extends Base
         $credentials = $this->readCookie();
 
         if ($credentials !== false) {
-
             $this->deleteCookie();
 
             $this->db

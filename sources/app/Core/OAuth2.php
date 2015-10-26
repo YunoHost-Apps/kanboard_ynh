@@ -1,6 +1,6 @@
 <?php
 
-namespace Core;
+namespace Kanboard\Core;
 
 /**
  * OAuth2 client
@@ -86,7 +86,6 @@ class OAuth2 extends Base
     public function getAccessToken($code)
     {
         if (empty($this->accessToken) && ! empty($code)) {
-
             $params = array(
                 'code' => $code,
                 'client_id' => $this->clientId,

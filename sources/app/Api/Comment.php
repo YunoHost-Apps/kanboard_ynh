@@ -1,6 +1,6 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
 /**
  * Comment API controller
@@ -8,7 +8,7 @@ namespace Api;
  * @package  api
  * @author   Frederic Guillot
  */
-class Comment extends \Core\Base
+class Comment extends \Kanboard\Core\Base
 {
     public function getComment($comment_id)
     {
@@ -33,7 +33,7 @@ class Comment extends \Core\Base
             'comment' => $content,
         );
 
-        list($valid,) = $this->comment->validateCreation($values);
+        list($valid, ) = $this->comment->validateCreation($values);
 
         return $valid ? $this->comment->create($values) : false;
     }
@@ -45,7 +45,7 @@ class Comment extends \Core\Base
             'comment' => $content,
         );
 
-        list($valid,) = $this->comment->validateModification($values);
+        list($valid, ) = $this->comment->validateModification($values);
         return $valid && $this->comment->update($values);
     }
 }

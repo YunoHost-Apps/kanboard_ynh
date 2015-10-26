@@ -1,18 +1,18 @@
 <?php
 
-namespace ServiceProvider;
+namespace Kanboard\ServiceProvider;
 
-use Core\Plugin\Loader;
-use Core\ObjectStorage\FileStorage;
-use Core\Paginator;
-use Core\OAuth2;
-use Core\Tool;
-use Model\Config;
-use Model\Project;
-use Model\Webhook;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use League\HTMLToMarkdown\HtmlConverter;
+use Kanboard\Core\Plugin\Loader;
+use Kanboard\Core\Mail\Client as EmailClient;
+use Kanboard\Core\ObjectStorage\FileStorage;
+use Kanboard\Core\Paginator;
+use Kanboard\Core\OAuth2;
+use Kanboard\Core\Tool;
+use Kanboard\Model\UserNotificationType;
+use Kanboard\Model\ProjectNotificationType;
 
 class ClassProvider implements ServiceProviderInterface
 {
@@ -28,24 +28,20 @@ class ClassProvider implements ServiceProviderInterface
             'Config',
             'Currency',
             'CustomFilter',
-            'DateParser',
             'File',
             'LastLogin',
             'Link',
             'Notification',
-            'NotificationType',
-            'NotificationFilter',
             'OverdueNotification',
-            'WebNotification',
-            'EmailNotification',
             'Project',
             'ProjectActivity',
             'ProjectAnalytic',
             'ProjectDuplication',
             'ProjectDailyColumnStats',
             'ProjectDailyStats',
-            'ProjectIntegration',
             'ProjectPermission',
+            'ProjectNotification',
+            'ProjectMetadata',
             'Subtask',
             'SubtaskExport',
             'SubtaskTimeTracking',
@@ -63,10 +59,17 @@ class ClassProvider implements ServiceProviderInterface
             'TaskPosition',
             'TaskStatus',
             'TaskValidator',
+            'TaskImport',
+            'TaskMetadata',
             'Transition',
             'User',
+            'UserImport',
             'UserSession',
-            'Webhook',
+            'UserNotification',
+            'UserNotificationType',
+            'UserNotificationFilter',
+            'UserUnreadNotification',
+            'UserMetadata',
         ),
         'Formatter' => array(
             'TaskFilterGanttFormatter',
@@ -76,7 +79,7 @@ class ClassProvider implements ServiceProviderInterface
             'ProjectGanttFormatter',
         ),
         'Core' => array(
-            'EmailClient',
+            'DateParser',
             'Helper',
             'HttpClient',
             'Lexer',
@@ -95,13 +98,6 @@ class ClassProvider implements ServiceProviderInterface
             'BitbucketWebhook',
             'GithubWebhook',
             'GitlabWebhook',
-            'HipchatWebhook',
-            'Jabber',
-            'Mailgun',
-            'Postmark',
-            'Sendgrid',
-            'SlackWebhook',
-            'Smtp',
         )
     );
 
@@ -117,12 +113,34 @@ class ClassProvider implements ServiceProviderInterface
             return new OAuth2($c);
         });
 
-        $container['htmlConverter'] = function() {
+        $container['htmlConverter'] = function () {
             return new HtmlConverter(array('strip_tags' => true));
         };
 
-        $container['objectStorage'] = function() {
+        $container['objectStorage'] = function () {
             return new FileStorage(FILES_DIR);
+        };
+
+        $container['emailClient'] = function ($container) {
+            $mailer = new EmailClient($container);
+            $mailer->setTransport('smtp', '\Kanboard\Core\Mail\Transport\Smtp');
+            $mailer->setTransport('sendmail', '\Kanboard\Core\Mail\Transport\Sendmail');
+            $mailer->setTransport('mail', '\Kanboard\Core\Mail\Transport\Mail');
+            return $mailer;
+        };
+
+        $container['userNotificationType'] = function ($container) {
+            $type = new UserNotificationType($container);
+            $type->setType('email', t('Email'), '\Kanboard\Notification\Mail');
+            $type->setType('web', t('Web'), '\Kanboard\Notification\Web');
+            return $type;
+        };
+
+        $container['projectNotificationType'] = function ($container) {
+            $type = new ProjectNotificationType($container);
+            $type->setType('webhook', 'Webhook', '\Kanboard\Notification\Webhook', true);
+            $type->setType('activity_stream', 'ActivityStream', '\Kanboard\Notification\ActivityStream', true);
+            return $type;
         };
 
         $container['pluginLoader'] = new Loader($container);

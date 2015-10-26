@@ -1,8 +1,6 @@
 <?php
 
-namespace Model;
-
-use Core\Translator;
+namespace Kanboard\Model;
 
 /**
  * User Session
@@ -153,5 +151,27 @@ class UserSession extends Base
     public function setBoardDisplayMode($project_id, $collapsed)
     {
         $_SESSION['board_collapsed'][$project_id] = $collapsed;
+    }
+
+    /**
+     * Set comments sorting
+     *
+     * @access public
+     * @param  string $order
+     */
+    public function setCommentSorting($order)
+    {
+        $this->session['comment_sorting'] = $order;
+    }
+
+    /**
+     * Get comments sorting direction
+     *
+     * @access public
+     * @return string
+     */
+    public function getCommentSorting()
+    {
+        return $this->session['comment_sorting'] ?: 'ASC';
     }
 }

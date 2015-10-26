@@ -2,19 +2,19 @@
 
 // Enable/disable debug
 defined('DEBUG') or define('DEBUG', false);
-defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.'/../data/debug.log');
+defined('DEBUG_FILE') or define('DEBUG_FILE', __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'debug.log');
 
 // Plugin directory
-defined('PLUGINS_DIR') or define('PLUGINS_DIR', __DIR__.'/../plugins');
+defined('PLUGINS_DIR') or define('PLUGINS_DIR', __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'plugins');
 
 // Application version
-defined('APP_VERSION') or define('APP_VERSION', '1.0.19');
+defined('APP_VERSION') or define('APP_VERSION', '1.0.20');
 
 // Database driver: sqlite, mysql or postgres
 defined('DB_DRIVER') or define('DB_DRIVER', 'sqlite');
 
 // Sqlite configuration
-defined('DB_FILENAME') or define('DB_FILENAME', 'data/db.sqlite');
+defined('DB_FILENAME') or define('DB_FILENAME', 'data'.DIRECTORY_SEPARATOR.'db.sqlite');
 
 // Mysql/Postgres configuration
 defined('DB_USERNAME') or define('DB_USERNAME', 'root');
@@ -82,11 +82,6 @@ defined('MAIL_SMTP_USERNAME') or define('MAIL_SMTP_USERNAME', '');
 defined('MAIL_SMTP_PASSWORD') or define('MAIL_SMTP_PASSWORD', '');
 defined('MAIL_SMTP_ENCRYPTION') or define('MAIL_SMTP_ENCRYPTION', null);
 defined('MAIL_SENDMAIL_COMMAND') or define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
-defined('POSTMARK_API_TOKEN') or define('POSTMARK_API_TOKEN', '');
-defined('MAILGUN_API_TOKEN') or define('MAILGUN_API_TOKEN', '');
-defined('MAILGUN_DOMAIN') or define('MAILGUN_DOMAIN', '');
-defined('SENDGRID_API_USER') or define('SENDGRID_API_USER', '');
-defined('SENDGRID_API_KEY') or define('SENDGRID_API_KEY', '');
 
 // Enable or disable "Strict-Transport-Security" HTTP header
 defined('ENABLE_HSTS') or define('ENABLE_HSTS', true);
@@ -98,7 +93,7 @@ defined('ENABLE_XFRAME') or define('ENABLE_XFRAME', true);
 defined('ENABLE_SYSLOG') or define('ENABLE_SYSLOG', true);
 
 // Default files directory
-defined('FILES_DIR') or define('FILES_DIR', 'data/files/');
+defined('FILES_DIR') or define('FILES_DIR', 'data'.DIRECTORY_SEPARATOR.'files');
 
 // Escape html inside markdown text
 defined('MARKDOWN_ESCAPE_HTML') or define('MARKDOWN_ESCAPE_HTML', true);
@@ -126,4 +121,3 @@ defined('HTTP_PROXY_HOSTNAME') or define('HTTP_PROXY_HOSTNAME', '');
 defined('HTTP_PROXY_PORT') or define('HTTP_PROXY_PORT', '3128');
 defined('HTTP_PROXY_USERNAME') or define('HTTP_PROXY_USERNAME', '');
 defined('HTTP_PROXY_PASSWORD') or define('HTTP_PROXY_PASSWORD', '');
-

@@ -1,9 +1,8 @@
 <?php
 
-namespace Api;
+namespace Kanboard\Api;
 
-use Model\Subtask as SubtaskModel;
-use Model\Task as TaskModel;
+use Kanboard\Model\Subtask as SubtaskModel;
 
 /**
  * Me API controller
@@ -45,7 +44,7 @@ class Me extends Base
             'is_private' => 1,
         );
 
-        list($valid,) = $this->project->validateCreation($values);
+        list($valid, ) = $this->project->validateCreation($values);
         return $valid ? $this->project->create($values, $this->userSession->getId(), true) : false;
     }
 
