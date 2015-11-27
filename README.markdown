@@ -45,15 +45,28 @@ If you wish to add a user, just log in with that user into Kanboard so the softw
 Developper infos
 ----------------
 
+Please do your pull request to the dev branch.
+
 Update package:
-
-    wget http://kanboard.net/kanboard-latest.zip
-    unzip kanboard-latest.zip
-    rm -Rf sources
-    mv kanboard sources
-
+```
+wget http://kanboard.net/kanboard-latest.zip
+unzip kanboard-latest.zip
+rm -Rf sources
+mv kanboard sources
+```
 Then do a manual diff between `conf/config.php` and `sources/config.default.php` to see if there are new config options
 
 Update readme with the new version
 
 Test it
+
+Test or upgrade to dev version:
+```
+su - admin
+git clone -b dev https://github.com/mbugeia/kanboard_ynh
+# to install
+sudo yunohost app install -l Kanboard /home/admin/kanboard_ynh
+# to upgrade
+sudo yunohost app upgrade -f /home/admin/kanboard_ynh kanboard
+
+```
