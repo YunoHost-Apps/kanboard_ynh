@@ -11,8 +11,11 @@ use Kanboard\Core\ObjectStorage\FileStorage;
 use Kanboard\Core\Paginator;
 use Kanboard\Core\OAuth2;
 use Kanboard\Core\Tool;
+use Kanboard\Core\Http\Client as HttpClient;
 use Kanboard\Model\UserNotificationType;
 use Kanboard\Model\ProjectNotificationType;
+use Kanboard\Notification\Mail as MailNotification;
+use Kanboard\Notification\Web as WebNotification;
 
 class ClassProvider implements ServiceProviderInterface
 {
@@ -81,18 +84,22 @@ class ClassProvider implements ServiceProviderInterface
         'Core' => array(
             'DateParser',
             'Helper',
-            'HttpClient',
             'Lexer',
-            'Request',
-            'Router',
-            'Session',
             'Template',
+        ),
+        'Core\Http' => array(
+            'Request',
+            'Response',
+            'Router',
         ),
         'Core\Cache' => array(
             'MemoryCache',
         ),
         'Core\Plugin' => array(
             'Hook',
+        ),
+        'Core\Security' => array(
+            'Token',
         ),
         'Integration' => array(
             'BitbucketWebhook',
@@ -113,6 +120,10 @@ class ClassProvider implements ServiceProviderInterface
             return new OAuth2($c);
         });
 
+        $container['httpClient'] = function ($c) {
+            return new HttpClient($c);
+        };
+
         $container['htmlConverter'] = function () {
             return new HtmlConverter(array('strip_tags' => true));
         };
@@ -131,8 +142,8 @@ class ClassProvider implements ServiceProviderInterface
 
         $container['userNotificationType'] = function ($container) {
             $type = new UserNotificationType($container);
-            $type->setType('email', t('Email'), '\Kanboard\Notification\Mail');
-            $type->setType('web', t('Web'), '\Kanboard\Notification\Web');
+            $type->setType(MailNotification::TYPE, t('Email'), '\Kanboard\Notification\Mail');
+            $type->setType(WebNotification::TYPE, t('Web'), '\Kanboard\Notification\Web');
             return $type;
         };
 
@@ -146,5 +157,7 @@ class ClassProvider implements ServiceProviderInterface
         $container['pluginLoader'] = new Loader($container);
 
         $container['cspRules'] = array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '* data:');
+
+        return $container;
     }
 }

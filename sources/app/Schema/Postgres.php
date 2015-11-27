@@ -3,9 +3,14 @@
 namespace Schema;
 
 use PDO;
-use Kanboard\Core\Security;
+use Kanboard\Core\Security\Token;
 
-const VERSION = 73;
+const VERSION = 74;
+
+function version_74(PDO $pdo)
+{
+    $pdo->exec('ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_name_key');
+}
 
 function version_73(PDO $pdo)
 {
@@ -994,6 +999,6 @@ function version_1(PDO $pdo)
     $pdo->exec("
         INSERT INTO config
         (webhooks_token, api_token)
-        VALUES ('".Security::generateToken()."', '".Security::generateToken()."')
+        VALUES ('".Token::getToken()."', '".Token::getToken()."')
     ");
 }
