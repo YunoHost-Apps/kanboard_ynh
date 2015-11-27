@@ -1,14 +1,17 @@
 <?php
 
-namespace Kanboard\Core;
+namespace Kanboard\Core\Http;
+
+use Kanboard\Core\Base;
+use Kanboard\Core\Csv;
 
 /**
  * Response class
  *
- * @package  core
+ * @package  http
  * @author   Frederic Guillot
  */
-class Response
+class Response extends Base
 {
     /**
      * Send no cache headers
@@ -44,6 +47,8 @@ class Response
     public function forceDownload($filename)
     {
         header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Type: application/octet-stream');
     }
 
     /**

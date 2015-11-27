@@ -4,7 +4,7 @@ namespace Kanboard\Model;
 
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
-use Kanboard\Core\Security;
+use Kanboard\Core\Security\Token;
 
 /**
  * Project model
@@ -491,7 +491,7 @@ class Project extends Base
                $this->db
                     ->table(self::TABLE)
                     ->eq('id', $project_id)
-                    ->save(array('is_public' => 1, 'token' => Security::generateToken()));
+                    ->save(array('is_public' => 1, 'token' => Token::getToken()));
     }
 
     /**
@@ -527,7 +527,6 @@ class Project extends Base
             new Validators\MaxLength('start_date', t('The maximum length is %d characters', 10), 10),
             new Validators\MaxLength('end_date', t('The maximum length is %d characters', 10), 10),
             new Validators\AlphaNumeric('identifier', t('This value must be alphanumeric')) ,
-            new Validators\Unique('name', t('This project must be unique'), $this->db->getConnection(), self::TABLE),
             new Validators\Unique('identifier', t('The identifier must be unique'), $this->db->getConnection(), self::TABLE),
         );
     }

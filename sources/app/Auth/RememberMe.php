@@ -3,9 +3,9 @@
 namespace Kanboard\Auth;
 
 use Kanboard\Core\Base;
-use Kanboard\Core\Request;
+use Kanboard\Core\Http\Request;
 use Kanboard\Event\AuthEvent;
-use Kanboard\Core\Security;
+use Kanboard\Core\Security\Token;
 
 /**
  * RememberMe model
@@ -101,10 +101,10 @@ class RememberMe extends Base
                 );
 
                 // Create the session
-                $this->userSession->refresh($this->user->getById($record['user_id']));
+                $this->userSession->initialize($this->user->getById($record['user_id']));
 
                 // Do not ask 2FA for remember me session
-                $this->session['2fa_validated'] = true;
+                $this->sessionStorage->postAuth['validated'] = true;
 
                 $this->container['dispatcher']->dispatch(
                     'auth.success',
@@ -165,8 +165,8 @@ class RememberMe extends Base
      */
     public function create($user_id, $ip, $user_agent)
     {
-        $token = hash('sha256', $user_id.$user_agent.$ip.Security::generateToken());
-        $sequence = Security::generateToken();
+        $token = hash('sha256', $user_id.$user_agent.$ip.Token::getToken());
+        $sequence = Token::getToken();
         $expiration = time() + self::EXPIRATION;
 
         $this->cleanup($user_id);
@@ -216,7 +216,7 @@ class RememberMe extends Base
      */
     public function update($token)
     {
-        $new_sequence = Security::generateToken();
+        $new_sequence = Token::getToken();
 
         $this->db
              ->table(self::TABLE)
