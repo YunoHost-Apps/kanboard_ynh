@@ -1,11 +1,41 @@
+Version 1.0.22
+--------------
+
+Breaking changes:
+
+* LDAP configuration parameters changes (See documentation)
+* SQL table changes:
+    - "users" table: added new column "role" and removed columns "is_admin" and "is_project_admin"
+    - "project_has_users" table: replaced column "is_owner" with column "role"
+    - Sqlite does not support alter table, old columns still there but unused
+* API procedure changes:
+    - createUser
+    - createLdapUser
+    - updateUser
+    - updateTask
+* Event removed: "session.bootstrap", use "app.boostrap" instead
+
+New features:
+
+* Add pluggable authentication and authorization system (complete rewrite)
+* Add groups (teams/organization)
+* Add LDAP groups synchronization
+* Add project group permissions
+* Add new project role Viewer
+* Add generic LDAP client library
+* Add search query attribute for task link
+* Add the possibility to define API token in config file
+* Add capability to reopen Gitlab issues
+* Try to load config.php from /data if not available
+
 Version 1.0.21
 --------------
 
 Breaking changes:
 
 * Projects with duplicate name are now allowed:
-    For Postgres and Mysql the unique constraint is removed by database migration
-    However Sqlite does not support alter table, only new databases will have the unique constraint removed
+    - For Postgres and Mysql the unique constraint is removed by database migration
+    - However Sqlite does not support alter table, only new databases will have the unique constraint removed
 
 New features:
 

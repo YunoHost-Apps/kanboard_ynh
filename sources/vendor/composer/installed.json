@@ -341,23 +341,23 @@
     },
     {
         "name": "fguillot/picodb",
-        "version": "v1.0.2",
-        "version_normalized": "1.0.2.0",
+        "version": "v1.0.3",
+        "version_normalized": "1.0.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/picoDb.git",
-            "reference": "61f492c125d9195ce869447e2b2450adeb3b01d6"
+            "reference": "0b4640ebe531a89d2faa36dfabe30a194f1fe903"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/61f492c125d9195ce869447e2b2450adeb3b01d6",
-            "reference": "61f492c125d9195ce869447e2b2450adeb3b01d6",
+            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/0b4640ebe531a89d2faa36dfabe30a194f1fe903",
+            "reference": "0b4640ebe531a89d2faa36dfabe30a194f1fe903",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2015-08-27 23:33:16",
+        "time": "2015-11-30 02:57:18",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -507,17 +507,17 @@
     },
     {
         "name": "league/html-to-markdown",
-        "version": "4.0.1",
-        "version_normalized": "4.0.1.0",
+        "version": "4.1.1",
+        "version_normalized": "4.1.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/thephpleague/html-to-markdown.git",
-            "reference": "c496c27e01b9dce310e03afbcdf783347738f67b"
+            "reference": "01bbfe039d9b97526e3f3a3ee32543fc1d8dba00"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/thephpleague/html-to-markdown/zipball/c496c27e01b9dce310e03afbcdf783347738f67b",
-            "reference": "c496c27e01b9dce310e03afbcdf783347738f67b",
+            "url": "https://api.github.com/repos/thephpleague/html-to-markdown/zipball/01bbfe039d9b97526e3f3a3ee32543fc1d8dba00",
+            "reference": "01bbfe039d9b97526e3f3a3ee32543fc1d8dba00",
             "shasum": ""
         },
         "require": {
@@ -526,14 +526,18 @@
             "php": ">=5.3.3"
         },
         "require-dev": {
+            "mikehaertl/php-shellcommand": "~1.1.0",
             "phpunit/phpunit": "4.*",
             "scrutinizer/ocular": "~1.1"
         },
-        "time": "2015-09-01 22:39:54",
+        "time": "2015-11-20 16:20:25",
+        "bin": [
+            "bin/html-to-markdown"
+        ],
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "4.1-dev"
+                "dev-master": "4.2-dev"
             }
         },
         "installation-source": "dist",
@@ -671,46 +675,107 @@
         ]
     },
     {
-        "name": "symfony/console",
-        "version": "v2.7.5",
-        "version_normalized": "2.7.5.0",
+        "name": "symfony/polyfill-mbstring",
+        "version": "v1.0.0",
+        "version_normalized": "1.0.0.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/symfony/console.git",
-            "reference": "06cb17c013a82f94a3d840682b49425cd00a2161"
+            "url": "https://github.com/symfony/polyfill-mbstring.git",
+            "reference": "0b6a8940385311a24e060ec1fe35680e17c74497"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/console/zipball/06cb17c013a82f94a3d840682b49425cd00a2161",
-            "reference": "06cb17c013a82f94a3d840682b49425cd00a2161",
+            "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/0b6a8940385311a24e060ec1fe35680e17c74497",
+            "reference": "0b6a8940385311a24e060ec1fe35680e17c74497",
             "shasum": ""
         },
         "require": {
-            "php": ">=5.3.9"
+            "php": ">=5.3.3"
+        },
+        "time": "2015-11-04 20:28:58",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.0-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Symfony\\Polyfill\\Mbstring\\": ""
+            },
+            "files": [
+                "bootstrap.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Nicolas Grekas",
+                "email": "p@tchwork.com"
+            },
+            {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+            }
+        ],
+        "description": "Symfony polyfill for the Mbstring extension",
+        "homepage": "https://symfony.com",
+        "keywords": [
+            "compatibility",
+            "mbstring",
+            "polyfill",
+            "portable",
+            "shim"
+        ]
+    },
+    {
+        "name": "symfony/console",
+        "version": "v2.8.0",
+        "version_normalized": "2.8.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/symfony/console.git",
+            "reference": "d232bfc100dfd32b18ccbcab4bcc8f28697b7e41"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/symfony/console/zipball/d232bfc100dfd32b18ccbcab4bcc8f28697b7e41",
+            "reference": "d232bfc100dfd32b18ccbcab4bcc8f28697b7e41",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.9",
+            "symfony/polyfill-mbstring": "~1.0"
         },
         "require-dev": {
             "psr/log": "~1.0",
-            "symfony/event-dispatcher": "~2.1",
-            "symfony/phpunit-bridge": "~2.7",
-            "symfony/process": "~2.1"
+            "symfony/event-dispatcher": "~2.1|~3.0.0",
+            "symfony/process": "~2.1|~3.0.0"
         },
         "suggest": {
             "psr/log": "For using the console logger",
             "symfony/event-dispatcher": "",
             "symfony/process": ""
         },
-        "time": "2015-09-25 08:32:23",
+        "time": "2015-11-30 12:35:10",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.7-dev"
+                "dev-master": "2.8-dev"
             }
         },
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
                 "Symfony\\Component\\Console\\": ""
-            }
+            },
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [
@@ -731,17 +796,17 @@
     },
     {
         "name": "symfony/event-dispatcher",
-        "version": "v2.7.5",
-        "version_normalized": "2.7.5.0",
+        "version": "v2.8.0",
+        "version_normalized": "2.8.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/event-dispatcher.git",
-            "reference": "ae4dcc2a8d3de98bd794167a3ccda1311597c5d9"
+            "reference": "a5eb815363c0388e83247e7e9853e5dbc14999cc"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/ae4dcc2a8d3de98bd794167a3ccda1311597c5d9",
-            "reference": "ae4dcc2a8d3de98bd794167a3ccda1311597c5d9",
+            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/a5eb815363c0388e83247e7e9853e5dbc14999cc",
+            "reference": "a5eb815363c0388e83247e7e9853e5dbc14999cc",
             "shasum": ""
         },
         "require": {
@@ -749,28 +814,30 @@
         },
         "require-dev": {
             "psr/log": "~1.0",
-            "symfony/config": "~2.0,>=2.0.5",
-            "symfony/dependency-injection": "~2.6",
-            "symfony/expression-language": "~2.6",
-            "symfony/phpunit-bridge": "~2.7",
-            "symfony/stopwatch": "~2.3"
+            "symfony/config": "~2.0,>=2.0.5|~3.0.0",
+            "symfony/dependency-injection": "~2.6|~3.0.0",
+            "symfony/expression-language": "~2.6|~3.0.0",
+            "symfony/stopwatch": "~2.3|~3.0.0"
         },
         "suggest": {
             "symfony/dependency-injection": "",
             "symfony/http-kernel": ""
         },
-        "time": "2015-09-22 13:49:29",
+        "time": "2015-10-30 20:15:42",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.7-dev"
+                "dev-master": "2.8-dev"
             }
         },
         "installation-source": "dist",
         "autoload": {
             "psr-4": {
                 "Symfony\\Component\\EventDispatcher\\": ""
-            }
+            },
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [

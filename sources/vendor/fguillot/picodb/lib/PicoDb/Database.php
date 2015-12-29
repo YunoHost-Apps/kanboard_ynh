@@ -6,6 +6,7 @@ use Closure;
 use PDOException;
 use LogicException;
 use PicoDb\Driver\Sqlite;
+use PicoDb\Driver\Mssql;
 use PicoDb\Driver\Mysql;
 use PicoDb\Driver\Postgres;
 
@@ -79,6 +80,9 @@ class Database
         switch ($settings['driver']) {
             case 'sqlite':
                 $this->driver = new Sqlite($settings);
+                break;
+            case 'mssql':
+                $this->driver = new Mssql($settings);
                 break;
             case 'mysql':
                 $this->driver = new Mysql($settings);

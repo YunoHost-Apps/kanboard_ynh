@@ -5,23 +5,17 @@ namespace Kanboard\ServiceProvider;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use League\HTMLToMarkdown\HtmlConverter;
-use Kanboard\Core\Plugin\Loader;
 use Kanboard\Core\Mail\Client as EmailClient;
 use Kanboard\Core\ObjectStorage\FileStorage;
 use Kanboard\Core\Paginator;
-use Kanboard\Core\OAuth2;
+use Kanboard\Core\Http\OAuth2;
 use Kanboard\Core\Tool;
 use Kanboard\Core\Http\Client as HttpClient;
-use Kanboard\Model\UserNotificationType;
-use Kanboard\Model\ProjectNotificationType;
-use Kanboard\Notification\Mail as MailNotification;
-use Kanboard\Notification\Web as WebNotification;
 
 class ClassProvider implements ServiceProviderInterface
 {
     private $classes = array(
         'Model' => array(
-            'Acl',
             'Action',
             'Authentication',
             'Board',
@@ -32,6 +26,8 @@ class ClassProvider implements ServiceProviderInterface
             'Currency',
             'CustomFilter',
             'File',
+            'Group',
+            'GroupMember',
             'LastLogin',
             'Link',
             'Notification',
@@ -45,6 +41,9 @@ class ClassProvider implements ServiceProviderInterface
             'ProjectPermission',
             'ProjectNotification',
             'ProjectMetadata',
+            'ProjectGroupRole',
+            'ProjectUserRole',
+            'RememberMeSession',
             'Subtask',
             'SubtaskExport',
             'SubtaskTimeTracking',
@@ -67,9 +66,8 @@ class ClassProvider implements ServiceProviderInterface
             'Transition',
             'User',
             'UserImport',
-            'UserSession',
+            'UserLocking',
             'UserNotification',
-            'UserNotificationType',
             'UserNotificationFilter',
             'UserUnreadNotification',
             'UserMetadata',
@@ -80,6 +78,8 @@ class ClassProvider implements ServiceProviderInterface
             'TaskFilterCalendarFormatter',
             'TaskFilterICalendarFormatter',
             'ProjectGanttFormatter',
+            'UserFilterAutoCompleteFormatter',
+            'GroupAutoCompleteFormatter',
         ),
         'Core' => array(
             'DateParser',
@@ -90,7 +90,7 @@ class ClassProvider implements ServiceProviderInterface
         'Core\Http' => array(
             'Request',
             'Response',
-            'Router',
+            'RememberMeCookie',
         ),
         'Core\Cache' => array(
             'MemoryCache',
@@ -100,6 +100,13 @@ class ClassProvider implements ServiceProviderInterface
         ),
         'Core\Security' => array(
             'Token',
+            'Role',
+        ),
+        'Core\User' => array(
+            'GroupSync',
+            'UserSync',
+            'UserSession',
+            'UserProfile',
         ),
         'Integration' => array(
             'BitbucketWebhook',
@@ -139,22 +146,6 @@ class ClassProvider implements ServiceProviderInterface
             $mailer->setTransport('mail', '\Kanboard\Core\Mail\Transport\Mail');
             return $mailer;
         };
-
-        $container['userNotificationType'] = function ($container) {
-            $type = new UserNotificationType($container);
-            $type->setType(MailNotification::TYPE, t('Email'), '\Kanboard\Notification\Mail');
-            $type->setType(WebNotification::TYPE, t('Web'), '\Kanboard\Notification\Web');
-            return $type;
-        };
-
-        $container['projectNotificationType'] = function ($container) {
-            $type = new ProjectNotificationType($container);
-            $type->setType('webhook', 'Webhook', '\Kanboard\Notification\Webhook', true);
-            $type->setType('activity_stream', 'ActivityStream', '\Kanboard\Notification\ActivityStream', true);
-            return $type;
-        };
-
-        $container['pluginLoader'] = new Loader($container);
 
         $container['cspRules'] = array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '* data:');
 

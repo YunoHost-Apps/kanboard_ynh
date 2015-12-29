@@ -13,6 +13,7 @@ namespace Symfony\Component\Console\Helper;
 
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Exception\LogicException;
 
 /**
  * The ProgressBar provides helpers to display progress output.
@@ -27,7 +28,8 @@ class ProgressBar
     private $barChar;
     private $emptyBarChar = '-';
     private $progressChar = '>';
-    private $format = null;
+    private $format;
+    private $internalFormat;
     private $redrawFreq = 1;
 
     /**
@@ -71,8 +73,6 @@ class ProgressBar
                 $this->setRedrawFrequency($max / 10);
             }
         }
-
-        $this->setFormat($this->determineBestFormat());
 
         $this->startTime = time();
     }
@@ -310,16 +310,8 @@ class ProgressBar
      */
     public function setFormat($format)
     {
-        // try to use the _nomax variant if available
-        if (!$this->max && null !== self::getFormatDefinition($format.'_nomax')) {
-            $this->format = self::getFormatDefinition($format.'_nomax');
-        } elseif (null !== self::getFormatDefinition($format)) {
-            $this->format = self::getFormatDefinition($format);
-        } else {
-            $this->format = $format;
-        }
-
-        $this->formatLineCount = substr_count($this->format, "\n");
+        $this->format = null;
+        $this->internalFormat = $format;
     }
 
     /**
@@ -355,7 +347,7 @@ class ProgressBar
      *
      * @param int $step Number of steps to advance
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function advance($step = 1)
     {
@@ -369,7 +361,7 @@ class ProgressBar
      *
      * @param int $step The current progress
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function setCurrent($step)
     {
@@ -393,13 +385,13 @@ class ProgressBar
      *
      * @param int $step The current progress
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function setProgress($step)
     {
         $step = (int) $step;
         if ($step < $this->step) {
-            throw new \LogicException('You can\'t regress the progress bar.');
+            throw new LogicException('You can\'t regress the progress bar.');
         }
 
         if ($this->max && $step > $this->max) {
@@ -441,6 +433,10 @@ class ProgressBar
             return;
         }
 
+        if (null === $this->format) {
+            $this->setRealFormat($this->internalFormat ?: $this->determineBestFormat());
+        }
+
         // these 3 variables can be removed in favor of using $this in the closure when support for PHP 5.3 will be dropped.
         $self = $this;
         $output = $this->output;
@@ -475,7 +471,30 @@ class ProgressBar
             return;
         }
 
+        if (null === $this->format) {
+            $this->setRealFormat($this->internalFormat ?: $this->determineBestFormat());
+        }
+
         $this->overwrite(str_repeat("\n", $this->formatLineCount));
+    }
+
+    /**
+     * Sets the progress bar format.
+     *
+     * @param string $format The format
+     */
+    private function setRealFormat($format)
+    {
+        // try to use the _nomax variant if available
+        if (!$this->max && null !== self::getFormatDefinition($format.'_nomax')) {
+            $this->format = self::getFormatDefinition($format.'_nomax');
+        } elseif (null !== self::getFormatDefinition($format)) {
+            $this->format = self::getFormatDefinition($format);
+        } else {
+            $this->format = $format;
+        }
+
+        $this->formatLineCount = substr_count($this->format, "\n");
     }
 
     /**
@@ -562,7 +581,7 @@ class ProgressBar
             },
             'remaining' => function (ProgressBar $bar) {
                 if (!$bar->getMaxSteps()) {
-                    throw new \LogicException('Unable to display the remaining time if the maximum number of steps is not set.');
+                    throw new LogicException('Unable to display the remaining time if the maximum number of steps is not set.');
                 }
 
                 if (!$bar->getProgress()) {
@@ -575,7 +594,7 @@ class ProgressBar
             },
             'estimated' => function (ProgressBar $bar) {
                 if (!$bar->getMaxSteps()) {
-                    throw new \LogicException('Unable to display the estimated time if the maximum number of steps is not set.');
+                    throw new LogicException('Unable to display the estimated time if the maximum number of steps is not set.');
                 }
 
                 if (!$bar->getProgress()) {
