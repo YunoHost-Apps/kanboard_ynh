@@ -10,6 +10,9 @@ admin=$(sudo yunohost app setting $app adminusername)
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 db_pwd=$(sudo yunohost app setting $app mysqlpwd)
 
+# flush php sessions before upgrade
+sudo rm -rf /var/lib/php5/session/*
+
 final_path=/var/www/$app
 sudo mv $final_path $final_path.old
 
