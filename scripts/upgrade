@@ -19,9 +19,9 @@ sudo mv $final_path $final_path.old
 sudo mkdir -p $final_path
 sudo cp -a ../sources/. $final_path
 # restore data
-sudo cp -a $final_path.old/data $final_path/data
+sudo cp -a $final_path.old/data $final_path
 # restore plugins
-sudo cp -a $final_path.old/plugins $final_path/plugins
+sudo cp -a $final_path.old/plugins $final_path
 # delete temp directory
 sudo rm -Rf $final_path.old
 
