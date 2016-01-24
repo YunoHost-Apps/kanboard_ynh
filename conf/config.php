@@ -50,7 +50,7 @@ define('DB_PORT', null);
 define('LDAP_AUTH', false);
 
 // LDAP server hostname
-define('LDAP_SERVER', '');
+define('LDAP_SERVER', 'localhost');
 
 // LDAP server port (389 by default)
 define('LDAP_PORT', 389);
@@ -78,12 +78,12 @@ define('LDAP_PASSWORD', null);
 // LDAP DN for users
 // Example for ActiveDirectory: CN=Users,DC=kanboard,DC=local
 // Example for OpenLDAP: ou=People,dc=example,dc=com
-define('LDAP_USER_BASE_DN', '');
+define('LDAP_USER_BASE_DN', 'ou=users,dc=yunohost,dc=org');
 
 // LDAP pattern to use when searching for a user account
 // Example for ActiveDirectory: '(&(objectClass=user)(sAMAccountName=%s))'
 // Example for OpenLDAP: 'uid=%s'
-define('LDAP_USER_FILTER', '');
+define('LDAP_USER_FILTER', 'uid=%s');
 
 // LDAP attribute for username
 // Example for ActiveDirectory: 'samaccountname'
@@ -93,7 +93,7 @@ define('LDAP_USER_ATTRIBUTE_USERNAME', 'uid');
 // LDAP attribute for user full name
 // Example for ActiveDirectory: 'displayname'
 // Example for OpenLDAP: 'cn'
-define('LDAP_USER_ATTRIBUTE_FULLNAME', 'cn');
+define('LDAP_USER_ATTRIBUTE_FULLNAME', 'displayname');
 
 // LDAP attribute for user email
 define('LDAP_USER_ATTRIBUTE_EMAIL', 'mail');
@@ -172,7 +172,7 @@ define('GITLAB_OAUTH_TOKEN_URL', 'https://gitlab.com/oauth/token');
 define('GITLAB_API_URL', 'https://gitlab.com/api/v3/');
 
 // Enable/disable the reverse proxy authentication
-define('REVERSE_PROXY_AUTH', true);
+define('REVERSE_PROXY_AUTH', false);
 
 // Header name to use for the username
 define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
