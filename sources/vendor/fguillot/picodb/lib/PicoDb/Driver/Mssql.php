@@ -161,4 +161,17 @@ class Mssql extends Base
         $rq = $this->pdo->prepare('UPDATE ['.$this->schemaTable.'] SET [version]=?');
         $rq->execute(array($version));
     }
+
+    /**
+     * Run EXPLAIN command
+     *
+     * @param  string $sql
+     * @param  array  $values
+     * @return array
+     */
+    public function explain($sql, array $values)
+    {
+        $this->getConnection()->exec('SET SHOWPLAN_ALL ON');
+        return $this->getConnection()->query($this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

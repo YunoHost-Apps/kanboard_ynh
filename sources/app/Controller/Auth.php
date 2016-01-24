@@ -2,8 +2,6 @@
 
 namespace Kanboard\Controller;
 
-use Gregwar\Captcha\CaptchaBuilder;
-
 /**
  * Authentication controller
  *
@@ -41,7 +39,7 @@ class Auth extends Base
     {
         $values = $this->request->getValues();
         $this->sessionStorage->hasRememberMe = ! empty($values['remember_me']);
-        list($valid, $errors) = $this->authentication->validateForm($values);
+        list($valid, $errors) = $this->authValidator->validateForm($values);
 
         if ($valid) {
             $this->redirectAfterLogin();
@@ -59,21 +57,6 @@ class Auth extends Base
     {
         $this->sessionManager->close();
         $this->response->redirect($this->helper->url->to('auth', 'login'));
-    }
-
-    /**
-     * Display captcha image
-     *
-     * @access public
-     */
-    public function captcha()
-    {
-        $this->response->contentType('image/jpeg');
-
-        $builder = new CaptchaBuilder;
-        $builder->build();
-        $this->sessionStorage->captcha = $builder->getPhrase();
-        $builder->output();
     }
 
     /**

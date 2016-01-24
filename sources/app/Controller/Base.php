@@ -17,18 +17,18 @@ abstract class Base extends \Kanboard\Core\Base
      *
      * @access public
      */
-    public function beforeAction($controller, $action)
+    public function beforeAction()
     {
         $this->sessionManager->open();
         $this->dispatcher->dispatch('app.bootstrap');
-        $this->sendHeaders($action);
+        $this->sendHeaders();
         $this->authenticationManager->checkCurrentSession();
 
-        if (! $this->applicationAuthorization->isAllowed($controller, $action, Role::APP_PUBLIC)) {
+        if (! $this->applicationAuthorization->isAllowed($this->router->getController(), $this->router->getAction(), Role::APP_PUBLIC)) {
             $this->handleAuthentication();
-            $this->handlePostAuthentication($controller, $action);
-            $this->checkApplicationAuthorization($controller, $action);
-            $this->checkProjectAuthorization($controller, $action);
+            $this->handlePostAuthentication();
+            $this->checkApplicationAuthorization();
+            $this->checkProjectAuthorization();
         }
     }
 
@@ -37,7 +37,7 @@ abstract class Base extends \Kanboard\Core\Base
      *
      * @access private
      */
-    private function sendHeaders($action)
+    private function sendHeaders()
     {
         // HTTP secure headers
         $this->response->csp($this->container['cspRules']);
@@ -45,7 +45,7 @@ abstract class Base extends \Kanboard\Core\Base
         $this->response->xss();
 
         // Allow the public board iframe inclusion
-        if (ENABLE_XFRAME && $action !== 'readonly') {
+        if (ENABLE_XFRAME && $this->router->getAction() !== 'readonly') {
             $this->response->xframe();
         }
 
@@ -76,8 +76,10 @@ abstract class Base extends \Kanboard\Core\Base
      *
      * @access private
      */
-    private function handlePostAuthentication($controller, $action)
+    private function handlePostAuthentication()
     {
+        $controller = strtolower($this->router->getController());
+        $action = strtolower($this->router->getAction());
         $ignore = ($controller === 'twofactor' && in_array($action, array('code', 'check'))) || ($controller === 'auth' && $action === 'logout');
 
         if ($ignore === false && $this->userSession->hasPostAuthentication() && ! $this->userSession->isPostAuthenticationValidated()) {
@@ -94,9 +96,9 @@ abstract class Base extends \Kanboard\Core\Base
      *
      * @access private
      */
-    private function checkApplicationAuthorization($controller, $action)
+    private function checkApplicationAuthorization()
     {
-        if (! $this->helper->user->hasAccess($controller, $action)) {
+        if (! $this->helper->user->hasAccess($this->router->getController(), $this->router->getAction())) {
             $this->forbidden();
         }
     }
@@ -106,7 +108,7 @@ abstract class Base extends \Kanboard\Core\Base
      *
      * @access private
      */
-    private function checkProjectAuthorization($controller, $action)
+    private function checkProjectAuthorization()
     {
         $project_id = $this->request->getIntegerParam('project_id');
         $task_id = $this->request->getIntegerParam('task_id');
@@ -116,7 +118,7 @@ abstract class Base extends \Kanboard\Core\Base
             $project_id = $this->taskFinder->getProjectId($task_id);
         }
 
-        if ($project_id > 0 && ! $this->helper->user->hasProjectAccess($controller, $action, $project_id)) {
+        if ($project_id > 0 && ! $this->helper->user->hasProjectAccess($this->router->getController(), $this->router->getAction(), $project_id)) {
             $this->forbidden();
         }
     }
@@ -144,7 +146,7 @@ abstract class Base extends \Kanboard\Core\Base
     protected function forbidden($no_layout = false)
     {
         if ($this->request->isAjax()) {
-            $this->response->text('Not Authorized', 401);
+            $this->response->text('Access Forbidden', 403);
         }
 
         $this->response->html($this->template->layout('app/forbidden', array(
@@ -190,7 +192,7 @@ abstract class Base extends \Kanboard\Core\Base
         $content = $this->template->render($template, $params);
         $params['task_content_for_layout'] = $content;
         $params['title'] = $params['task']['project_name'].' &gt; '.$params['task']['title'];
-        $params['board_selector'] = $this->projectUserRole->getProjectsByUser($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
 
         return $this->template->layout('task/layout', $params);
     }
@@ -208,7 +210,7 @@ abstract class Base extends \Kanboard\Core\Base
         $content = $this->template->render($template, $params);
         $params['project_content_for_layout'] = $content;
         $params['title'] = $params['project']['name'] === $params['title'] ? $params['title'] : $params['project']['name'].' &gt; '.$params['title'];
-        $params['board_selector'] = $this->projectUserRole->getProjectsByUser($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         $params['sidebar_template'] = $sidebar_template;
 
         return $this->template->layout('project/layout', $params);
@@ -289,7 +291,7 @@ abstract class Base extends \Kanboard\Core\Base
     {
         $project = $this->getProject();
         $search = $this->request->getStringParam('search', $this->userSession->getFilters($project['id']));
-        $board_selector = $this->projectUserRole->getProjectsByUser($this->userSession->getId());
+        $board_selector = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         unset($board_selector[$project['id']]);
 
         $filters = array(

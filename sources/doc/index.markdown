@@ -45,6 +45,7 @@ Using Kanboard
 - [Create tasks by email](create-tasks-by-email.markdown)
 - [Subtasks](subtasks.markdown)
 - [Analytics for tasks](analytics-tasks.markdown)
+- [User mentions](user-mentions.markdown)
 
 ### Working with users and groups
 
@@ -67,9 +68,6 @@ Using Kanboard
 
 ### Integrations
 
-- [Bitbucket webhooks](bitbucket-webhooks.markdown)
-- [Github webhooks](github-webhooks.markdown)
-- [Gitlab webhooks](gitlab-webhooks.markdown)
 - [iCalendar subscriptions](ical.markdown)
 - [RSS/Atom subscriptions](rss.markdown)
 - [Json-RPC API](api-json-rpc.markdown)
@@ -89,7 +87,7 @@ Technical details
 
 ### Installation
 
-- [Recommended configuration](recommended-configuration.markdown)
+- [Requirements](requirements.markdown)
 - [Installation instructions](installation.markdown)
 - [Upgrade Kanboard to a new version](update.markdown)
 - [Installation on Ubuntu](ubuntu-installation.markdown)
@@ -117,7 +115,7 @@ Technical details
 ### Authentication
 
 - [LDAP authentication](ldap-authentication.markdown)
-- [LDAP group sync](ldap-group-sync.markdown)
+- [LDAP group synchronization](ldap-group-sync.markdown)
 - [LDAP parameters](ldap-parameters.markdown)
 - [Google authentication](google-authentication.markdown)
 - [Github authentication](github-authentication.markdown)

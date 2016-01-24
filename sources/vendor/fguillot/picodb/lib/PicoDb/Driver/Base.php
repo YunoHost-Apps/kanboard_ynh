@@ -189,4 +189,34 @@ abstract class Base
             return false;
         }
     }
+
+    /**
+     * Run EXPLAIN command
+     *
+     * @access public
+     * @param  string $sql
+     * @param  array  $values
+     * @return array
+     */
+    public function explain($sql, array $values)
+    {
+        return $this->getConnection()->query('EXPLAIN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Replace placeholder with values in prepared statement
+     *
+     * @access protected
+     * @param  string $sql
+     * @param  array  $values
+     * @return string
+     */
+    protected function getSqlFromPreparedStatement($sql, array $values)
+    {
+        foreach ($values as $value) {
+            $sql = substr_replace($sql, "'$value'", strpos($sql, '?'), 1);
+        }
+
+        return $sql;
+    }
 }

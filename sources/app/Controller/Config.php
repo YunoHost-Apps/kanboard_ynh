@@ -20,7 +20,7 @@ class Config extends Base
      */
     private function layout($template, array $params)
     {
-        $params['board_selector'] = $this->projectUserRole->getProjectsByUser($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         $params['values'] = $this->config->getAll();
         $params['errors'] = array();
         $params['config_content_for_layout'] = $this->template->render($template, $params);
@@ -40,6 +40,9 @@ class Config extends Base
             $values =  $this->request->getValues();
 
             switch ($redirect) {
+                case 'application':
+                    $values += array('password_reset' => 0);
+                    break;
                 case 'project':
                     $values += array('subtask_restriction' => 0, 'subtask_time_tracking' => 0, 'cfd_include_closed_tasks' => 0);
                     break;

@@ -25,7 +25,7 @@ class Group extends Base
             ->calculate();
 
         $this->response->html($this->template->layout('group/index', array(
-            'board_selector' => $this->projectUserRole->getProjectsByUser($this->userSession->getId()),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'title' => t('Groups').' ('.$paginator->getTotal().')',
             'paginator' => $paginator,
         )));
@@ -42,14 +42,14 @@ class Group extends Base
         $group = $this->group->getById($group_id);
 
         $paginator = $this->paginator
-            ->setUrl('group', 'users')
+            ->setUrl('group', 'users', array('group_id' => $group_id))
             ->setMax(30)
             ->setOrder('username')
             ->setQuery($this->groupMember->getQuery($group_id))
             ->calculate();
 
         $this->response->html($this->template->layout('group/users', array(
-            'board_selector' => $this->projectUserRole->getProjectsByUser($this->userSession->getId()),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'title' => t('Members of %s', $group['name']).' ('.$paginator->getTotal().')',
             'paginator' => $paginator,
             'group' => $group,
@@ -64,7 +64,7 @@ class Group extends Base
     public function create(array $values = array(), array $errors = array())
     {
         $this->response->html($this->template->layout('group/create', array(
-            'board_selector' => $this->projectUserRole->getProjectsByUser($this->userSession->getId()),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'errors' => $errors,
             'values' => $values,
             'title' => t('New group')
@@ -79,7 +79,7 @@ class Group extends Base
     public function save()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->group->validateCreation($values);
+        list($valid, $errors) = $this->groupValidator->validateCreation($values);
 
         if ($valid) {
             if ($this->group->create($values['name']) !== false) {
@@ -105,7 +105,7 @@ class Group extends Base
         }
 
         $this->response->html($this->template->layout('group/edit', array(
-            'board_selector' => $this->projectUserRole->getProjectsByUser($this->userSession->getId()),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'errors' => $errors,
             'values' => $values,
             'title' => t('Edit group')
@@ -120,7 +120,7 @@ class Group extends Base
     public function update()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->group->validateModification($values);
+        list($valid, $errors) = $this->groupValidator->validateModification($values);
 
         if ($valid) {
             if ($this->group->update($values) !== false) {
@@ -149,7 +149,7 @@ class Group extends Base
         }
 
         $this->response->html($this->template->layout('group/associate', array(
-            'board_selector' => $this->projectUserRole->getProjectsByUser($this->userSession->getId()),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'users' => $this->user->prepareList($this->groupMember->getNotMembers($group_id)),
             'group' => $group,
             'errors' => $errors,

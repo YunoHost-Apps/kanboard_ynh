@@ -106,6 +106,7 @@ class AuthenticationProvider implements ServiceProviderInterface
         $acl->add('Taskmodification', '*', Role::PROJECT_MEMBER);
         $acl->add('Taskstatus', '*', Role::PROJECT_MEMBER);
         $acl->add('Timer', '*', Role::PROJECT_MEMBER);
+        $acl->add('UserHelper', array('mention'), Role::PROJECT_MEMBER);
 
         return $acl;
     }
@@ -125,7 +126,9 @@ class AuthenticationProvider implements ServiceProviderInterface
         $acl->setRoleHierarchy(Role::APP_USER, array(Role::APP_PUBLIC));
 
         $acl->add('Oauth', array('google', 'github', 'gitlab'), Role::APP_PUBLIC);
-        $acl->add('Auth', array('login', 'check', 'captcha'), Role::APP_PUBLIC);
+        $acl->add('Auth', array('login', 'check'), Role::APP_PUBLIC);
+        $acl->add('Captcha', '*', Role::APP_PUBLIC);
+        $acl->add('PasswordReset', '*', Role::APP_PUBLIC);
         $acl->add('Webhook', '*', Role::APP_PUBLIC);
         $acl->add('Task', 'readonly', Role::APP_PUBLIC);
         $acl->add('Board', 'readonly', Role::APP_PUBLIC);

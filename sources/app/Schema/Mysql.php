@@ -6,7 +6,53 @@ use PDO;
 use Kanboard\Core\Security\Token;
 use Kanboard\Core\Security\Role;
 
-const VERSION = 98;
+const VERSION = 101;
+
+function version_101(PDO $pdo)
+{
+    $pdo->exec("
+        CREATE TABLE password_reset (
+            token VARCHAR(80) PRIMARY KEY,
+            user_id INT NOT NULL,
+            date_expiration INT NOT NULL,
+            date_creation INT NOT NULL,
+            ip VARCHAR(45) NOT NULL,
+            user_agent VARCHAR(255) NOT NULL,
+            is_active TINYINT(1) NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB CHARSET=utf8
+    ");
+
+    $pdo->exec("INSERT INTO settings VALUES ('password_reset', '1')");
+}
+
+function version_100(PDO $pdo)
+{
+    $pdo->exec('ALTER TABLE `actions` MODIFY `action_name` VARCHAR(255)');
+}
+
+function version_99(PDO $pdo)
+{
+    $rq = $pdo->prepare('SELECT * FROM actions');
+    $rq->execute();
+    $rows = $rq->fetchAll(PDO::FETCH_ASSOC) ?: array();
+
+    $rq = $pdo->prepare('UPDATE actions SET action_name=? WHERE id=?');
+
+    foreach ($rows as $row) {
+        if ($row['action_name'] === 'TaskAssignCurrentUser' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskAssignCurrentUserColumn';
+        } elseif ($row['action_name'] === 'TaskClose' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskCloseColumn';
+        } elseif ($row['action_name'] === 'TaskLogMoveAnotherColumn') {
+            $row['action_name'] = '\Kanboard\Action\CommentCreationMoveTaskColumn';
+        } elseif ($row['action_name']{0} !== '\\') {
+            $row['action_name'] = '\Kanboard\Action\\'.$row['action_name'];
+        }
+
+        $rq->execute(array($row['action_name'], $row['id']));
+    }
+}
 
 function version_98(PDO $pdo)
 {
@@ -1035,7 +1081,7 @@ function version_12(PDO $pdo)
         CREATE TABLE remember_me (
             id INT NOT NULL AUTO_INCREMENT,
             user_id INT,
-            ip VARCHAR(40),
+            ip VARCHAR(45),
             user_agent VARCHAR(255),
             token VARCHAR(255),
             sequence VARCHAR(255),
@@ -1051,7 +1097,7 @@ function version_12(PDO $pdo)
             id INT NOT NULL AUTO_INCREMENT,
             auth_type VARCHAR(25),
             user_id INT,
-            ip VARCHAR(40),
+            ip VARCHAR(45),
             user_agent VARCHAR(255),
             date_creation INT,
             FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,

@@ -20,7 +20,19 @@ class ProjectUserRole extends Base
     const TABLE = 'project_has_users';
 
     /**
-     * Get the list of project visible by the given user
+     * Get the list of active project for the given user
+     *
+     * @access public
+     * @param  integer  $user_id
+     * @return array
+     */
+    public function getActiveProjectsByUser($user_id)
+    {
+        return $this->getProjectsByUser($user_id, array(Project::ACTIVE));
+    }
+
+    /**
+     * Get the list of project visible for the given user
      *
      * @access public
      * @param  integer  $user_id
@@ -40,11 +52,11 @@ class ProjectUserRole extends Base
             ->getAll(Project::TABLE.'.id', Project::TABLE.'.name');
 
         $groupProjects = $this->projectGroupRole->getProjectsByUser($user_id, $status);
-        $groups = $userProjects + $groupProjects;
+        $projects = $userProjects + $groupProjects;
 
-        asort($groups);
+        asort($projects);
 
-        return $groups;
+        return $projects;
     }
 
     /**

@@ -6,7 +6,48 @@ use Kanboard\Core\Security\Token;
 use Kanboard\Core\Security\Role;
 use PDO;
 
-const VERSION = 91;
+const VERSION = 93;
+
+function version_93(PDO $pdo)
+{
+    $pdo->exec("
+        CREATE TABLE password_reset (
+            token TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            date_expiration INTEGER NOT NULL,
+            date_creation INTEGER NOT NULL,
+            ip TEXT NOT NULL,
+            user_agent TEXT NOT NULL,
+            is_active INTEGER NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+
+    $pdo->exec("INSERT INTO settings VALUES ('password_reset', '1')");
+}
+
+function version_92(PDO $pdo)
+{
+    $rq = $pdo->prepare('SELECT * FROM actions');
+    $rq->execute();
+    $rows = $rq->fetchAll(PDO::FETCH_ASSOC) ?: array();
+
+    $rq = $pdo->prepare('UPDATE actions SET action_name=? WHERE id=?');
+
+    foreach ($rows as $row) {
+        if ($row['action_name'] === 'TaskAssignCurrentUser' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskAssignCurrentUserColumn';
+        } elseif ($row['action_name'] === 'TaskClose' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskCloseColumn';
+        } elseif ($row['action_name'] === 'TaskLogMoveAnotherColumn') {
+            $row['action_name'] = '\Kanboard\Action\CommentCreationMoveTaskColumn';
+        } elseif ($row['action_name']{0} !== '\\') {
+            $row['action_name'] = '\Kanboard\Action\\'.$row['action_name'];
+        }
+
+        $rq->execute(array($row['action_name'], $row['id']));
+    }
+}
 
 function version_91(PDO $pdo)
 {
