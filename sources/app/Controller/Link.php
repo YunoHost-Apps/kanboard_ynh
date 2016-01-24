@@ -21,7 +21,7 @@ class Link extends Base
      */
     private function layout($template, array $params)
     {
-        $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         $params['config_content_for_layout'] = $this->template->render($template, $params);
 
         return $this->template->layout('config/layout', $params);
@@ -67,7 +67,7 @@ class Link extends Base
     public function save()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->link->validateCreation($values);
+        list($valid, $errors) = $this->linkValidator->validateCreation($values);
 
         if ($valid) {
             if ($this->link->create($values['label'], $values['opposite_label']) !== false) {
@@ -108,7 +108,7 @@ class Link extends Base
     public function update()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->link->validateModification($values);
+        list($valid, $errors) = $this->linkValidator->validateModification($values);
 
         if ($valid) {
             if ($this->link->update($values)) {

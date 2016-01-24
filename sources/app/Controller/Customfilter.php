@@ -2,6 +2,8 @@
 
 namespace Kanboard\Controller;
 
+use Kanboard\Core\Security\Role;
+
 /**
  * Custom Filter management
  *
@@ -40,7 +42,7 @@ class Customfilter extends Base
         $values = $this->request->getValues();
         $values['user_id'] = $this->userSession->getId();
 
-        list($valid, $errors) = $this->customFilter->validateCreation($values);
+        list($valid, $errors) = $this->customFilterValidator->validateCreation($values);
 
         if ($valid) {
             if ($this->customFilter->create($values)) {
@@ -119,7 +121,7 @@ class Customfilter extends Base
             $values += array('append' => 0);
         }
 
-        list($valid, $errors) = $this->customFilter->validateModification($values);
+        list($valid, $errors) = $this->customFilterValidator->validateModification($values);
 
         if ($valid) {
             if ($this->customFilter->update($values)) {
@@ -137,7 +139,7 @@ class Customfilter extends Base
     {
         $user_id = $this->userSession->getId();
 
-        if ($filter['user_id'] != $user_id && (! $this->projectPermission->isManager($project['id'], $user_id) || ! $this->userSession->isAdmin())) {
+        if ($filter['user_id'] != $user_id && ($this->projectUserRole->getUserRole($project['id'], $user_id) === Role::PROJECT_MANAGER || ! $this->userSession->isAdmin())) {
             $this->forbidden();
         }
     }

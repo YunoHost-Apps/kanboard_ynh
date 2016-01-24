@@ -169,4 +169,16 @@ class Postgres extends Base
         $rq = $this->pdo->prepare('UPDATE '.$this->schemaTable.' SET version=?');
         $rq->execute(array($version));
     }
+
+    /**
+     * Run EXPLAIN command
+     *
+     * @param  string $sql
+     * @param  array  $values
+     * @return array
+     */
+    public function explain($sql, array $values)
+    {
+        return $this->getConnection()->query('EXPLAIN (FORMAT YAML) '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

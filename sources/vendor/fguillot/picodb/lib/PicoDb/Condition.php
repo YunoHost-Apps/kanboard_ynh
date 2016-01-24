@@ -175,6 +175,19 @@ class Condition
     }
 
     /**
+     * IN condition with a subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function inSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
+    }
+
+    /**
      * NOT IN condition
      *
      * @access public
@@ -187,6 +200,19 @@ class Condition
             $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
             $this->values = array_merge($this->values, $values);
         }
+    }
+
+    /**
+     * NOT IN condition with a subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function notInSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
     }
 
     /**

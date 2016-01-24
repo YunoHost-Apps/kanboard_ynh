@@ -6,6 +6,7 @@ use Closure;
 use PDOException;
 use LogicException;
 use PicoDb\Driver\Sqlite;
+use PicoDb\Driver\Mssql;
 use PicoDb\Driver\Mysql;
 use PicoDb\Driver\Postgres;
 
@@ -49,12 +50,28 @@ class Database
     public $stopwatch = false;
 
     /**
+     * Execution time of all queries
+     *
+     * @access public
+     * @var float
+     */
+    public $executionTime = 0;
+
+    /**
      * Flag to log generated SQL queries
      *
      * @access public
      * @var boolean
      */
     public $logQueries = false;
+
+    /**
+     * Run explain command on each query
+     *
+     * @access public
+     * @var boolean
+     */
+    public $explain = false;
 
     /**
      * Number of SQL queries executed
@@ -79,6 +96,9 @@ class Database
         switch ($settings['driver']) {
             case 'sqlite':
                 $this->driver = new Sqlite($settings);
+                break;
+            case 'mssql':
+                $this->driver = new Mssql($settings);
                 break;
             case 'mysql':
                 $this->driver = new Mysql($settings);
@@ -139,11 +159,29 @@ class Database
      * Add a log message
      *
      * @access public
-     * @param  string    $message   Message
+     * @param  mixed $message
+     * @return Database
      */
     public function setLogMessage($message)
     {
-        $this->logs[] = $message;
+        $this->logs[] = is_array($message) ? var_export($message, true) : $message;
+        return $this;
+    }
+
+    /**
+     * Add many log messages
+     *
+     * @access public
+     * @param  array $messages
+     * @return Database
+     */
+    public function setLogMessages(array $messages)
+    {
+        foreach ($messages as $message) {
+            $this->setLogMessage($message);
+        }
+
+        return $this;
     }
 
     /**
@@ -265,7 +303,13 @@ class Database
             $rq->execute($values);
 
             if ($this->stopwatch) {
-                $this->setLogMessage('DURATION='.(microtime(true) - $start));
+                $duration = microtime(true) - $start;
+                $this->executionTime += $duration;
+                $this->setLogMessage('QUERY_DURATION='.$duration.' ALL_QUERIES_DURATION='.$this->executionTime);
+            }
+
+            if ($this->explain) {
+                $this->setLogMessages($this->getDriver()->explain($sql, $values));
             }
 
             $this->nbQueries++;

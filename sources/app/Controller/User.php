@@ -3,6 +3,8 @@
 namespace Kanboard\Controller;
 
 use Kanboard\Notification\Mail as MailNotification;
+use Kanboard\Model\Project as ProjectModel;
+use Kanboard\Core\Security\Role;
 
 /**
  * User controller
@@ -24,7 +26,7 @@ class User extends Base
     {
         $content = $this->template->render($template, $params);
         $params['user_content_for_layout'] = $content;
-        $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
 
         if (isset($params['user'])) {
             $params['title'] = ($params['user']['name'] ?: $params['user']['username']).' (#'.$params['user']['id'].')';
@@ -49,10 +51,32 @@ class User extends Base
 
         $this->response->html(
             $this->template->layout('user/index', array(
-                'board_selector' => $this->projectPermission->getAllowedProjects($this->userSession->getId()),
+                'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
                 'title' => t('Users').' ('.$paginator->getTotal().')',
                 'paginator' => $paginator,
         )));
+    }
+
+    /**
+     * Public user profile
+     *
+     * @access public
+     */
+    public function profile()
+    {
+        $user = $this->user->getById($this->request->getIntegerParam('user_id'));
+
+        if (empty($user)) {
+            $this->notfound();
+        }
+
+        $this->response->html(
+            $this->template->layout('user/profile', array(
+                'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
+                'title' => $user['name'] ?: $user['username'],
+                'user' => $user,
+            )
+        ));
     }
 
     /**
@@ -67,10 +91,11 @@ class User extends Base
         $this->response->html($this->template->layout($is_remote ? 'user/create_remote' : 'user/create_local', array(
             'timezones' => $this->config->getTimezones(true),
             'languages' => $this->config->getLanguages(true),
-            'board_selector' => $this->projectPermission->getAllowedProjects($this->userSession->getId()),
+            'roles' => $this->role->getApplicationRoles(),
+            'board_selector' => $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId()),
             'projects' => $this->project->getList(),
             'errors' => $errors,
-            'values' => $values,
+            'values' => $values + array('role' => Role::APP_USER),
             'title' => t('New user')
         )));
     }
@@ -83,7 +108,7 @@ class User extends Base
     public function save()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->user->validateCreation($values);
+        list($valid, $errors) = $this->userValidator->validateCreation($values);
 
         if ($valid) {
             $project_id = empty($values['project_id']) ? 0 : $values['project_id'];
@@ -92,7 +117,7 @@ class User extends Base
             $user_id = $this->user->create($values);
 
             if ($user_id !== false) {
-                $this->projectPermission->addMember($project_id, $user_id);
+                $this->projectUserRole->addUser($project_id, $user_id, Role::PROJECT_MEMBER);
 
                 if (! empty($values['notifications_enabled'])) {
                     $this->userNotificationType->saveSelectedTypes($user_id, array(MailNotification::TYPE));
@@ -148,6 +173,20 @@ class User extends Base
     }
 
     /**
+     * Display last password reset
+     *
+     * @access public
+     */
+    public function passwordReset()
+    {
+        $user = $this->getUser();
+        $this->response->html($this->layout('user/password_reset', array(
+            'tokens' => $this->passwordReset->getAll($user['id']),
+            'user' => $user,
+        )));
+    }
+
+    /**
      * Display last connections
      *
      * @access public
@@ -170,7 +209,7 @@ class User extends Base
     {
         $user = $this->getUser();
         $this->response->html($this->layout('user/sessions', array(
-            'sessions' => $this->authentication->backend('rememberMe')->getAll($user['id']),
+            'sessions' => $this->rememberMeSession->getAll($user['id']),
             'user' => $user,
         )));
     }
@@ -184,8 +223,8 @@ class User extends Base
     {
         $this->checkCSRFParam();
         $user = $this->getUser();
-        $this->authentication->backend('rememberMe')->remove($this->request->getIntegerParam('id'));
-        $this->response->redirect($this->helper->url->to('user', 'session', array('user_id' => $user['id'])));
+        $this->rememberMeSession->remove($this->request->getIntegerParam('id'));
+        $this->response->redirect($this->helper->url->to('user', 'sessions', array('user_id' => $user['id'])));
     }
 
     /**
@@ -205,7 +244,7 @@ class User extends Base
         }
 
         $this->response->html($this->layout('user/notifications', array(
-            'projects' => $this->projectPermission->getMemberProjects($user['id']),
+            'projects' => $this->projectUserRole->getProjectsByUser($user['id'], array(ProjectModel::ACTIVE)),
             'notifications' => $this->userNotification->readSettings($user['id']),
             'types' => $this->userNotificationType->getTypes(),
             'filters' => $this->userNotificationFilter->getFilters(),
@@ -290,7 +329,7 @@ class User extends Base
 
         if ($this->request->isPost()) {
             $values = $this->request->getValues();
-            list($valid, $errors) = $this->user->validatePasswordModification($values);
+            list($valid, $errors) = $this->userValidator->validatePasswordModification($values);
 
             if ($valid) {
                 if ($this->user->update($values)) {
@@ -326,20 +365,13 @@ class User extends Base
         if ($this->request->isPost()) {
             $values = $this->request->getValues();
 
-            if ($this->userSession->isAdmin()) {
-                $values += array('is_admin' => 0, 'is_project_admin' => 0);
-            } else {
-                // Regular users can't be admin
-                if (isset($values['is_admin'])) {
-                    unset($values['is_admin']);
-                }
-
-                if (isset($values['is_project_admin'])) {
-                    unset($values['is_project_admin']);
+            if (! $this->userSession->isAdmin()) {
+                if (isset($values['role'])) {
+                    unset($values['role']);
                 }
             }
 
-            list($valid, $errors) = $this->user->validateModification($values);
+            list($valid, $errors) = $this->userValidator->validateModification($values);
 
             if ($valid) {
                 if ($this->user->update($values)) {
@@ -358,6 +390,7 @@ class User extends Base
             'user' => $user,
             'timezones' => $this->config->getTimezones(true),
             'languages' => $this->config->getLanguages(true),
+            'roles' => $this->role->getApplicationRoles(),
         )));
     }
 
@@ -376,7 +409,7 @@ class User extends Base
 
         if ($this->request->isPost()) {
             $values = $this->request->getValues() + array('disable_login_form' => 0, 'is_ldap_user' => 0);
-            list($valid, $errors) = $this->user->validateModification($values);
+            list($valid, $errors) = $this->userValidator->validateModification($values);
 
             if ($valid) {
                 if ($this->user->update($values)) {

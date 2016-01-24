@@ -33,7 +33,8 @@ From command line:
 
 Infos
 -----
-Kanboard v1.0.21
+Kanboard v1.0.24
+Reverse-Proxy Authentication with LDAP user provider plugin v1.0.0 https://github.com/kanboard/plugin-reverse-proxy-ldap
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
 

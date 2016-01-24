@@ -3,7 +3,6 @@
 namespace Kanboard\Core\Session;
 
 use Kanboard\Core\Base;
-use Kanboard\Core\Http\Request;
 
 /**
  * Session Manager
@@ -13,6 +12,13 @@ use Kanboard\Core\Http\Request;
  */
 class SessionManager extends Base
 {
+    /**
+     * Event names
+     *
+     * @var string
+     */
+    const EVENT_DESTROY = 'session.destroy';
+
     /**
      * Return true if the session is open
      *
@@ -41,7 +47,7 @@ class SessionManager extends Base
         session_name('KB_SID');
         session_start();
 
-        $this->container['sessionStorage']->setStorage($_SESSION);
+        $this->sessionStorage->setStorage($_SESSION);
     }
 
     /**
@@ -51,6 +57,8 @@ class SessionManager extends Base
      */
     public function close()
     {
+        $this->dispatcher->dispatch(self::EVENT_DESTROY);
+
         // Destroy the session cookie
         $params = session_get_cookie_params();
 
@@ -80,7 +88,7 @@ class SessionManager extends Base
             SESSION_DURATION,
             $this->helper->url->dir() ?: '/',
             null,
-            Request::isHTTPS(),
+            $this->request->isHTTPS(),
             true
         );
 
@@ -92,7 +100,7 @@ class SessionManager extends Base
         ini_set('session.use_strict_mode', '1');
 
         // Better session hash
-        ini_set('session.hash_function', 'sha512');
+        ini_set('session.hash_function', '1'); // 'sha512' is not compatible with FreeBSD, only MD5 '0' and SHA-1 '1' seems to work
         ini_set('session.hash_bits_per_character', 6);
 
         // Set an additional entropy

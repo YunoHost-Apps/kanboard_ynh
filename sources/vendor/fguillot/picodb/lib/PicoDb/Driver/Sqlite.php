@@ -165,4 +165,16 @@ class Sqlite extends Base
             return false;
         }
     }
+
+    /**
+     * Run EXPLAIN command
+     *
+     * @param  string $sql
+     * @param  array  $values
+     * @return array
+     */
+    public function explain($sql, array $values)
+    {
+        return $this->getConnection()->query('EXPLAIN QUERY PLAN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

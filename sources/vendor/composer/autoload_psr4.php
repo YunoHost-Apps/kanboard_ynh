@@ -6,12 +6,11 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Component\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher'),
     'Symfony\\Component\\Console\\' => array($vendorDir . '/symfony/console'),
-    'League\\HTMLToMarkdown\\' => array($vendorDir . '/league/html-to-markdown/src'),
     'Kanboard\\Plugin\\' => array($baseDir . '/plugins'),
     'Kanboard\\' => array($baseDir . '/app'),
     'Gregwar\\Captcha\\' => array($vendorDir . '/gregwar/captcha'),
-    'Fabiang\\Xmpp\\' => array($vendorDir . '/fabiang/xmpp/src'),
     'Base32\\' => array($vendorDir . '/christian-riesen/base32/src'),
 );

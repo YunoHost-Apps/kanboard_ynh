@@ -8,17 +8,19 @@ namespace Kanboard\Core\Session;
  * @package  session
  * @author   Frederic Guillot
  *
- * @property array  $config
  * @property array  $user
  * @property array  $flash
  * @property array  $csrf
- * @property array  $postAuth
+ * @property array  $postAuthenticationValidated
  * @property array  $filters
  * @property string $redirectAfterLogin
  * @property string $captcha
  * @property string $commentSorting
  * @property bool   $hasSubtaskInProgress
+ * @property bool   $hasRememberMe
  * @property bool   $boardCollapsed
+ * @property bool   $twoFactorBeforeCodeCalled
+ * @property string $twoFactorSecret
  */
 class SessionStorage
 {
@@ -58,6 +60,21 @@ class SessionStorage
         unset($session['storage']);
 
         return $session;
+    }
+
+    /**
+     * Flush session data
+     *
+     * @access public
+     */
+    public function flush()
+    {
+        $session = get_object_vars($this);
+        unset($session['storage']);
+
+        foreach (array_keys($session) as $property) {
+            unset($this->$property);
+        }
     }
 
     /**

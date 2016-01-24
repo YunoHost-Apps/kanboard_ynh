@@ -1,10 +1,10 @@
-
 <div id="subtasks" class="task-show-section">
-    <div class="page-header">
-        <h2><?= t('Sub-Tasks') ?></h2>
-    </div>
 
     <?php if (! empty($subtasks)): ?>
+        <div class="page-header">
+            <h2><?= t('Sub-Tasks') ?></h2>
+        </div>
+
         <?php $first_position = $subtasks[0]['position']; ?>
         <?php $last_position = $subtasks[count($subtasks) - 1]['position']; ?>
         <table class="subtasks-table">
@@ -12,14 +12,14 @@
                 <th class="column-40"><?= t('Title') ?></th>
                 <th><?= t('Assignee') ?></th>
                 <th><?= t('Time tracking') ?></th>
-                <?php if (! isset($not_editable)): ?>
-                    <th><?= t('Actions') ?></th>
+                <?php if ($editable): ?>
+                    <th class="column-5"></th>
                 <?php endif ?>
             </tr>
             <?php foreach ($subtasks as $subtask): ?>
             <tr>
                 <td>
-                    <?php if (! isset($not_editable)): ?>
+                    <?php if ($editable): ?>
                         <?= $this->subtask->toggleStatus($subtask, 'task') ?>
                     <?php else: ?>
                         <?= $this->render('subtask/icons', array('subtask' => $subtask)) . $this->e($subtask['title']) ?>
@@ -27,7 +27,7 @@
                 </td>
                 <td>
                     <?php if (! empty($subtask['username'])): ?>
-                        <?php if (! isset($not_editable)): ?>
+                        <?php if ($editable): ?>
                             <?= $this->url->link($this->e($subtask['name'] ?: $subtask['username']), 'user', 'show', array('user_id' => $subtask['user_id'])) ?>
                         <?php else: ?>
                             <?= $this->e($subtask['name'] ?: $subtask['username']) ?>
@@ -45,7 +45,7 @@
                                 <strong><?= $this->e($subtask['time_estimated']).'h' ?></strong> <?= t('estimated') ?>
                             <?php endif ?>
                         </li>
-                        <?php if (! isset($not_editable) && $subtask['user_id'] == $this->user->getId()): ?>
+                        <?php if ($editable && $subtask['user_id'] == $this->user->getId()): ?>
                         <li>
                             <?php if ($subtask['is_timer_started']): ?>
                                 <i class="fa fa-pause"></i>
@@ -59,8 +59,10 @@
                         <?php endif ?>
                     </ul>
                 </td>
-                <?php if (! isset($not_editable)): ?>
+                <?php if ($editable): ?>
                     <td>
+                        <div class="dropdown">
+                        <a href="#" class="dropdown-menu dropdown-menu-link-icon"><i class="fa fa-cog fa-fw"></i><i class="fa fa-caret-down"></i></a>
                         <ul>
                             <?php if ($subtask['position'] != $first_position): ?>
                                 <li>
@@ -79,6 +81,7 @@
                                 <?= $this->url->link(t('Remove'), 'subtask', 'confirm', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'subtask_id' => $subtask['id'])) ?>
                             </li>
                         </ul>
+                        </div>
                     </td>
                 <?php endif ?>
             </tr>
@@ -86,7 +89,12 @@
         </table>
     <?php endif ?>
 
-    <?php if (! isset($not_editable)): ?>
+    <?php if ($editable && $this->user->hasProjectAccess('subtask', 'save', $task['project_id'])): ?>
+        <?php if (empty($subtasks)): ?>
+            <div class="page-header">
+                <h2><?= t('Sub-Tasks') ?></h2>
+            </div>
+        <?php endif ?>
         <form method="post" action="<?= $this->url->href('subtask', 'save', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>" autocomplete="off">
             <?= $this->form->csrf() ?>
             <?= $this->form->hidden('task_id', array('task_id' => $task['id'])) ?>

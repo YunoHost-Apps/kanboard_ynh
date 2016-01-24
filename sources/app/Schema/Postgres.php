@@ -4,8 +4,139 @@ namespace Schema;
 
 use PDO;
 use Kanboard\Core\Security\Token;
+use Kanboard\Core\Security\Role;
 
-const VERSION = 74;
+const VERSION = 81;
+
+function version_81(PDO $pdo)
+{
+    $pdo->exec("
+        CREATE TABLE password_reset (
+            token VARCHAR(80) PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            date_expiration INTEGER NOT NULL,
+            date_creation INTEGER NOT NULL,
+            ip VARCHAR(45) NOT NULL,
+            user_agent VARCHAR(255) NOT NULL,
+            is_active BOOLEAN NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+
+    $pdo->exec("INSERT INTO settings VALUES ('password_reset', '1')");
+}
+
+function version_80(PDO $pdo)
+{
+    $pdo->exec('ALTER TABLE "actions" ALTER COLUMN "action_name" TYPE VARCHAR(255)');
+}
+
+function version_79(PDO $pdo)
+{
+    $rq = $pdo->prepare('SELECT * FROM actions');
+    $rq->execute();
+    $rows = $rq->fetchAll(PDO::FETCH_ASSOC) ?: array();
+
+    $rq = $pdo->prepare('UPDATE actions SET action_name=? WHERE id=?');
+
+    foreach ($rows as $row) {
+        if ($row['action_name'] === 'TaskAssignCurrentUser' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskAssignCurrentUserColumn';
+        } elseif ($row['action_name'] === 'TaskClose' && $row['event_name'] === 'task.move.column') {
+            $row['action_name'] = '\Kanboard\Action\TaskCloseColumn';
+        } elseif ($row['action_name'] === 'TaskLogMoveAnotherColumn') {
+            $row['action_name'] = '\Kanboard\Action\CommentCreationMoveTaskColumn';
+        } elseif ($row['action_name']{0} !== '\\') {
+            $row['action_name'] = '\Kanboard\Action\\'.$row['action_name'];
+        }
+
+        $rq->execute(array($row['action_name'], $row['id']));
+    }
+}
+
+function version_78(PDO $pdo)
+{
+    $pdo->exec('ALTER TABLE "users" ALTER COLUMN "language" TYPE VARCHAR(5)');
+}
+
+function version_77(PDO $pdo)
+{
+    $pdo->exec('ALTER TABLE "users" ADD COLUMN "role" VARCHAR(25) NOT NULL DEFAULT \''.Role::APP_USER.'\'');
+
+    $rq = $pdo->prepare('SELECT * FROM "users"');
+    $rq->execute();
+    $rows = $rq->fetchAll(PDO::FETCH_ASSOC) ?: array();
+
+    $rq = $pdo->prepare('UPDATE "users" SET "role"=? WHERE "id"=?');
+
+    foreach ($rows as $row) {
+        $role = Role::APP_USER;
+
+        if ($row['is_admin'] == 1) {
+            $role = Role::APP_ADMIN;
+        } else if ($row['is_project_admin']) {
+            $role = Role::APP_MANAGER;
+        }
+
+        $rq->execute(array($role, $row['id']));
+    }
+
+    $pdo->exec('ALTER TABLE users DROP COLUMN "is_admin"');
+    $pdo->exec('ALTER TABLE users DROP COLUMN "is_project_admin"');
+}
+
+function version_76(PDO $pdo)
+{
+    $pdo->exec("
+        CREATE TABLE project_has_groups (
+            group_id INTEGER NOT NULL,
+            project_id INTEGER NOT NULL,
+            role VARCHAR(25) NOT NULL,
+            FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE CASCADE,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            UNIQUE(group_id, project_id)
+        )
+    ");
+
+    $pdo->exec("ALTER TABLE project_has_users ADD COLUMN role VARCHAR(25) NOT NULL DEFAULT '".Role::PROJECT_VIEWER."'");
+
+    $rq = $pdo->prepare('SELECT * FROM project_has_users');
+    $rq->execute();
+    $rows = $rq->fetchAll(PDO::FETCH_ASSOC) ?: array();
+
+    $rq = $pdo->prepare('UPDATE project_has_users SET "role"=? WHERE "id"=?');
+
+    foreach ($rows as $row) {
+        $rq->execute(array(
+            $row['is_owner'] == 1 ? Role::PROJECT_MANAGER : Role::PROJECT_MEMBER,
+            $row['id'],
+        ));
+    }
+
+    $pdo->exec('ALTER TABLE project_has_users DROP COLUMN "is_owner"');
+    $pdo->exec('ALTER TABLE project_has_users DROP COLUMN "id"');
+}
+
+function version_75(PDO $pdo)
+{
+    $pdo->exec("
+        CREATE TABLE groups (
+            id SERIAL PRIMARY KEY,
+            external_id VARCHAR(255) DEFAULT '',
+            name VARCHAR(100) NOT NULL UNIQUE
+        )
+    ");
+
+    $pdo->exec("
+        CREATE TABLE group_has_users (
+            group_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE CASCADE,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(group_id, user_id)
+        )
+    ");
+}
 
 function version_74(PDO $pdo)
 {
@@ -870,7 +1001,7 @@ function version_1(PDO $pdo)
         CREATE TABLE remember_me (
             id SERIAL PRIMARY KEY,
             user_id INTEGER,
-            ip VARCHAR(40),
+            ip VARCHAR(45),
             user_agent VARCHAR(255),
             token VARCHAR(255),
             sequence VARCHAR(255),
@@ -883,7 +1014,7 @@ function version_1(PDO $pdo)
             id SERIAL PRIMARY KEY,
             auth_type VARCHAR(25),
             user_id INTEGER,
-            ip VARCHAR(40),
+            ip VARCHAR(45),
             user_agent VARCHAR(255),
             date_creation INTEGER,
             FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE

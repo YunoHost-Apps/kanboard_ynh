@@ -86,8 +86,16 @@ class TaskCreation extends Base
      */
     private function fireEvents($task_id, array $values)
     {
-        $values['task_id'] = $task_id;
-        $this->container['dispatcher']->dispatch(Task::EVENT_CREATE_UPDATE, new TaskEvent($values));
-        $this->container['dispatcher']->dispatch(Task::EVENT_CREATE, new TaskEvent($values));
+        $event = new TaskEvent(array('task_id' => $task_id) + $values);
+
+        $this->logger->debug('Event fired: '.Task::EVENT_CREATE_UPDATE);
+        $this->logger->debug('Event fired: '.Task::EVENT_CREATE);
+
+        $this->dispatcher->dispatch(Task::EVENT_CREATE_UPDATE, $event);
+        $this->dispatcher->dispatch(Task::EVENT_CREATE, $event);
+
+        if (! empty($values['description'])) {
+            $this->userMention->fireEvents($values['description'], Task::EVENT_USER_MENTION, $event);
+        }
     }
 }

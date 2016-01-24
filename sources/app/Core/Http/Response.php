@@ -60,7 +60,7 @@ class Response extends Base
     public function status($status_code)
     {
         header('Status: '.$status_code);
-        header($_SERVER['SERVER_PROTOCOL'].' '.$status_code);
+        header($this->request->getServerVariable('SERVER_PROTOCOL').' '.$status_code);
     }
 
     /**
@@ -71,7 +71,7 @@ class Response extends Base
      */
     public function redirect($url)
     {
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        if ($this->request->getServerVariable('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest') {
             header('X-Ajax-Redirect: '.$url);
         } else {
             header('Location: '.$url);
@@ -220,7 +220,6 @@ class Response extends Base
      */
     public function csp(array $policies = array())
     {
-        $policies['default-src'] = "'self'";
         $values = '';
 
         foreach ($policies as $policy => $acl) {
@@ -257,7 +256,7 @@ class Response extends Base
      */
     public function hsts()
     {
-        if (Request::isHTTPS()) {
+        if ($this->request->isHTTPS()) {
             header('Strict-Transport-Security: max-age=31536000');
         }
     }

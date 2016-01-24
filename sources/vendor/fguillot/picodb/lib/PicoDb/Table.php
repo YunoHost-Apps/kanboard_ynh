@@ -399,6 +399,48 @@ class Table
     }
 
     /**
+     * Increment column value
+     *
+     * @access public
+     * @param  string $column
+     * @param  string $value
+     * @return boolean
+     */
+    public function increment($column, $value)
+    {
+        $sql = sprintf(
+            'UPDATE %s SET %s=%s+%d '.$this->condition->build(),
+            $this->db->escapeIdentifier($this->name),
+            $this->db->escapeIdentifier($column),
+            $this->db->escapeIdentifier($column),
+            $value
+        );
+
+        return $this->db->execute($sql, $this->condition->getValues()) !== false;
+    }
+
+    /**
+     * Decrement column value
+     *
+     * @access public
+     * @param  string $column
+     * @param  string $value
+     * @return boolean
+     */
+    public function decrement($column, $value)
+    {
+        $sql = sprintf(
+            'UPDATE %s SET %s=%s-%d '.$this->condition->build(),
+            $this->db->escapeIdentifier($this->name),
+            $this->db->escapeIdentifier($column),
+            $this->db->escapeIdentifier($column),
+            $value
+        );
+
+        return $this->db->execute($sql, $this->condition->getValues()) !== false;
+    }
+
+    /**
      * Left join
      *
      * @access public

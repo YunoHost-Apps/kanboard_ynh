@@ -9,8 +9,8 @@
         <th class="column-20"><?= t('Project') ?></th>
         <th><?= t('Column') ?></th>
         <th><?= t('Assignee') ?></th>
-        <?php if (! isset($not_editable)): ?>
-            <th><?= t('Action') ?></th>
+        <?php if ($editable): ?>
+            <th class="column-5"><?= t('Action') ?></th>
         <?php endif ?>
     </tr>
     <?php foreach ($links as $label => $grouped_links): ?>
@@ -23,12 +23,12 @@
             <?php endif ?>
 
             <td>
-                <?php if (! isset($not_editable)): ?>
+                <?php if ($is_public): ?>
                     <?= $this->url->link(
                         $this->e('#'.$link['task_id'].' '.$link['title']),
                         'task',
-                        'show',
-                        array('task_id' => $link['task_id'], 'project_id' => $link['project_id']),
+                        'readonly',
+                        array('task_id' => $link['task_id'], 'token' => $project['token']),
                         false,
                         $link['is_active'] ? '' : 'task-link-closed'
                     ) ?>
@@ -36,8 +36,8 @@
                     <?= $this->url->link(
                         $this->e('#'.$link['task_id'].' '.$link['title']),
                         'task',
-                        'readonly',
-                        array('task_id' => $link['task_id'], 'token' => $project['token']),
+                        'show',
+                        array('task_id' => $link['task_id'], 'project_id' => $link['project_id']),
                         false,
                         $link['is_active'] ? '' : 'task-link-closed'
                     ) ?>
@@ -57,19 +57,22 @@
             <td><?= $this->e($link['column_title']) ?></td>
             <td>
                 <?php if (! empty($link['task_assignee_username'])): ?>
-                    <?php if (! isset($not_editable)): ?>
+                    <?php if ($editable): ?>
                         <?= $this->url->link($this->e($link['task_assignee_name'] ?: $link['task_assignee_username']), 'user', 'show', array('user_id' => $link['task_assignee_id'])) ?>
                     <?php else: ?>
                         <?= $this->e($link['task_assignee_name'] ?: $link['task_assignee_username']) ?>
                     <?php endif ?>
                 <?php endif ?>
             </td>
-            <?php if (! isset($not_editable)): ?>
+            <?php if ($editable): ?>
             <td>
+                <div class="dropdown">
+                <a href="#" class="dropdown-menu dropdown-menu-link-icon"><i class="fa fa-cog fa-fw"></i><i class="fa fa-caret-down"></i></a>
                 <ul>
                     <li><?= $this->url->link(t('Edit'), 'tasklink', 'edit', array('link_id' => $link['id'], 'task_id' => $task['id'], 'project_id' => $task['project_id'])) ?></li>
                     <li><?= $this->url->link(t('Remove'), 'tasklink', 'confirm', array('link_id' => $link['id'], 'task_id' => $task['id'], 'project_id' => $task['project_id'])) ?></li>
                 </ul>
+                </div>
             </td>
             <?php endif ?>
         </tr>
@@ -77,7 +80,7 @@
     <?php endforeach ?>
 </table>
 
-<?php if (! isset($not_editable) && isset($link_label_list)): ?>
+<?php if ($editable && isset($link_label_list)): ?>
     <form action="<?= $this->url->href('tasklink', 'save', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>" method="post" autocomplete="off">
 
         <?= $this->form->csrf() ?>
@@ -95,9 +98,9 @@
                 'placeholder="'.t('Start to type task title...').'"',
                 'title="'.t('Start to type task title...').'"',
                 'data-dst-field="opposite_task_id"',
-                'data-search-url="'.$this->url->href('app', 'autocomplete', array('exclude_task_id' => $task['id'])).'"',
+                'data-search-url="'.$this->url->href('TaskHelper', 'autocomplete', array('exclude_task_id' => $task['id'])).'"',
             ),
-            'task-autocomplete') ?>
+            'autocomplete') ?>
 
         <input type="submit" value="<?= t('Add') ?>" class="btn btn-blue"/>
     </form>

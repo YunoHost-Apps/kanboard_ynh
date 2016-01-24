@@ -10,12 +10,19 @@ admin=$(sudo yunohost app setting $app adminusername)
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 db_pwd=$(sudo yunohost app setting $app mysqlpwd)
 
+# flush php sessions before upgrade
+sudo rm -rf /var/lib/php5/session/*
+
 final_path=/var/www/$app
 sudo mv $final_path $final_path.old
 
 sudo mkdir -p $final_path
 sudo cp -a ../sources/. $final_path
-sudo cp -a $final_path.old/data $final_path/data
+# restore data
+sudo cp -a $final_path.old/data $final_path
+# restore plugins
+sudo cp -a $final_path.old/plugins $final_path
+# delete temp directory
 sudo rm -Rf $final_path.old
 
 # Copy and edit config.php

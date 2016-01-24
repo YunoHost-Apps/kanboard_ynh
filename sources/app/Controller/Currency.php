@@ -20,7 +20,7 @@ class Currency extends Base
      */
     private function layout($template, array $params)
     {
-        $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         $params['config_content_for_layout'] = $this->template->render($template, $params);
 
         return $this->template->layout('config/layout', $params);
@@ -38,7 +38,7 @@ class Currency extends Base
             'values' => $values,
             'errors' => $errors,
             'rates' => $this->currency->getAll(),
-            'currencies' => $this->config->getCurrencies(),
+            'currencies' => $this->currency->getCurrencies(),
             'title' => t('Settings').' &gt; '.t('Currency rates'),
         )));
     }
@@ -51,7 +51,7 @@ class Currency extends Base
     public function create()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->currency->validate($values);
+        list($valid, $errors) = $this->currencyValidator->validateCreation($values);
 
         if ($valid) {
             if ($this->currency->create($values['currency'], $values['rate'])) {

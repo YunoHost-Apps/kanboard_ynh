@@ -19,6 +19,7 @@ Using Kanboard
 
 ### Working with projects
 
+- [Project Types](project-types.markdown)
 - [Creating projects](creating-projects.markdown)
 - [Editing projects](editing-projects.markdown)
 - [Sharing boards and tasks](sharing-projects.markdown)
@@ -44,9 +45,13 @@ Using Kanboard
 - [Create tasks by email](create-tasks-by-email.markdown)
 - [Subtasks](subtasks.markdown)
 - [Analytics for tasks](analytics-tasks.markdown)
+- [User mentions](user-mentions.markdown)
 
-### Working with users
+### Working with users and groups
 
+- [Roles](roles.markdown)
+- [User Types](user-types.markdown)
+- [Group management](groups.markdown)
 - [User management](user-management.markdown)
 - [Notifications](notifications.markdown)
 - [Two factor authentication](2fa.markdown)
@@ -63,9 +68,6 @@ Using Kanboard
 
 ### Integrations
 
-- [Bitbucket webhooks](bitbucket-webhooks.markdown)
-- [Github webhooks](github-webhooks.markdown)
-- [Gitlab webhooks](gitlab-webhooks.markdown)
 - [iCalendar subscriptions](ical.markdown)
 - [RSS/Atom subscriptions](rss.markdown)
 - [Json-RPC API](api-json-rpc.markdown)
@@ -77,7 +79,7 @@ Using Kanboard
 - [Advanced Search Syntax](search.markdown)
 - [Command line interface](cli.markdown)
 - [Syntax guide](syntax-guide.markdown)
-- [Bruteforce protection](bruteforce-protection.markdown)
+- [Brute force protection](bruteforce-protection.markdown)
 - [Frequently asked questions](faq.markdown)
 
 Technical details
@@ -85,7 +87,7 @@ Technical details
 
 ### Installation
 
-- [Recommended configuration](recommended-configuration.markdown)
+- [Requirements](requirements.markdown)
 - [Installation instructions](installation.markdown)
 - [Upgrade Kanboard to a new version](update.markdown)
 - [Installation on Ubuntu](ubuntu-installation.markdown)
@@ -95,7 +97,6 @@ Technical details
 - [Installation on Windows Server with IIS](windows-iis-installation.markdown)
 - [Installation on Windows Server with Apache](windows-apache-installation.markdown)
 - [Installation on Heroku](heroku.markdown)
-- [Example with Nginx + HTTPS + SPDY + PHP-FPM](nginx-ssl-php-fpm.markdown)
 - [Run Kanboard with Docker](docker.markdown)
 - [Run Kanboard with Vagrant](vagrant.markdown)
 
@@ -114,7 +115,8 @@ Technical details
 ### Authentication
 
 - [LDAP authentication](ldap-authentication.markdown)
-- [LDAP group sync](ldap-group-sync.markdown)
+- [LDAP group synchronization](ldap-group-sync.markdown)
+- [LDAP parameters](ldap-parameters.markdown)
 - [Google authentication](google-authentication.markdown)
 - [Github authentication](github-authentication.markdown)
 - [Gitlab authentication](gitlab-authentication.markdown)

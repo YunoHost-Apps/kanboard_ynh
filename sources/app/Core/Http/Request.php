@@ -2,6 +2,7 @@
 
 namespace Kanboard\Core\Http;
 
+use Pimple\Container;
 use Kanboard\Core\Base;
 
 /**
@@ -13,7 +14,45 @@ use Kanboard\Core\Base;
 class Request extends Base
 {
     /**
-     * Get URL string parameter
+     * Pointer to PHP environment variables
+     *
+     * @access private
+     * @var array
+     */
+    private $server;
+    private $get;
+    private $post;
+    private $files;
+    private $cookies;
+
+    /**
+     * Constructor
+     *
+     * @access public
+     * @param  \Pimple\Container   $container
+     */
+    public function __construct(Container $container, array $server = array(), array $get = array(), array $post = array(), array $files = array(), array $cookies = array())
+    {
+        parent::__construct($container);
+        $this->server = empty($server) ? $_SERVER : $server;
+        $this->get = empty($get) ? $_GET : $get;
+        $this->post = empty($post) ? $_POST : $post;
+        $this->files = empty($files) ? $_FILES : $files;
+        $this->cookies = empty($cookies) ? $_COOKIE : $cookies;
+    }
+
+    /**
+     * Set GET parameters
+     *
+     * @param array $params
+     */
+    public function setParams(array $params)
+    {
+        $this->get = array_merge($this->get, $params);
+    }
+
+    /**
+     * Get query string string parameter
      *
      * @access public
      * @param  string   $name            Parameter name
@@ -22,11 +61,11 @@ class Request extends Base
      */
     public function getStringParam($name, $default_value = '')
     {
-        return isset($_GET[$name]) ? $_GET[$name] : $default_value;
+        return isset($this->get[$name]) ? $this->get[$name] : $default_value;
     }
 
     /**
-     * Get URL integer parameter
+     * Get query string integer parameter
      *
      * @access public
      * @param  string   $name            Parameter name
@@ -35,7 +74,7 @@ class Request extends Base
      */
     public function getIntegerParam($name, $default_value = 0)
     {
-        return isset($_GET[$name]) && ctype_digit($_GET[$name]) ? (int) $_GET[$name] : $default_value;
+        return isset($this->get[$name]) && ctype_digit($this->get[$name]) ? (int) $this->get[$name] : $default_value;
     }
 
     /**
@@ -59,9 +98,9 @@ class Request extends Base
      */
     public function getValues()
     {
-        if (! empty($_POST) && ! empty($_POST['csrf_token']) && $this->token->validateCSRFToken($_POST['csrf_token'])) {
-            unset($_POST['csrf_token']);
-            return $_POST;
+        if (! empty($this->post) && ! empty($this->post['csrf_token']) && $this->token->validateCSRFToken($this->post['csrf_token'])) {
+            unset($this->post['csrf_token']);
+            return $this->post;
         }
 
         return array();
@@ -98,8 +137,8 @@ class Request extends Base
      */
     public function getFileContent($name)
     {
-        if (isset($_FILES[$name])) {
-            return file_get_contents($_FILES[$name]['tmp_name']);
+        if (isset($this->files[$name]['tmp_name'])) {
+            return file_get_contents($this->files[$name]['tmp_name']);
         }
 
         return '';
@@ -114,7 +153,30 @@ class Request extends Base
      */
     public function getFilePath($name)
     {
-        return isset($_FILES[$name]['tmp_name']) ? $_FILES[$name]['tmp_name'] : '';
+        return isset($this->files[$name]['tmp_name']) ? $this->files[$name]['tmp_name'] : '';
+    }
+
+    /**
+     * Get info of an uploaded file
+     *
+     * @access public
+     * @param  string   $name   Form file name
+     * @return array
+     */
+    public function getFileInfo($name)
+    {
+        return isset($this->files[$name]) ? $this->files[$name] : array();
+    }
+
+    /**
+     * Return HTTP method
+     *
+     * @access public
+     * @return bool
+     */
+    public function getMethod()
+    {
+        return $this->getServerVariable('REQUEST_METHOD');
     }
 
     /**
@@ -125,7 +187,7 @@ class Request extends Base
      */
     public function isPost()
     {
-        return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+        return $this->getServerVariable('REQUEST_METHOD') === 'POST';
     }
 
     /**
@@ -144,13 +206,24 @@ class Request extends Base
      *
      * Note: IIS return the value 'off' and other web servers an empty value when it's not HTTPS
      *
-     * @static
      * @access public
      * @return boolean
      */
-    public static function isHTTPS()
+    public function isHTTPS()
     {
-        return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        return isset($this->server['HTTPS']) && $this->server['HTTPS'] !== '' && $this->server['HTTPS'] !== 'off';
+    }
+
+    /**
+     * Get cookie value
+     *
+     * @access public
+     * @param  string $name
+     * @return string
+     */
+    public function getCookie($name)
+    {
+        return isset($this->cookies[$name]) ? $this->cookies[$name] : '';
     }
 
     /**
@@ -163,52 +236,60 @@ class Request extends Base
     public function getHeader($name)
     {
         $name = 'HTTP_'.str_replace('-', '_', strtoupper($name));
-        return isset($_SERVER[$name]) ? $_SERVER[$name] : '';
+        return $this->getServerVariable($name);
     }
 
     /**
-     * Returns current request's query string, useful for redirecting
+     * Get remote user
+     *
+     * @access public
+     * @return string
+     */
+    public function getRemoteUser()
+    {
+        return $this->getServerVariable(REVERSE_PROXY_USER_HEADER);
+    }
+
+    /**
+     * Returns query string
      *
      * @access public
      * @return string
      */
     public function getQueryString()
     {
-        return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
+        return $this->getServerVariable('QUERY_STRING');
     }
 
     /**
-     * Returns uri
+     * Return URI
      *
      * @access public
      * @return string
      */
     public function getUri()
     {
-        return isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        return $this->getServerVariable('REQUEST_URI');
     }
 
     /**
      * Get the user agent
      *
-     * @static
      * @access public
      * @return string
      */
-    public static function getUserAgent()
+    public function getUserAgent()
     {
-        return empty($_SERVER['HTTP_USER_AGENT']) ? t('Unknown') : $_SERVER['HTTP_USER_AGENT'];
+        return empty($this->server['HTTP_USER_AGENT']) ? t('Unknown') : $this->server['HTTP_USER_AGENT'];
     }
 
     /**
-     * Get the real IP address of the user
+     * Get the IP address of the user
      *
-     * @static
      * @access public
-     * @param  bool    $only_public   Return only public IP address
      * @return string
      */
-    public static function getIpAddress($only_public = false)
+    public function getIpAddress()
     {
         $keys = array(
             'HTTP_CLIENT_IP',
@@ -221,23 +302,36 @@ class Request extends Base
         );
 
         foreach ($keys as $key) {
-            if (isset($_SERVER[$key])) {
-                foreach (explode(',', $_SERVER[$key]) as $ip_address) {
-                    $ip_address = trim($ip_address);
-
-                    if ($only_public) {
-
-                        // Return only public IP address
-                        if (filter_var($ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                            return $ip_address;
-                        }
-                    } else {
-                        return $ip_address;
-                    }
+            if ($this->getServerVariable($key) !== '') {
+                foreach (explode(',', $this->server[$key]) as $ipAddress) {
+                    return trim($ipAddress);
                 }
             }
         }
 
         return t('Unknown');
+    }
+
+    /**
+     * Get start time
+     *
+     * @access public
+     * @return float
+     */
+    public function getStartTime()
+    {
+        return $this->getServerVariable('REQUEST_TIME_FLOAT') ?: 0;
+    }
+
+    /**
+     * Get server variable
+     *
+     * @access public
+     * @param  string $variable
+     * @return string
+     */
+    public function getServerVariable($variable)
+    {
+        return isset($this->server[$variable]) ? $this->server[$variable] : '';
     }
 }

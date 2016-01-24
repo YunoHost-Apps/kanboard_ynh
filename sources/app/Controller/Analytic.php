@@ -1,6 +1,7 @@
 <?php
 
 namespace Kanboard\Controller;
+use Kanboard\Model\Task as TaskModel;
 
 /**
  * Project Analytic controller
@@ -20,7 +21,7 @@ class Analytic extends Base
      */
     private function layout($template, array $params)
     {
-        $params['board_selector'] = $this->projectPermission->getAllowedProjects($this->userSession->getId());
+        $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
         $params['content_for_sublayout'] = $this->template->render($template, $params);
 
         return $this->template->layout('analytic/layout', $params);
@@ -34,17 +35,7 @@ class Analytic extends Base
     public function leadAndCycleTime()
     {
         $project = $this->getProject();
-        $values = $this->request->getValues();
-
-        $this->projectDailyStats->updateTotals($project['id'], date('Y-m-d'));
-
-        $from = $this->request->getStringParam('from', date('Y-m-d', strtotime('-1week')));
-        $to = $this->request->getStringParam('to', date('Y-m-d'));
-
-        if (! empty($values)) {
-            $from = $values['from'];
-            $to = $values['to'];
-        }
+        list($from, $to) = $this->getDates();
 
         $this->response->html($this->layout('analytic/lead_cycle_time', array(
             'values' => array(
@@ -52,11 +43,37 @@ class Analytic extends Base
                 'to' => $to,
             ),
             'project' => $project,
-            'average' => $this->projectAnalytic->getAverageLeadAndCycleTime($project['id']),
+            'average' => $this->averageLeadCycleTimeAnalytic->build($project['id']),
             'metrics' => $this->projectDailyStats->getRawMetrics($project['id'], $from, $to),
             'date_format' => $this->config->get('application_date_format'),
             'date_formats' => $this->dateParser->getAvailableFormats(),
             'title' => t('Lead and Cycle time for "%s"', $project['name']),
+        )));
+    }
+
+    /**
+     * Show comparison between actual and estimated hours chart
+     *
+     * @access public
+     */
+    public function compareHours()
+    {
+        $project = $this->getProject();
+        $params = $this->getProjectFilters('analytic', 'compareHours');
+        $query = $this->taskFilter->create()->filterByProject($params['project']['id'])->getQuery();
+
+        $paginator = $this->paginator
+            ->setUrl('analytic', 'compareHours', array('project_id' => $project['id']))
+            ->setMax(30)
+            ->setOrder(TaskModel::TABLE.'.id')
+            ->setQuery($query)
+            ->calculate();
+
+        $this->response->html($this->layout('analytic/compare_hours', array(
+            'project' => $project,
+            'paginator' => $paginator,
+            'metrics' => $this->estimatedTimeComparisonAnalytic->build($project['id']),
+            'title' => t('Compare hours for "%s"', $project['name']),
         )));
     }
 
@@ -71,7 +88,7 @@ class Analytic extends Base
 
         $this->response->html($this->layout('analytic/avg_time_columns', array(
             'project' => $project,
-            'metrics' => $this->projectAnalytic->getAverageTimeSpentByColumn($project['id']),
+            'metrics' => $this->averageTimeSpentColumnAnalytic->build($project['id']),
             'title' => t('Average time spent into each column for "%s"', $project['name']),
         )));
     }
@@ -87,7 +104,7 @@ class Analytic extends Base
 
         $this->response->html($this->layout('analytic/tasks', array(
             'project' => $project,
-            'metrics' => $this->projectAnalytic->getTaskRepartition($project['id']),
+            'metrics' => $this->taskDistributionAnalytic->build($project['id']),
             'title' => t('Task repartition for "%s"', $project['name']),
         )));
     }
@@ -103,7 +120,7 @@ class Analytic extends Base
 
         $this->response->html($this->layout('analytic/users', array(
             'project' => $project,
-            'metrics' => $this->projectAnalytic->getUserRepartition($project['id']),
+            'metrics' => $this->userDistributionAnalytic->build($project['id']),
             'title' => t('User repartition for "%s"', $project['name']),
         )));
     }
@@ -132,21 +149,14 @@ class Analytic extends Base
      * Common method for CFD and Burdown chart
      *
      * @access private
+     * @param string $template
+     * @param string $column
+     * @param string $title
      */
     private function commonAggregateMetrics($template, $column, $title)
     {
         $project = $this->getProject();
-        $values = $this->request->getValues();
-
-        $this->projectDailyColumnStats->updateTotals($project['id'], date('Y-m-d'));
-
-        $from = $this->request->getStringParam('from', date('Y-m-d', strtotime('-1week')));
-        $to = $this->request->getStringParam('to', date('Y-m-d'));
-
-        if (! empty($values)) {
-            $from = $values['from'];
-            $to = $values['to'];
-        }
+        list($from, $to) = $this->getDates();
 
         $display_graph = $this->projectDailyColumnStats->countDays($project['id'], $from, $to) >= 2;
 
@@ -162,5 +172,20 @@ class Analytic extends Base
             'date_formats' => $this->dateParser->getAvailableFormats(),
             'title' => t($title, $project['name']),
         )));
+    }
+
+    private function getDates()
+    {
+        $values = $this->request->getValues();
+
+        $from = $this->request->getStringParam('from', date('Y-m-d', strtotime('-1week')));
+        $to = $this->request->getStringParam('to', date('Y-m-d'));
+
+        if (! empty($values)) {
+            $from = $values['from'];
+            $to = $values['to'];
+        }
+
+        return array($from, $to);
     }
 }

@@ -48,7 +48,7 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask/create', array(
             'values' => $values,
             'errors' => $errors,
-            'users_list' => $this->projectPermission->getMemberList($task['project_id']),
+            'users_list' => $this->projectUserRole->getAssignableUsersList($task['project_id']),
             'task' => $task,
         )));
     }
@@ -63,7 +63,7 @@ class Subtask extends Base
         $task = $this->getTask();
         $values = $this->request->getValues();
 
-        list($valid, $errors) = $this->subtask->validateCreation($values);
+        list($valid, $errors) = $this->subtaskValidator->validateCreation($values);
 
         if ($valid) {
             if ($this->subtask->create($values)) {
@@ -95,7 +95,7 @@ class Subtask extends Base
         $this->response->html($this->taskLayout('subtask/edit', array(
             'values' => empty($values) ? $subtask : $values,
             'errors' => $errors,
-            'users_list' => $this->projectPermission->getMemberList($task['project_id']),
+            'users_list' => $this->projectUserRole->getAssignableUsersList($task['project_id']),
             'status_list' => $this->subtask->getStatusList(),
             'subtask' => $subtask,
             'task' => $task,
@@ -113,7 +113,7 @@ class Subtask extends Base
         $this->getSubtask();
 
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->subtask->validateModification($values);
+        list($valid, $errors) = $this->subtaskValidator->validateModification($values);
 
         if ($valid) {
             if ($this->subtask->update($values)) {

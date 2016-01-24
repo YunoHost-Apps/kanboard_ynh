@@ -2,9 +2,8 @@
 
 namespace Kanboard\Model;
 
-use SimpleValidator\Validator;
-use SimpleValidator\Validators;
 use Kanboard\Core\Security\Token;
+use Kanboard\Core\Security\Role;
 
 /**
  * Project model
@@ -287,7 +286,7 @@ class Project extends Base
     {
         foreach ($projects as &$project) {
             $this->getColumnStats($project);
-            $project = array_merge($project, $this->projectPermission->getProjectUsers($project['id']));
+            $project = array_merge($project, $this->projectUserRole->getAllUsersGroupedByRole($project['id']));
         }
 
         return $projects;
@@ -365,7 +364,7 @@ class Project extends Base
         }
 
         if ($add_user && $user_id) {
-            $this->projectPermission->addManager($project_id, $user_id);
+            $this->projectUserRole->addUser($project_id, $user_id, Role::PROJECT_MANAGER);
         }
 
         $this->category->createDefaultCategories($project_id);
@@ -508,72 +507,5 @@ class Project extends Base
                     ->table(self::TABLE)
                     ->eq('id', $project_id)
                     ->save(array('is_public' => 0, 'token' => ''));
-    }
-
-    /**
-     * Common validation rules
-     *
-     * @access private
-     * @return array
-     */
-    private function commonValidationRules()
-    {
-        return array(
-            new Validators\Integer('id', t('This value must be an integer')),
-            new Validators\Integer('is_active', t('This value must be an integer')),
-            new Validators\Required('name', t('The project name is required')),
-            new Validators\MaxLength('name', t('The maximum length is %d characters', 50), 50),
-            new Validators\MaxLength('identifier', t('The maximum length is %d characters', 50), 50),
-            new Validators\MaxLength('start_date', t('The maximum length is %d characters', 10), 10),
-            new Validators\MaxLength('end_date', t('The maximum length is %d characters', 10), 10),
-            new Validators\AlphaNumeric('identifier', t('This value must be alphanumeric')) ,
-            new Validators\Unique('identifier', t('The identifier must be unique'), $this->db->getConnection(), self::TABLE),
-        );
-    }
-
-    /**
-     * Validate project creation
-     *
-     * @access public
-     * @param  array   $values           Form values
-     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
-     */
-    public function validateCreation(array $values)
-    {
-        if (! empty($values['identifier'])) {
-            $values['identifier'] = strtoupper($values['identifier']);
-        }
-
-        $v = new Validator($values, $this->commonValidationRules());
-
-        return array(
-            $v->execute(),
-            $v->getErrors()
-        );
-    }
-
-    /**
-     * Validate project modification
-     *
-     * @access public
-     * @param  array   $values           Form values
-     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
-     */
-    public function validateModification(array $values)
-    {
-        if (! empty($values['identifier'])) {
-            $values['identifier'] = strtoupper($values['identifier']);
-        }
-
-        $rules = array(
-            new Validators\Required('id', t('This value is required')),
-        );
-
-        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
-
-        return array(
-            $v->execute(),
-            $v->getErrors()
-        );
     }
 }

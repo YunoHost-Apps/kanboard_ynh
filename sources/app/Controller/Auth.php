@@ -2,8 +2,6 @@
 
 namespace Kanboard\Controller;
 
-use Gregwar\Captcha\CaptchaBuilder;
-
 /**
  * Authentication controller
  *
@@ -24,7 +22,7 @@ class Auth extends Base
         }
 
         $this->response->html($this->template->layout('auth/index', array(
-            'captcha' => isset($values['username']) && $this->authentication->hasCaptcha($values['username']),
+            'captcha' => ! empty($values['username']) && $this->userLocking->hasCaptcha($values['username']),
             'errors' => $errors,
             'values' => $values,
             'no_layout' => true,
@@ -40,18 +38,11 @@ class Auth extends Base
     public function check()
     {
         $values = $this->request->getValues();
-        list($valid, $errors) = $this->authentication->validateForm($values);
+        $this->sessionStorage->hasRememberMe = ! empty($values['remember_me']);
+        list($valid, $errors) = $this->authValidator->validateForm($values);
 
         if ($valid) {
-            if (isset($this->sessionStorage->redirectAfterLogin)
-                && ! empty($this->sessionStorage->redirectAfterLogin)
-                && ! filter_var($this->sessionStorage->redirectAfterLogin, FILTER_VALIDATE_URL)) {
-                $redirect = $this->sessionStorage->redirectAfterLogin;
-                unset($this->sessionStorage->redirectAfterLogin);
-                $this->response->redirect($redirect);
-            }
-
-            $this->response->redirect($this->helper->url->to('app', 'index'));
+            $this->redirectAfterLogin();
         }
 
         $this->login($values, $errors);
@@ -64,23 +55,23 @@ class Auth extends Base
      */
     public function logout()
     {
-        $this->authentication->backend('rememberMe')->destroy($this->userSession->getId());
         $this->sessionManager->close();
         $this->response->redirect($this->helper->url->to('auth', 'login'));
     }
 
     /**
-     * Display captcha image
+     * Redirect the user after the authentication
      *
-     * @access public
+     * @access private
      */
-    public function captcha()
+    private function redirectAfterLogin()
     {
-        $this->response->contentType('image/jpeg');
+        if (isset($this->sessionStorage->redirectAfterLogin) && ! empty($this->sessionStorage->redirectAfterLogin) && ! filter_var($this->sessionStorage->redirectAfterLogin, FILTER_VALIDATE_URL)) {
+            $redirect = $this->sessionStorage->redirectAfterLogin;
+            unset($this->sessionStorage->redirectAfterLogin);
+            $this->response->redirect($redirect);
+        }
 
-        $builder = new CaptchaBuilder;
-        $builder->build();
-        $this->sessionStorage->captcha = $builder->getPhrase();
-        $builder->output();
+        $this->response->redirect($this->helper->url->to('app', 'index'));
     }
 }

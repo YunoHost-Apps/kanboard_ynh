@@ -2,14 +2,63 @@
 
 namespace Kanboard\Helper;
 
+use Kanboard\Core\Base;
+
 /**
  * Application helpers
  *
  * @package helper
  * @author  Frederic Guillot
  */
-class App extends \Kanboard\Core\Base
+class App extends Base
 {
+    /**
+     * Get config variable
+     *
+     * @access public
+     * @param  string $param
+     * @return mixed
+     */
+    public function config($param)
+    {
+        return $this->config->get($param);
+    }
+
+    /**
+     * Make sidebar menu active
+     *
+     * @access public
+     * @param  string $controller
+     * @param  string $action
+     * @param  string $plugin
+     * @return string
+     */
+    public function checkMenuSelection($controller, $action = '', $plugin = '')
+    {
+        $result = strtolower($this->getRouterController()) === strtolower($controller);
+
+        if ($result && $action !== '') {
+            $result = strtolower($this->getRouterAction()) === strtolower($action);
+        }
+
+        if ($result && $plugin !== '') {
+            $result = strtolower($this->getPluginName()) === strtolower($plugin);
+        }
+
+        return $result ? 'class="active"' : '';
+    }
+
+    /**
+     * Get plugin name from route
+     *
+     * @access public
+     * @return string
+     */
+    public function getPluginName()
+    {
+        return $this->router->getPlugin();
+    }
+
     /**
      * Get router controller
      *

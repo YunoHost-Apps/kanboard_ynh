@@ -48,7 +48,7 @@
             <i class="fa fa-list fa-fw"></i>
             <?= $this->url->link(t('List'), 'listing', 'show', array('project_id' => $project['id'], 'search' => $filters['search']), false, 'view-listing', t('Keyboard shortcut: "%s"', 'v l')) ?>
         </li>
-        <?php if ($this->user->isProjectManagementAllowed($project['id'])): ?>
+        <?php if ($this->user->hasProjectAccess('gantt', 'project', $project['id'])): ?>
         <li <?= $filters['controller'] === 'gantt' ? 'class="active"' : '' ?>>
             <i class="fa fa-sliders fa-fw"></i>
             <?= $this->url->link(t('Gantt'), 'gantt', 'project', array('project_id' => $project['id'], 'search' => $filters['search']), false, 'view-gantt', t('Keyboard shortcut: "%s"', 'v g')) ?>
@@ -63,7 +63,8 @@
     </form>
 
     <div class="filter-dropdowns">
-        <?= $this->render('app/filters_helper', array('reset' => 'status:open')) ?>
+
+	<?= $this->render('app/filters_helper', array('reset' => 'status:open', 'project' => $project)) ?>
 
         <?php if (isset($custom_filters_list) && ! empty($custom_filters_list)): ?>
             <div class="dropdown filters">

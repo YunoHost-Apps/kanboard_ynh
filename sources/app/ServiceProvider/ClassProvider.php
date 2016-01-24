@@ -4,26 +4,26 @@ namespace Kanboard\ServiceProvider;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use League\HTMLToMarkdown\HtmlConverter;
-use Kanboard\Core\Plugin\Loader;
 use Kanboard\Core\Mail\Client as EmailClient;
 use Kanboard\Core\ObjectStorage\FileStorage;
 use Kanboard\Core\Paginator;
-use Kanboard\Core\OAuth2;
+use Kanboard\Core\Http\OAuth2;
 use Kanboard\Core\Tool;
 use Kanboard\Core\Http\Client as HttpClient;
-use Kanboard\Model\UserNotificationType;
-use Kanboard\Model\ProjectNotificationType;
-use Kanboard\Notification\Mail as MailNotification;
-use Kanboard\Notification\Web as WebNotification;
 
 class ClassProvider implements ServiceProviderInterface
 {
     private $classes = array(
+        'Analytic' => array(
+            'TaskDistributionAnalytic',
+            'UserDistributionAnalytic',
+            'EstimatedTimeComparisonAnalytic',
+            'AverageLeadCycleTimeAnalytic',
+            'AverageTimeSpentColumnAnalytic',
+        ),
         'Model' => array(
-            'Acl',
             'Action',
-            'Authentication',
+            'ActionParameter',
             'Board',
             'Category',
             'Color',
@@ -32,19 +32,26 @@ class ClassProvider implements ServiceProviderInterface
             'Currency',
             'CustomFilter',
             'File',
+            'Group',
+            'GroupMember',
             'LastLogin',
             'Link',
             'Notification',
             'OverdueNotification',
+            'PasswordReset',
             'Project',
             'ProjectActivity',
-            'ProjectAnalytic',
             'ProjectDuplication',
             'ProjectDailyColumnStats',
             'ProjectDailyStats',
             'ProjectPermission',
             'ProjectNotification',
             'ProjectMetadata',
+            'ProjectGroupRole',
+            'ProjectGroupRoleFilter',
+            'ProjectUserRole',
+            'ProjectUserRoleFilter',
+            'RememberMeSession',
             'Subtask',
             'SubtaskExport',
             'SubtaskTimeTracking',
@@ -61,15 +68,14 @@ class ClassProvider implements ServiceProviderInterface
             'TaskPermission',
             'TaskPosition',
             'TaskStatus',
-            'TaskValidator',
             'TaskImport',
             'TaskMetadata',
             'Transition',
             'User',
             'UserImport',
-            'UserSession',
+            'UserLocking',
+            'UserMention',
             'UserNotification',
-            'UserNotificationType',
             'UserNotificationFilter',
             'UserUnreadNotification',
             'UserMetadata',
@@ -80,6 +86,26 @@ class ClassProvider implements ServiceProviderInterface
             'TaskFilterCalendarFormatter',
             'TaskFilterICalendarFormatter',
             'ProjectGanttFormatter',
+            'UserFilterAutoCompleteFormatter',
+            'GroupAutoCompleteFormatter',
+        ),
+        'Validator' => array(
+            'ActionValidator',
+            'AuthValidator',
+            'CategoryValidator',
+            'ColumnValidator',
+            'CommentValidator',
+            'CurrencyValidator',
+            'CustomFilterValidator',
+            'GroupValidator',
+            'LinkValidator',
+            'PasswordResetValidator',
+            'ProjectValidator',
+            'SubtaskValidator',
+            'SwimlaneValidator',
+            'TaskValidator',
+            'TaskLinkValidator',
+            'UserValidator',
         ),
         'Core' => array(
             'DateParser',
@@ -87,10 +113,13 @@ class ClassProvider implements ServiceProviderInterface
             'Lexer',
             'Template',
         ),
+        'Core\Event' => array(
+            'EventManager',
+        ),
         'Core\Http' => array(
             'Request',
             'Response',
-            'Router',
+            'RememberMeCookie',
         ),
         'Core\Cache' => array(
             'MemoryCache',
@@ -100,11 +129,13 @@ class ClassProvider implements ServiceProviderInterface
         ),
         'Core\Security' => array(
             'Token',
+            'Role',
         ),
-        'Integration' => array(
-            'BitbucketWebhook',
-            'GithubWebhook',
-            'GitlabWebhook',
+        'Core\User' => array(
+            'GroupSync',
+            'UserSync',
+            'UserSession',
+            'UserProfile',
         )
     );
 
@@ -124,10 +155,6 @@ class ClassProvider implements ServiceProviderInterface
             return new HttpClient($c);
         };
 
-        $container['htmlConverter'] = function () {
-            return new HtmlConverter(array('strip_tags' => true));
-        };
-
         $container['objectStorage'] = function () {
             return new FileStorage(FILES_DIR);
         };
@@ -140,23 +167,11 @@ class ClassProvider implements ServiceProviderInterface
             return $mailer;
         };
 
-        $container['userNotificationType'] = function ($container) {
-            $type = new UserNotificationType($container);
-            $type->setType(MailNotification::TYPE, t('Email'), '\Kanboard\Notification\Mail');
-            $type->setType(WebNotification::TYPE, t('Web'), '\Kanboard\Notification\Web');
-            return $type;
-        };
-
-        $container['projectNotificationType'] = function ($container) {
-            $type = new ProjectNotificationType($container);
-            $type->setType('webhook', 'Webhook', '\Kanboard\Notification\Webhook', true);
-            $type->setType('activity_stream', 'ActivityStream', '\Kanboard\Notification\ActivityStream', true);
-            return $type;
-        };
-
-        $container['pluginLoader'] = new Loader($container);
-
-        $container['cspRules'] = array('style-src' => "'self' 'unsafe-inline'", 'img-src' => '* data:');
+        $container['cspRules'] = array(
+            'default-src' => "'self'",
+            'style-src' => "'self' 'unsafe-inline'",
+            'img-src' => '* data:',
+        );
 
         return $container;
     }
