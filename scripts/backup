@@ -14,7 +14,7 @@ db_pwd=$(sudo yunohost app setting ${APP} mysqlpwd)
 
 # Backup app files
 sudo mkdir -p "${BACKUP_DIR}/www"
-sudo cp -a /var/www/${app}/. "${BACKUP_DIR}/www"
+sudo cp -a /var/www/${APP}/. "${BACKUP_DIR}/www"
 
 # Backup conf files
 sudo mkdir -p "${BACKUP_DIR}/conf"
