@@ -241,23 +241,23 @@
     },
     {
         "name": "fguillot/picodb",
-        "version": "v1.0.4",
-        "version_normalized": "1.0.4.0",
+        "version": "v1.0.5",
+        "version_normalized": "1.0.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/picoDb.git",
-            "reference": "9ed4ee0c412dc9259d45bbc52e55c74150f7fb99"
+            "reference": "3b388ef12f8c57f3bca85d278a53cf6fa2d832b8"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/9ed4ee0c412dc9259d45bbc52e55c74150f7fb99",
-            "reference": "9ed4ee0c412dc9259d45bbc52e55c74150f7fb99",
+            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/3b388ef12f8c57f3bca85d278a53cf6fa2d832b8",
+            "reference": "3b388ef12f8c57f3bca85d278a53cf6fa2d832b8",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2015-12-24 11:39:04",
+        "time": "2016-02-20 02:56:11",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -447,17 +447,17 @@
     },
     {
         "name": "paragonie/random_compat",
-        "version": "1.1.5",
-        "version_normalized": "1.1.5.0",
+        "version": "v1.2.0",
+        "version_normalized": "1.2.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/paragonie/random_compat.git",
-            "reference": "dd8998b7c846f6909f4e7a5f67fabebfc412a4f7"
+            "reference": "b0e69d10852716b2ccbdff69c75c477637220790"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/paragonie/random_compat/zipball/dd8998b7c846f6909f4e7a5f67fabebfc412a4f7",
-            "reference": "dd8998b7c846f6909f4e7a5f67fabebfc412a4f7",
+            "url": "https://api.github.com/repos/paragonie/random_compat/zipball/b0e69d10852716b2ccbdff69c75c477637220790",
+            "reference": "b0e69d10852716b2ccbdff69c75c477637220790",
             "shasum": ""
         },
         "require": {
@@ -469,7 +469,7 @@
         "suggest": {
             "ext-libsodium": "Provides a modern crypto API that can be used to generate random bytes."
         },
-        "time": "2016-01-06 13:31:20",
+        "time": "2016-02-06 03:52:05",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -647,17 +647,17 @@
     },
     {
         "name": "symfony/polyfill-mbstring",
-        "version": "v1.0.1",
-        "version_normalized": "1.0.1.0",
+        "version": "v1.1.0",
+        "version_normalized": "1.1.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-mbstring.git",
-            "reference": "49ff736bd5d41f45240cec77b44967d76e0c3d25"
+            "reference": "1289d16209491b584839022f29257ad859b8532d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/49ff736bd5d41f45240cec77b44967d76e0c3d25",
-            "reference": "49ff736bd5d41f45240cec77b44967d76e0c3d25",
+            "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/1289d16209491b584839022f29257ad859b8532d",
+            "reference": "1289d16209491b584839022f29257ad859b8532d",
             "shasum": ""
         },
         "require": {
@@ -666,11 +666,11 @@
         "suggest": {
             "ext-mbstring": "For best performance"
         },
-        "time": "2015-11-20 09:19:13",
+        "time": "2016-01-20 09:13:37",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "1.0-dev"
+                "dev-master": "1.1-dev"
             }
         },
         "installation-source": "dist",

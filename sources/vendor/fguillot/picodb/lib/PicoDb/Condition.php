@@ -255,6 +255,19 @@ class Condition
     }
 
     /**
+     * Greater than condition with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function gtSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' > ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
+    }
+
+    /**
      * Lower than condition
      *
      * @access public
@@ -265,6 +278,19 @@ class Condition
     {
         $this->addCondition($this->db->escapeIdentifier($column).' < ?');
         $this->values[] = $value;
+    }
+
+    /**
+     * Lower than condition with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function ltSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' < ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
     }
 
     /**
@@ -281,6 +307,19 @@ class Condition
     }
 
     /**
+     * Greater than or equal condition with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function gteSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' >= ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
+    }
+
+    /**
      * Lower than or equals condition
      *
      * @access public
@@ -291,6 +330,19 @@ class Condition
     {
         $this->addCondition($this->db->escapeIdentifier($column).' <= ?');
         $this->values[] = $value;
+    }
+
+    /**
+     * Lower than or equal condition with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function lteSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' <= ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->condition->getValues());
     }
 
     /**
