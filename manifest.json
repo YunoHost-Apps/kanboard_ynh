@@ -1,6 +1,7 @@
 {
     "name": "Kanboard",
     "id": "kanboard",
+    "packaging_format": 1,
     "description": {
         "en": "Kanboard is a simple visual task board web application",
         "fr": "Kanboard est une application web de management de tâches simples" 
