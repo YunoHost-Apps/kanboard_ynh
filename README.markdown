@@ -22,19 +22,18 @@ From yunohost admin panel:
 
 From command line:
 
-`sudo yunohost app install -l kanboard https://github.com/mbugeia/kanboard_ynh`
+`sudo yunohost app install -l kanboard https://github.com/YunoHost-Apps/kanboard_ynh`
 
 
 Upgrade
 -------
 From command line:
 
-`sudo yunohost app upgrade -u https://github.com/mbugeia/kanboard_ynh kanboard`
+`sudo yunohost app upgrade -u https://github.com/YunoHost-Apps/kanboard_ynh kanboard`
 
 Infos
 -----
-Kanboard v1.0.24
-Reverse-Proxy Authentication with LDAP user provider plugin v1.0.0 https://github.com/kanboard/plugin-reverse-proxy-ldap
+Kanboard v1.0.27
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
 
