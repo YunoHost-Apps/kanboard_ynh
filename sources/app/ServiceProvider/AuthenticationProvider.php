@@ -67,6 +67,8 @@ class AuthenticationProvider implements ServiceProviderInterface
         $acl->setRoleHierarchy(Role::PROJECT_MEMBER, array(Role::PROJECT_VIEWER));
 
         $acl->add('Action', '*', Role::PROJECT_MANAGER);
+        $acl->add('ActionProject', '*', Role::PROJECT_MANAGER);
+        $acl->add('ActionCreation', '*', Role::PROJECT_MANAGER);
         $acl->add('Analytic', '*', Role::PROJECT_MANAGER);
         $acl->add('Board', 'save', Role::PROJECT_MEMBER);
         $acl->add('BoardPopover', '*', Role::PROJECT_MEMBER);
@@ -92,10 +94,8 @@ class AuthenticationProvider implements ServiceProviderInterface
         $acl->add('Taskduplication', '*', Role::PROJECT_MEMBER);
         $acl->add('TaskRecurrence', '*', Role::PROJECT_MEMBER);
         $acl->add('TaskImport', '*', Role::PROJECT_MANAGER);
-        $acl->add('Tasklink', '*', Role::PROJECT_MEMBER);
-        $acl->add('Tasklink', array('show'), Role::PROJECT_VIEWER);
+        $acl->add('TaskInternalLink', '*', Role::PROJECT_MEMBER);
         $acl->add('TaskExternalLink', '*', Role::PROJECT_MEMBER);
-        $acl->add('TaskExternalLink', array('show'), Role::PROJECT_VIEWER);
         $acl->add('Taskmodification', '*', Role::PROJECT_MEMBER);
         $acl->add('Taskstatus', '*', Role::PROJECT_MEMBER);
         $acl->add('UserHelper', array('mention'), Role::PROJECT_MEMBER);
@@ -125,6 +125,7 @@ class AuthenticationProvider implements ServiceProviderInterface
         $acl->add('Board', 'readonly', Role::APP_PUBLIC);
         $acl->add('Ical', '*', Role::APP_PUBLIC);
         $acl->add('Feed', '*', Role::APP_PUBLIC);
+        $acl->add('AvatarFile', 'show', Role::APP_PUBLIC);
 
         $acl->add('Config', '*', Role::APP_ADMIN);
         $acl->add('Currency', '*', Role::APP_ADMIN);

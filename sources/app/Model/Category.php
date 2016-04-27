@@ -22,12 +22,11 @@ class Category extends Base
      *
      * @access public
      * @param  integer   $category_id    Category id
-     * @param  integer   $project_id     Project id
      * @return boolean
      */
-    public function exists($category_id, $project_id)
+    public function exists($category_id)
     {
-        return $this->db->table(self::TABLE)->eq('id', $category_id)->eq('project_id', $project_id)->exists();
+        return $this->db->table(self::TABLE)->eq('id', $category_id)->exists();
     }
 
     /**
@@ -115,25 +114,29 @@ class Category extends Base
     }
 
     /**
-     * Create default cetegories during project creation (transaction already started in Project::create())
+     * Create default categories during project creation (transaction already started in Project::create())
      *
      * @access public
      * @param  integer  $project_id
+     * @return boolean
      */
     public function createDefaultCategories($project_id)
     {
+        $results = array();
         $categories = explode(',', $this->config->get('project_categories'));
 
         foreach ($categories as $category) {
             $category = trim($category);
 
             if (! empty($category)) {
-                $this->db->table(self::TABLE)->insert(array(
+                $results[] = $this->db->table(self::TABLE)->insert(array(
                     'project_id' => $project_id,
                     'name' => $category,
                 ));
             }
         }
+
+        return in_array(false, $results, true);
     }
 
     /**
@@ -188,14 +191,14 @@ class Category extends Base
      *
      * @author Antonio Rabelo
      * @param  integer    $src_project_id        Source project id
-     * @return integer    $dst_project_id        Destination project id
+     * @param  integer    $dst_project_id        Destination project id
      * @return boolean
      */
     public function duplicate($src_project_id, $dst_project_id)
     {
         $categories = $this->db
             ->table(self::TABLE)
-            ->columns('name')
+            ->columns('name', 'description')
             ->eq('project_id', $src_project_id)
             ->asc('name')
             ->findAll();

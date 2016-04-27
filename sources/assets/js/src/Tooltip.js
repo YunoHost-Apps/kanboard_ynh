@@ -1,10 +1,12 @@
-function Tooltip(app) {
+Kanboard.Tooltip = function(app) {
     this.app = app;
-}
+};
 
-Tooltip.prototype.listen = function() {
-    var self = this;
+Kanboard.Tooltip.prototype.onBoardRendered = function() {
+    this.execute();
+};
 
+Kanboard.Tooltip.prototype.execute = function() {
     $(".tooltip").tooltip({
         track: false,
         show: false,

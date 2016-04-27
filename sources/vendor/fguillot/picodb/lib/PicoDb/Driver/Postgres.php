@@ -181,4 +181,15 @@ class Postgres extends Base
     {
         return $this->getConnection()->query('EXPLAIN (FORMAT YAML) '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Get database version
+     *
+     * @access public
+     * @return array
+     */
+    public function getDatabaseVersion()
+    {
+        return $this->getConnection()->query('SHOW server_version')->fetchColumn();
+    }
 }

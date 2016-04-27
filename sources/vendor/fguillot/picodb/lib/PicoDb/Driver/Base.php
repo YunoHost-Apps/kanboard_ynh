@@ -219,4 +219,15 @@ abstract class Base
 
         return $sql;
     }
+
+    /**
+     * Get database version
+     *
+     * @access public
+     * @return array
+     */
+    public function getDatabaseVersion()
+    {
+        return $this->getConnection()->query('SELECT VERSION()')->fetchColumn();
+    }
 }

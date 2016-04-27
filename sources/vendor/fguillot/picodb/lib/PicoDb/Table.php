@@ -486,6 +486,30 @@ class Table
 
         return $this;
     }
+    
+    /**
+     * Inner join
+     *
+     * @access public
+     * @param  string   $table1
+     * @param  string   $alias1
+     * @param  string   $column1
+     * @param  string   $table2
+     * @param  string   $column2
+     * @return Table
+     */
+    public function inner($table1, $alias1, $column1, $table2, $column2)
+    {
+        $this->joins[] = sprintf(
+            'JOIN %s AS %s ON %s=%s',
+            $this->db->escapeIdentifier($table1),
+            $this->db->escapeIdentifier($alias1),
+            $this->db->escapeIdentifier($alias1).'.'.$this->db->escapeIdentifier($column1),
+            $this->db->escapeIdentifier($table2).'.'.$this->db->escapeIdentifier($column2)
+        );
+
+        return $this;
+    }
 
     /**
      * Order by

@@ -66,12 +66,29 @@ class User extends \Kanboard\Core\Base
         return $valid ? $this->user->create($values) : false;
     }
 
+    /**
+     * Create LDAP user in the database
+     *
+     * Only "anonymous" and "proxy" LDAP authentication are supported by this method
+     *
+     * User information will be fetched from the LDAP server
+     *
+     * @access public
+     * @param  string $username
+     * @return bool|int
+     */
     public function createLdapUser($username)
     {
+        if (LDAP_BIND_TYPE === 'user') {
+            $this->logger->error('LDAP authentication "user" is not supported by this API call');
+            return false;
+        }
+
         try {
 
             $ldap = LdapClient::connect();
-            $user = LdapUser::getUser($ldap, sprintf(LDAP_USER_FILTER, $username));
+            $ldap->setLogger($this->logger);
+            $user = LdapUser::getUser($ldap, $username);
 
             if ($user === null) {
                 $this->logger->info('User not found in LDAP server');

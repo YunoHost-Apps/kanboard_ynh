@@ -26,6 +26,7 @@ require __DIR__.'/constants.php';
 require __DIR__.'/check_setup.php';
 
 $container = new Pimple\Container;
+$container->register(new Kanboard\ServiceProvider\HelperProvider);
 $container->register(new Kanboard\ServiceProvider\SessionProvider);
 $container->register(new Kanboard\ServiceProvider\LoggingProvider);
 $container->register(new Kanboard\ServiceProvider\DatabaseProvider);
@@ -37,4 +38,5 @@ $container->register(new Kanboard\ServiceProvider\GroupProvider);
 $container->register(new Kanboard\ServiceProvider\RouteProvider);
 $container->register(new Kanboard\ServiceProvider\ActionProvider);
 $container->register(new Kanboard\ServiceProvider\ExternalLinkProvider);
+$container->register(new Kanboard\ServiceProvider\AvatarProvider);
 $container->register(new Kanboard\ServiceProvider\PluginProvider);

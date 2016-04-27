@@ -2,6 +2,8 @@
 
 namespace Kanboard\Controller;
 
+use Kanboard\Core\DateParser;
+
 /**
  * Task Modification controller
  *
@@ -35,7 +37,7 @@ class Taskmodification extends Base
             $values = array('id' => $task['id'], 'description' => $task['description']);
         }
 
-        $this->response->html($this->helper->layout->task('task_modification/edit_description', array(
+        $this->response->html($this->template->render('task_modification/edit_description', array(
             'values' => $values,
             'errors' => $errors,
             'task' => $task,
@@ -83,10 +85,10 @@ class Taskmodification extends Base
             $values = $this->hook->merge('controller:task-modification:form:default', $values, array('default_values' => $values));
         }
 
-        $values = $this->dateParser->format($values, array('date_due'), $this->config->get('application_date_format', 'm/d/Y'));
-        $values = $this->dateParser->format($values, array('date_started'), $this->config->get('application_datetime_format', 'm/d/Y H:i'));
+        $values = $this->dateParser->format($values, array('date_due'), $this->config->get('application_date_format', DateParser::DATE_FORMAT));
+        $values = $this->dateParser->format($values, array('date_started'), $this->config->get('application_datetime_format', DateParser::DATE_TIME_FORMAT));
 
-        $this->response->html($this->helper->layout->task('task_modification/edit_task', array(
+        $this->response->html($this->template->render('task_modification/edit_task', array(
             'project' => $project,
             'values' => $values,
             'errors' => $errors,

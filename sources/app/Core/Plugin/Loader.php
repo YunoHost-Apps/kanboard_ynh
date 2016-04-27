@@ -55,6 +55,7 @@ class Loader extends \Kanboard\Core\Base
      * Load plugin
      *
      * @access public
+     * @throws LogicException
      * @param  string $plugin
      */
     public function load($plugin)
@@ -68,6 +69,8 @@ class Loader extends \Kanboard\Core\Base
         $instance = new $class($this->container);
 
         Tool::buildDic($this->container, $instance->getClasses());
+
+        Tool::buildDICHelpers($this->container, $instance->getHelpers());
 
         $instance->initialize();
         $this->plugins[] = $instance;

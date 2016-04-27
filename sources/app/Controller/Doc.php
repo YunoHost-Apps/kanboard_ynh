@@ -5,24 +5,56 @@ namespace Kanboard\Controller;
 use Parsedown;
 
 /**
- * Documentation controller
+ * Documentation Viewer
  *
  * @package  controller
  * @author   Frederic Guillot
  */
 class Doc extends Base
 {
-    private function readFile($filename)
+    public function show()
     {
-        $url = $this->helper->url;
+        $page = $this->request->getStringParam('file', 'index');
+
+        if (!preg_match('/^[a-z0-9\-]+/', $page)) {
+            $page = 'index';
+        }
+
+        if ($this->config->getCurrentLanguage() === 'fr_FR') {
+            $filename = __DIR__.'/../../doc/fr/' . $page . '.markdown';
+        } else {
+            $filename = __DIR__ . '/../../doc/' . $page . '.markdown';
+        }
+
+        if (!file_exists($filename)) {
+            $filename = __DIR__.'/../../doc/index.markdown';
+        }
+
+        $this->response->html($this->helper->layout->app('doc/show', $this->render($filename)));
+    }
+
+    /**
+     * Display keyboard shortcut
+     */
+    public function shortcuts()
+    {
+        $this->response->html($this->template->render('config/keyboard_shortcuts'));
+    }
+
+    /**
+     * Prepare Markdown file
+     *
+     * @access private
+     * @param  string $filename
+     * @return array
+     */
+    private function render($filename)
+    {
         $data = file_get_contents($filename);
+        $content = preg_replace_callback('/\((.*.markdown)\)/', array($this, 'replaceMarkdownUrl'), $data);
+        $content = preg_replace_callback('/\((screenshots.*\.png)\)/', array($this, 'replaceImageUrl'), $content);
+
         list($title, ) = explode("\n", $data, 2);
-
-        $replaceUrl = function (array $matches) use ($url) {
-            return '('.$url->to('doc', 'show', array('file' => str_replace('.markdown', '', $matches[1]))).')';
-        };
-
-        $content = preg_replace_callback('/\((.*.markdown)\)/', $replaceUrl, $data);
 
         return array(
             'content' => Parsedown::instance()->text($content),
@@ -30,28 +62,31 @@ class Doc extends Base
         );
     }
 
-    public function show()
+    /**
+     * Regex callback to replace Markdown links
+     *
+     * @access public
+     * @param  array $matches
+     * @return string
+     */
+    public function replaceMarkdownUrl(array $matches)
     {
-        $page = $this->request->getStringParam('file', 'index');
+        return '('.$this->helper->url->to('doc', 'show', array('file' => str_replace('.markdown', '', $matches[1]))).')';
+    }
 
-        if (! preg_match('/^[a-z0-9\-]+/', $page)) {
-            $page = 'index';
-        }
-
-        $filenames = array(__DIR__.'/../../doc/'.$page.'.markdown');
-        $filename = __DIR__.'/../../doc/index.markdown';
-
+    /**
+     * Regex callback to replace image links
+     *
+     * @access public
+     * @param  array $matches
+     * @return string
+     */
+    public function replaceImageUrl(array $matches)
+    {
         if ($this->config->getCurrentLanguage() === 'fr_FR') {
-            array_unshift($filenames, __DIR__.'/../../doc/fr/'.$page.'.markdown');
+            return '('.$this->helper->url->base().'doc/fr/'.$matches[1].')';
         }
 
-        foreach ($filenames as $file) {
-            if (file_exists($file)) {
-                $filename = $file;
-                break;
-            }
-        }
-
-        $this->response->html($this->helper->layout->app('doc/show', $this->readFile($filename)));
+        return '('.$this->helper->url->base().'doc/'.$matches[1].')';
     }
 }

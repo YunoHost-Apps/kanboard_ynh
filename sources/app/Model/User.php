@@ -253,10 +253,10 @@ class User extends Base
             }
         }
 
-        $this->removeFields($values, array('confirmation', 'current_password'));
-        $this->resetFields($values, array('is_ldap_user', 'disable_login_form'));
-        $this->convertNullFields($values, array('gitlab_id'));
-        $this->convertIntegerFields($values, array('gitlab_id'));
+        $this->helper->model->removeFields($values, array('confirmation', 'current_password'));
+        $this->helper->model->resetFields($values, array('is_ldap_user', 'disable_login_form'));
+        $this->helper->model->convertNullFields($values, array('gitlab_id'));
+        $this->helper->model->convertIntegerFields($values, array('gitlab_id'));
     }
 
     /**
@@ -283,12 +283,7 @@ class User extends Base
     {
         $this->prepare($values);
         $result = $this->db->table(self::TABLE)->eq('id', $values['id'])->update($values);
-
-        // If the user is connected refresh his session
-        if ($this->userSession->getId() == $values['id']) {
-            $this->userSession->initialize($this->getById($this->userSession->getId()));
-        }
-
+        $this->userSession->refresh($values['id']);
         return $result;
     }
 
@@ -325,6 +320,8 @@ class User extends Base
      */
     public function remove($user_id)
     {
+        $this->avatarFile->remove($user_id);
+
         return $this->db->transaction(function (Database $db) use ($user_id) {
 
             // All assigned tasks are now unassigned (no foreign key)

@@ -241,23 +241,23 @@
     },
     {
         "name": "fguillot/picodb",
-        "version": "v1.0.5",
-        "version_normalized": "1.0.5.0",
+        "version": "v1.0.8",
+        "version_normalized": "1.0.8.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fguillot/picoDb.git",
-            "reference": "3b388ef12f8c57f3bca85d278a53cf6fa2d832b8"
+            "reference": "672a819ba2757a9e22a3572a230e735e84bcf625"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/3b388ef12f8c57f3bca85d278a53cf6fa2d832b8",
-            "reference": "3b388ef12f8c57f3bca85d278a53cf6fa2d832b8",
+            "url": "https://api.github.com/repos/fguillot/picoDb/zipball/672a819ba2757a9e22a3572a230e735e84bcf625",
+            "reference": "672a819ba2757a9e22a3572a230e735e84bcf625",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2016-02-20 02:56:11",
+        "time": "2016-03-27 20:15:25",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -447,17 +447,17 @@
     },
     {
         "name": "paragonie/random_compat",
-        "version": "v1.2.0",
-        "version_normalized": "1.2.0.0",
+        "version": "v2.0.1",
+        "version_normalized": "2.0.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/paragonie/random_compat.git",
-            "reference": "b0e69d10852716b2ccbdff69c75c477637220790"
+            "reference": "76e90f747b769b347fe584e8015a014549107d35"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/paragonie/random_compat/zipball/b0e69d10852716b2ccbdff69c75c477637220790",
-            "reference": "b0e69d10852716b2ccbdff69c75c477637220790",
+            "url": "https://api.github.com/repos/paragonie/random_compat/zipball/76e90f747b769b347fe584e8015a014549107d35",
+            "reference": "76e90f747b769b347fe584e8015a014549107d35",
             "shasum": ""
         },
         "require": {
@@ -469,7 +469,7 @@
         "suggest": {
             "ext-libsodium": "Provides a modern crypto API that can be used to generate random bytes."
         },
-        "time": "2016-02-06 03:52:05",
+        "time": "2016-03-18 20:36:13",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -647,8 +647,8 @@
     },
     {
         "name": "symfony/polyfill-mbstring",
-        "version": "v1.1.0",
-        "version_normalized": "1.1.0.0",
+        "version": "v1.1.1",
+        "version_normalized": "1.1.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-mbstring.git",
@@ -708,17 +708,17 @@
     },
     {
         "name": "symfony/console",
-        "version": "v2.8.2",
-        "version_normalized": "2.8.2.0",
+        "version": "v2.8.4",
+        "version_normalized": "2.8.4.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/console.git",
-            "reference": "d0239fb42f98dd02e7d342f793c5d2cdee0c478d"
+            "reference": "9a5aef5fc0d4eff86853d44202b02be8d5a20154"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/console/zipball/d0239fb42f98dd02e7d342f793c5d2cdee0c478d",
-            "reference": "d0239fb42f98dd02e7d342f793c5d2cdee0c478d",
+            "url": "https://api.github.com/repos/symfony/console/zipball/9a5aef5fc0d4eff86853d44202b02be8d5a20154",
+            "reference": "9a5aef5fc0d4eff86853d44202b02be8d5a20154",
             "shasum": ""
         },
         "require": {
@@ -735,7 +735,7 @@
             "symfony/event-dispatcher": "",
             "symfony/process": ""
         },
-        "time": "2016-01-14 08:33:16",
+        "time": "2016-03-17 09:19:04",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -770,17 +770,17 @@
     },
     {
         "name": "symfony/event-dispatcher",
-        "version": "v2.8.2",
-        "version_normalized": "2.8.2.0",
+        "version": "v2.8.4",
+        "version_normalized": "2.8.4.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/event-dispatcher.git",
-            "reference": "ee278f7c851533e58ca307f66305ccb9188aceda"
+            "reference": "47d2d8cade9b1c3987573d2943bb9352536cdb87"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/ee278f7c851533e58ca307f66305ccb9188aceda",
-            "reference": "ee278f7c851533e58ca307f66305ccb9188aceda",
+            "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/47d2d8cade9b1c3987573d2943bb9352536cdb87",
+            "reference": "47d2d8cade9b1c3987573d2943bb9352536cdb87",
             "shasum": ""
         },
         "require": {
@@ -797,7 +797,7 @@
             "symfony/dependency-injection": "",
             "symfony/http-kernel": ""
         },
-        "time": "2016-01-13 10:28:07",
+        "time": "2016-03-07 14:04:32",
         "type": "library",
         "extra": {
             "branch-alias": {

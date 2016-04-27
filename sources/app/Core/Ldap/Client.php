@@ -3,6 +3,7 @@
 namespace Kanboard\Core\Ldap;
 
 use LogicException;
+use Psr\Log\LoggerInterface;
 
 /**
  * LDAP Client
@@ -21,6 +22,14 @@ class Client
     protected $ldap;
 
     /**
+     * Logger instance
+     *
+     * @access private
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * Establish LDAP connection
      *
      * @static
@@ -31,7 +40,7 @@ class Client
      */
     public static function connect($username = null, $password = null)
     {
-        $client = new self;
+        $client = new static;
         $client->open($client->getLdapServer());
         $username = $username ?: $client->getLdapUsername();
         $password = $password ?: $client->getLdapPassword();
@@ -60,6 +69,7 @@ class Client
      * Establish server connection
      *
      * @access public
+     * @throws ClientException
      * @param  string   $server  LDAP server hostname or IP
      * @param  integer  $port    LDAP port
      * @param  boolean  $tls     Start TLS
@@ -98,6 +108,7 @@ class Client
      * Anonymous authentication
      *
      * @access public
+     * @throws ClientException
      * @return boolean
      */
     public function useAnonymousAuthentication()
@@ -113,6 +124,7 @@ class Client
      * Authentication with username/password
      *
      * @access public
+     * @throws ClientException
      * @param  string  $bind_rdn
      * @param  string  $bind_password
      * @return boolean
@@ -161,5 +173,40 @@ class Client
     public function getLdapPassword()
     {
         return LDAP_PASSWORD;
+    }
+
+    /**
+     * Set logger
+     *
+     * @access public
+     * @param  LoggerInterface $logger
+     * @return Client
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    /**
+     * Get logger
+     *
+     * @access public
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Test if a logger is defined
+     *
+     * @access public
+     * @return boolean
+     */
+    public function hasLogger()
+    {
+        return $this->logger !== null;
     }
 }

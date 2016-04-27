@@ -1,3 +1,7 @@
+<div class="task-show-title color-<?= $task['color_id'] ?>">
+    <h2><?= $this->text->e($task['title']) ?></h2>
+</div>
+
 <?= $this->render('task/time_tracking_summary', array('task' => $task)) ?>
 
 <h3><?= t('Subtask timesheet') ?></h3>
@@ -14,7 +18,7 @@
         </tr>
         <?php foreach ($subtask_paginator->getCollection() as $record): ?>
         <tr>
-            <td><?= $this->url->link($this->e($record['user_fullname'] ?: $record['username']), 'user', 'show', array('user_id' => $record['user_id'])) ?></td>
+            <td><?= $this->url->link($this->text->e($record['user_fullname'] ?: $record['username']), 'user', 'show', array('user_id' => $record['user_id'])) ?></td>
             <td><?= t($record['subtask_title']) ?></td>
             <td><?= $this->dt->datetime($record['start']) ?></td>
             <td><?= $this->dt->datetime($record['end']) ?></td>

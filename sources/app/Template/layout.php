@@ -30,13 +30,13 @@
         <link rel="apple-touch-icon" sizes="114x114" href="<?= $this->url->dir() ?>assets/img/touch-icon-iphone-retina.png">
         <link rel="apple-touch-icon" sizes="144x144" href="<?= $this->url->dir() ?>assets/img/touch-icon-ipad-retina.png">
 
-        <title><?= isset($title) ? $this->e($title) : 'Kanboard' ?></title>
+        <title><?= isset($title) ? $this->text->e($title) : 'Kanboard' ?></title>
 
         <?= $this->hook->render('template:layout:head') ?>
     </head>
     <body data-status-url="<?= $this->url->href('app', 'status') ?>"
           data-login-url="<?= $this->url->href('auth', 'login') ?>"
-          data-markdown-preview-url="<?= $this->url->href('TaskHelper', 'preview') ?>"
+          data-keyboard-shortcut-url="<?= $this->url->href('Doc', 'shortcuts') ?>"
           data-timezone="<?= $this->app->getTimezone() ?>"
           data-js-lang="<?= $this->app->jsLang() ?>">
 

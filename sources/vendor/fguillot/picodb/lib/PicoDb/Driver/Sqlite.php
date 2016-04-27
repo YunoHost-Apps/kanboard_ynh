@@ -169,6 +169,7 @@ class Sqlite extends Base
     /**
      * Run EXPLAIN command
      *
+     * @access public
      * @param  string $sql
      * @param  array  $values
      * @return array
@@ -176,5 +177,16 @@ class Sqlite extends Base
     public function explain($sql, array $values)
     {
         return $this->getConnection()->query('EXPLAIN QUERY PLAN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get database version
+     *
+     * @access public
+     * @return array
+     */
+    public function getDatabaseVersion()
+    {
+        return $this->getConnection()->query('SELECT sqlite_version()')->fetchColumn();
     }
 }

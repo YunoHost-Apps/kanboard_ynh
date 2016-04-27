@@ -10,17 +10,20 @@ use Pimple\Container;
  * @package core
  * @author  Frederic Guillot
  *
- * @property \Helper\App        $app
- * @property \Helper\Asset      $asset
- * @property \Helper\Dt         $dt
- * @property \Helper\File       $file
- * @property \Helper\Form       $form
- * @property \Helper\Subtask    $subtask
- * @property \Helper\Task       $task
- * @property \Helper\Text       $text
- * @property \Helper\Url        $url
- * @property \Helper\User       $user
- * @property \Helper\Layout     $layout
+ * @property \Kanboard\Helper\AppHelper               $app
+ * @property \Kanboard\Helper\AssetHelper             $asset
+ * @property \Kanboard\Helper\DateHelper              $dt
+ * @property \Kanboard\Helper\FileHelper              $file
+ * @property \Kanboard\Helper\FormHelper              $form
+ * @property \Kanboard\Helper\HookHelper              $hook
+ * @property \Kanboard\Helper\ModelHelper             $model
+ * @property \Kanboard\Helper\SubtaskHelper           $subtask
+ * @property \Kanboard\Helper\TaskHelper              $task
+ * @property \Kanboard\Helper\TextHelper              $text
+ * @property \Kanboard\Helper\UrlHelper               $url
+ * @property \Kanboard\Helper\UserHelper              $user
+ * @property \Kanboard\Helper\LayoutHelper            $layout
+ * @property \Kanboard\Helper\ProjectHeaderHelper     $projectHeader
  */
 class Helper
 {
@@ -28,17 +31,17 @@ class Helper
      * Helper instances
      *
      * @access private
-     * @var array
+     * @var \Pimple\Container
      */
-    private $helpers = array();
+    private $helpers;
 
     /**
      * Container instance
      *
-     * @access protected
+     * @access private
      * @var \Pimple\Container
      */
-    protected $container;
+    private $container;
 
     /**
      * Constructor
@@ -49,33 +52,49 @@ class Helper
     public function __construct(Container $container)
     {
         $this->container = $container;
+        $this->helpers = new Container;
     }
 
     /**
-     * Load automatically helpers
+     * Expose helpers with magic getter
      *
      * @access public
-     * @param  string    $name    Helper name
+     * @param  string $helper
      * @return mixed
      */
-    public function __get($name)
+    public function __get($helper)
     {
-        if (! isset($this->helpers[$name])) {
-            $class = '\Kanboard\Helper\\'.ucfirst($name);
-            $this->helpers[$name] = new $class($this->container);
-        }
-
-        return $this->helpers[$name];
+        return $this->getHelper($helper);
     }
 
     /**
-     * HTML escaping
+     * Expose helpers with method
      *
-     * @param  string   $value    Value to escape
-     * @return string
+     * @access public
+     * @param  string $helper
+     * @return mixed
      */
-    public function e($value)
+    public function getHelper($helper)
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false);
+        return $this->helpers[$helper];
+    }
+
+    /**
+     * Register a new Helper
+     *
+     * @access public
+     * @param  string $property
+     * @param  string $className
+     * @return Helper
+     */
+    public function register($property, $className)
+    {
+        $container = $this->container;
+
+        $this->helpers[$property] = function() use($className, $container) {
+            return new $className($container);
+        };
+
+        return $this;
     }
 }

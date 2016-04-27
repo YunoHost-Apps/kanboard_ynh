@@ -59,25 +59,23 @@ class Schema
     public function migrateTo($current_version, $next_version)
     {
         try {
-
-            $this->db->startTransaction();
-            $this->db->getDriver()->disableForeignKeys();
-
             for ($i = $current_version + 1; $i <= $next_version; $i++) {
+                $this->db->startTransaction();
+                $this->db->getDriver()->disableForeignKeys();
 
                 $function_name = '\Schema\version_'.$i;
 
                 if (function_exists($function_name)) {
+                    $this->db->setLogMessage('Running migration '.$function_name);
                     call_user_func($function_name, $this->db->getConnection());
                 }
-            }
 
-            $this->db->getDriver()->setSchemaVersion($i - 1);
-            $this->db->getDriver()->enableForeignKeys();
-            $this->db->closeTransaction();
-        }
-        catch (PDOException $e) {
-            $this->db->setLogMessage($function_name.' => '.$e->getMessage());
+                $this->db->getDriver()->setSchemaVersion($i);
+                $this->db->getDriver()->enableForeignKeys();
+                $this->db->closeTransaction();
+            }
+        } catch (PDOException $e) {
+            $this->db->setLogMessage($e->getMessage());
             $this->db->cancelTransaction();
             $this->db->getDriver()->enableForeignKeys();
             return false;

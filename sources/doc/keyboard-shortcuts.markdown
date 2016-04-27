@@ -19,9 +19,18 @@ Board view
 - Expand/collapse tasks = **s**
 - Compact/wide view = **c**
 
+Task view
+---------
+
+- Edit task = **e**
+- New subtask = **s**
+- New comment = **c**
+- New internal link = **l**
+
 Application
 -----------
 
+- Display list of keyboard shortcuts = **?**
 - Open board switcher = **b**
 - Go to the search box = **f**
 - Reset the search box = **r**
