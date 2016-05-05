@@ -9,6 +9,12 @@ path=$(sudo yunohost app setting $app path)
 admin=$(sudo yunohost app setting $app adminusername)
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 db_pwd=$(sudo yunohost app setting $app mysqlpwd)
+is_public=$(sudo yunohost app setting $app is_public)
+if [ -z $is_public ]
+then	# Old version doesnt have is_public settings
+	is_public=No
+	sudo yunohost app setting $app is_public -v $is_public
+fi
 
 # flush php sessions before upgrade
 sudo rm -rf /var/lib/php5/session/*
@@ -21,7 +27,10 @@ sudo cp -a ../sources/. $final_path
 # restore data
 sudo cp -a $final_path.old/data $final_path
 # restore plugins
-sudo cp -a $final_path.old/plugins $final_path
+if [ -e $final_path.old/plugins ]
+then
+	sudo cp -a $final_path.old/plugins $final_path
+fi
 # delete temp directory
 sudo rm -Rf $final_path.old
 
@@ -49,6 +58,16 @@ sed -i "s@NAMETOCHANGE@$app@g" ../conf/nginx.conf*
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf*
 sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf*
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Make app public or private
+if [ "$is_public" = "Yes" ];
+then
+	sudo yunohost app setting $app unprotected_uris -v "/"
+	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" $final_path/config.php
+	sudo sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" $final_path/config.php
+	sudo sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" $final_path/config.php
+	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" $final_path/config.php
+fi
 
 # Reload Nginx, PHP5-FPM and regenerate SSOwat conf
 sudo service php5-fpm restart
