@@ -7,6 +7,7 @@ app=kanboard
 domain=$1
 path=$2
 admin=$3
+is_public=$4
 
 # Retrieve admin email
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
@@ -22,6 +23,7 @@ db_pwd=$(openssl rand -hex 15)
 sudo yunohost app initdb $app -p $db_pwd
 sudo yunohost app setting $app mysqlpwd -v $db_pwd
 sudo yunohost app setting $app adminusername -v $admin
+sudo yunohost app setting $app is_public -v $is_public
 
 # Copy sources
 final_path=/var/www/$app
@@ -52,6 +54,16 @@ sed -i "s@NAMETOCHANGE@$app@g" ../conf/nginx.conf*
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf*
 sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf*
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Make app public or private
+if [ "$is_public" = "Yes" ];
+then
+	sudo yunohost app setting $app unprotected_uris -v "/"
+	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" $final_path/config.php
+	sudo sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" $final_path/config.php
+	sudo sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" $final_path/config.php
+	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" $final_path/config.php
+fi
 
 # Reload Nginx, PHP5-FPM and regenerate SSOwat conf
 sudo service php5-fpm restart
