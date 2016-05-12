@@ -43,7 +43,16 @@
                     "fr": "Choisissez l'administrateur de Kanboard"
                 },
                 "example": "johndoe"
-            }
+            },
+			{
+				"name": "is_public",
+				"ask": {
+					"en": "Is it a public site ?",
+					"fr": "Est-ce un site public ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "No"
+			}
         ]
     }
 }
