@@ -25,7 +25,8 @@
                     "en": "Choose a domain for Kanboard",
                     "fr": "Choisissez un domaine pour Kanboard"
                 },
-                "example": "domain.org"
+                "example": "domain.org",
+                "type": "domain"
             },
             {
                 "name": "path",
@@ -33,6 +34,7 @@
                     "en": "Choose a path for Kanboard",
                     "fr": "Choisissez un chemin pour Kanboard"
                 },
+                "type": "path",
                 "example": "/kanboard",
                 "default": "/kanboard"
             },
@@ -42,6 +44,7 @@
                     "en": "Choose the admin user for Kanboard",
                     "fr": "Choisissez l'administrateur de Kanboard"
                 },
+                "type": "user",
                 "example": "johndoe"
             },
 			{
