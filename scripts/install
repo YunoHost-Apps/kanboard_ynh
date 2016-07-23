@@ -82,6 +82,9 @@ then
 	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
 fi
 
+# Init database
+ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${DESTDIR}/app/Schema/Sql/mysql.sql
+
 # Reload services
 sudo service php5-fpm restart || true
 sudo service nginx reload || true
