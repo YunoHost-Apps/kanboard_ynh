@@ -2,7 +2,7 @@
     <div class="page-header">
         <h2><?= $title ?></h2>
     </div>
-    <form class="popover-form" id="project-creation-form" method="post" action="<?= $this->url->href('ProjectCreation', 'save') ?>" autocomplete="off">
+    <form class="popover-form" id="project-creation-form" method="post" action="<?= $this->url->href('ProjectCreationController', 'save') ?>" autocomplete="off">
 
         <?= $this->form->csrf() ?>
         <?= $this->form->hidden('is_private', $values) ?>
@@ -22,16 +22,17 @@
                 <?= $this->form->checkbox('projectPermission', t('Permissions'), 1, true) ?>
             <?php endif ?>
 
-            <?= $this->form->checkbox('category', t('Categories'), 1, true) ?>
-            <?= $this->form->checkbox('action', t('Actions'), 1, true) ?>
-            <?= $this->form->checkbox('swimlane', t('Swimlanes'), 1, true) ?>
-            <?= $this->form->checkbox('task', t('Tasks'), 1, false) ?>
+            <?= $this->form->checkbox('categoryModel', t('Categories'), 1, true) ?>
+            <?= $this->form->checkbox('tagDuplicationModel', t('Tags'), 1, true) ?>
+            <?= $this->form->checkbox('actionModel', t('Actions'), 1, true) ?>
+            <?= $this->form->checkbox('swimlaneModel', t('Swimlanes'), 1, true) ?>
+            <?= $this->form->checkbox('projectTaskDuplicationModel', t('Tasks'), 1, false) ?>
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
             <?= t('or') ?>
-            <?= $this->url->link(t('cancel'), 'project', 'index', array(), false, 'close-popover') ?>
+            <?= $this->url->link(t('cancel'), 'ProjectListController', 'show', array(), false, 'close-popover') ?>
         </div>
     </form>
     <?php if ($is_private): ?>

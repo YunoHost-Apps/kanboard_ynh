@@ -2,8 +2,8 @@
     <div class="page-header">
         <ul>
             <li>
-                <i class="fa fa-folder fa-fw"></i>
-                <?= $this->url->link(t('All projects'), 'project', 'index') ?>
+                <i class="fa fa-search fa-fw"></i>
+                <?= $this->url->link(t('Activity stream search'), 'SearchController', 'activity') ?>
             </li>
         </ul>
     </div>

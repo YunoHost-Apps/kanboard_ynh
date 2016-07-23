@@ -8,10 +8,10 @@ use SimpleValidator\Validators;
 /**
  * Task Validator
  *
- * @package  validator
+ * @package  Kanboard\Validator
  * @author   Frederic Guillot
  */
-class TaskValidator extends Base
+class TaskValidator extends BaseValidator
 {
     /**
      * Common validation rules
@@ -40,8 +40,8 @@ class TaskValidator extends Base
             new Validators\Integer('priority', t('This value must be an integer')),
             new Validators\MaxLength('title', t('The maximum length is %d characters', 200), 200),
             new Validators\MaxLength('reference', t('The maximum length is %d characters', 50), 50),
-            new Validators\Date('date_due', t('Invalid date'), $this->dateParser->getDateFormats(true)),
-            new Validators\Date('date_started', t('Invalid date'), $this->dateParser->getDateTimeFormats(true)),
+            new Validators\Date('date_due', t('Invalid date'), $this->dateParser->getParserFormats()),
+            new Validators\Date('date_started', t('Invalid date'), $this->dateParser->getParserFormats()),
             new Validators\Numeric('time_spent', t('This value must be numeric')),
             new Validators\Numeric('time_estimated', t('This value must be numeric')),
         );
@@ -59,6 +59,32 @@ class TaskValidator extends Base
         $rules = array(
             new Validators\Required('project_id', t('The project is required')),
             new Validators\Required('title', t('The title is required')),
+        );
+
+        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
+
+        return array(
+            $v->execute(),
+            $v->getErrors()
+        );
+    }
+
+    /**
+     * Validate task creation
+     *
+     * @access public
+     * @param  array    $values           Form values
+     * @return array    $valid, $errors   [0] = Success or not, [1] = List of errors
+     */
+    public function validateBulkCreation(array $values)
+    {
+        $rules = array(
+            new Validators\Required('project_id', t('The project is required')),
+            new Validators\Required('tasks', t('Field required')),
+            new Validators\Required('column_id', t('Field required')),
+            new Validators\Required('swimlane_id', t('Field required')),
+            new Validators\Integer('category_id', t('This value must be an integer')),
+            new Validators\Integer('swimlane_id', t('This value must be an integer')),
         );
 
         $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
@@ -145,53 +171,6 @@ class TaskValidator extends Base
     {
         $rules = array(
             new Validators\Required('id', t('The id is required')),
-        );
-
-        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
-
-        return array(
-            $v->execute(),
-            $v->getErrors()
-        );
-    }
-
-    /**
-     * Validate assignee change
-     *
-     * @access public
-     * @param  array   $values           Form values
-     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
-     */
-    public function validateAssigneeModification(array $values)
-    {
-        $rules = array(
-            new Validators\Required('id', t('The id is required')),
-            new Validators\Required('project_id', t('The project is required')),
-            new Validators\Required('owner_id', t('This value is required')),
-        );
-
-        $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));
-
-        return array(
-            $v->execute(),
-            $v->getErrors()
-        );
-    }
-
-    /**
-     * Validate category change
-     *
-     * @access public
-     * @param  array   $values           Form values
-     * @return array   $valid, $errors   [0] = Success or not, [1] = List of errors
-     */
-    public function validateCategoryModification(array $values)
-    {
-        $rules = array(
-            new Validators\Required('id', t('The id is required')),
-            new Validators\Required('project_id', t('The project is required')),
-            new Validators\Required('category_id', t('This value is required')),
-
         );
 
         $v = new Validator($values, array_merge($rules, $this->commonValidationRules()));

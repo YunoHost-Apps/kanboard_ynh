@@ -1,3 +1,135 @@
+Version 1.0.31
+--------------
+
+New features:
+
+* Added tags: global and specific by project
+* Added application and project roles validation for API procedure calls
+* Added new API call: "getProjectByIdentifier"
+* Added new API calls for external task links, project attachments and subtask time tracking
+
+Improvements:
+
+* Use PHP 7 for the Docker image
+* Preserve role for existing users when using ReverseProxy authentication
+* Handle priority for task and project duplication
+* Expose task reference field to the user interface
+* Improve ICal export
+* Added argument owner_id and identifier to project API calls
+* Rewrite integration tests to run with Docker containers
+* Use the same task form layout everywhere
+* Removed some tasks dropdown menus that are now available with task edit form
+* Make embedded documentation readable in multiple languages (if a translation is available)
+* Added acceptance tests (browser tests)
+
+Bug fixes:
+
+* Fixed broken CSV exports
+* Fixed identical background color for LetterAvatar on 32bits platforms (Hash greater than PHP_MAX_INT)
+* Fixed lexer issue with non word characters
+* Flush memory cache in worker to get latest config values
+* Fixed empty title for web notification with only one overdue task
+* Take default swimlane into consideration for SwimlaneModel::getFirstActiveSwimlane()
+* Fixed "due today" highlighting
+
+Version 1.0.30
+--------------
+
+Improvements:
+
+* Show tasks that are due today in a different color
+
+Bug fixes:
+
+* Fixed wrong controller for search in dashboard
+* Fixed plural form in alert message
+* Fixed CSS cosmetic issue with popover and tooltips
+
+Version 1.0.29
+--------------
+
+New features:
+
+* Manage plugin from the user interface and from the command line
+* Added support for background workers
+* Added the possibility to convert a subtask to a task
+* Added menu entry to add tasks from all project views
+* Add tasks in bulk from the board
+* Add dropdown for projects
+* Added config parameter to allow self-signed certificates for the HTTP client
+
+Improvements:
+
+* Display local date format in date picker
+* Configure email settings with the user interface in addition to config file
+* Upgrade Docker image to Alpine Linux 3.4
+* Move task import to a separate section
+* Mark web notification as read when clicking on it
+* Support strtotime strings for date search
+* Reset failed login counter and unlock user when changing password
+* Task do not open anymore in a new window on the Gantt chart
+* Do not display task progress for tasks with no start/end date
+* Use Gulp and Bower to manage assets
+* Controller and Middleware refactoring
+* Replace jQuery mobile detection by the library isMobile
+
+Bug fixes:
+
+* Fixed user date format parsing for dates that can be valid in multiple formats
+* Do not sync user role if LDAP groups are not configured
+* Fixed issue with unicode handling for letter based avatars and user initials
+* Do not send notifications to disabled users
+* Fixed wrong redirect when removing a task from the task view page
+
+Breaking changes:
+
+* Webhook to create tasks have been removed, use the API instead
+* All controllers have been renamed, people who are not using URL rewriting will see different URLs
+* All models have been renamed, plugin maintainers will have to update their plugins
+
+Version 1.0.28
+--------------
+
+New features:
+
+* Added automated action to change task color based on the priority
+* Added support for LDAP Posix Groups (OpenLDAP with memberUid or groupOfNames)
+* Added support for LDAP user photo attribute (Avatar image)
+* Added support for language LDAP attribute
+* Added support for Mysql SSL connection
+* Search in activity stream
+* Search in comments
+* Search by task creator
+* Added command line utility to reset user password and to disable 2FA
+
+Improvements:
+
+* Improve Avatar upload form
+* User roles are now synced with LDAP at each login
+* Improve web page title on the task view
+* Unify task drop-down menu between different views
+* Improve LDAP user group membership synchronization
+* Category and user filters do not append anymore in search field
+* Added more template hooks
+* Added tasks search with the API
+* Added priority field to API procedures
+* Added API procedure "getMemberGroups"
+* Added parameters for overdue tasks notifications: group by projects and send only to managers
+* Allow people to install Kanboard outside of the DocumentRoot
+* Allow plugins to be loaded from another folder
+* Filter/Lexer/QueryBuilder refactoring
+
+Bug fixes:
+
+* Allow a project owner to manage his own public project
+* Fixed PHP warning when removing a user with no Avatar image
+* Fixed improper Markdown escaping for some tooltips
+* Closing all tasks by column, also update closed tasks
+* Fixed wrong task link generation within Markdown text
+* Fixed wrong URL on comment toggle link for sorting
+* Fixed form submission with Meta+Enter keyboard shortcut
+* Removed PHP notices in comment suppression view
+
 Version 1.0.27
 --------------
 

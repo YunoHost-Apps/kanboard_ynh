@@ -7,7 +7,8 @@ use PDOException;
 /**
  * Schema migration class
  *
- * @author   Frederic Guillot
+ * @package PicoDb
+ * @author  Frederic Guillot
  */
 class Schema
 {
@@ -20,6 +21,14 @@ class Schema
     protected $db = null;
 
     /**
+     * Schema namespace
+     *
+     * @access protected
+     * @var string
+     */
+    protected $namespace = '\Schema';
+
+    /**
      * Constructor
      *
      * @access public
@@ -28,6 +37,30 @@ class Schema
     public function __construct(Database $db)
     {
         $this->db = $db;
+    }
+
+    /**
+     * Set another namespace
+     *
+     * @access public
+     * @param  string $namespace
+     * @return Schema
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+        return $this;
+    }
+
+    /**
+     * Get schema namespace
+     *
+     * @access public
+     * @return string
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
     }
 
     /**
@@ -63,7 +96,7 @@ class Schema
                 $this->db->startTransaction();
                 $this->db->getDriver()->disableForeignKeys();
 
-                $function_name = '\Schema\version_'.$i;
+                $function_name = $this->getNamespace().'\version_'.$i;
 
                 if (function_exists($function_name)) {
                     $this->db->setLogMessage('Running migration '.$function_name);

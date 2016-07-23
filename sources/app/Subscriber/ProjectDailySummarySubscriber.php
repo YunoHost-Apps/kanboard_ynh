@@ -3,7 +3,8 @@
 namespace Kanboard\Subscriber;
 
 use Kanboard\Event\TaskEvent;
-use Kanboard\Model\Task;
+use Kanboard\Job\ProjectMetricJob;
+use Kanboard\Model\TaskModel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ProjectDailySummarySubscriber extends BaseSubscriber implements EventSubscriberInterface
@@ -11,11 +12,11 @@ class ProjectDailySummarySubscriber extends BaseSubscriber implements EventSubsc
     public static function getSubscribedEvents()
     {
         return array(
-            Task::EVENT_CREATE_UPDATE => 'execute',
-            Task::EVENT_CLOSE => 'execute',
-            Task::EVENT_OPEN => 'execute',
-            Task::EVENT_MOVE_COLUMN => 'execute',
-            Task::EVENT_MOVE_SWIMLANE => 'execute',
+            TaskModel::EVENT_CREATE_UPDATE => 'execute',
+            TaskModel::EVENT_CLOSE         => 'execute',
+            TaskModel::EVENT_OPEN          => 'execute',
+            TaskModel::EVENT_MOVE_COLUMN   => 'execute',
+            TaskModel::EVENT_MOVE_SWIMLANE => 'execute',
         );
     }
 
@@ -23,8 +24,7 @@ class ProjectDailySummarySubscriber extends BaseSubscriber implements EventSubsc
     {
         if (isset($event['project_id']) && !$this->isExecuted()) {
             $this->logger->debug('Subscriber executed: '.__METHOD__);
-            $this->projectDailyColumnStats->updateTotals($event['project_id'], date('Y-m-d'));
-            $this->projectDailyStats->updateTotals($event['project_id'], date('Y-m-d'));
+            $this->queueManager->push(ProjectMetricJob::getInstance($this->container)->withParams($event['project_id']));
         }
     }
 }

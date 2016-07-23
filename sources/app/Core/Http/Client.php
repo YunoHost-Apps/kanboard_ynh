@@ -3,6 +3,7 @@
 namespace Kanboard\Core\Http;
 
 use Kanboard\Core\Base;
+use Kanboard\Job\HttpAsyncJob;
 
 /**
  * HTTP client
@@ -80,6 +81,24 @@ class Client extends Base
     }
 
     /**
+     * Send a POST HTTP request encoded in JSON (Fire and forget)
+     *
+     * @access public
+     * @param  string     $url
+     * @param  array      $data
+     * @param  string[]   $headers
+     */
+    public function postJsonAsync($url, array $data, array $headers = array())
+    {
+        $this->queueManager->push(HttpAsyncJob::getInstance($this->container)->withParams(
+            'POST',
+            $url,
+            json_encode($data),
+            array_merge(array('Content-type: application/json'), $headers)
+        ));
+    }
+
+    /**
      * Send a POST HTTP request encoded in www-form-urlencoded
      *
      * @access public
@@ -99,21 +118,40 @@ class Client extends Base
     }
 
     /**
+     * Send a POST HTTP request encoded in www-form-urlencoded (fire and forget)
+     *
+     * @access public
+     * @param  string     $url
+     * @param  array      $data
+     * @param  string[]   $headers
+     */
+    public function postFormAsync($url, array $data, array $headers = array())
+    {
+        $this->queueManager->push(HttpAsyncJob::getInstance($this->container)->withParams(
+            'POST',
+            $url,
+            http_build_query($data),
+            array_merge(array('Content-type: application/x-www-form-urlencoded'), $headers)
+        ));
+    }
+
+    /**
      * Make the HTTP request
      *
-     * @access private
+     * @access public
      * @param  string     $method
      * @param  string     $url
      * @param  string     $content
      * @param  string[]   $headers
      * @return string
      */
-    private function doRequest($method, $url, $content, array $headers)
+    public function doRequest($method, $url, $content, array $headers)
     {
         if (empty($url)) {
             return '';
         }
 
+        $startTime = microtime(true);
         $stream = @fopen(trim($url), 'r', false, stream_context_create($this->getContext($method, $content, $headers)));
         $response = '';
 
@@ -125,9 +163,11 @@ class Client extends Base
 
         if (DEBUG) {
             $this->logger->debug('HttpClient: url='.$url);
+            $this->logger->debug('HttpClient: headers='.var_export($headers, true));
             $this->logger->debug('HttpClient: payload='.$content);
             $this->logger->debug('HttpClient: metadata='.var_export(@stream_get_meta_data($stream), true));
             $this->logger->debug('HttpClient: response='.$response);
+            $this->logger->debug('HttpClient: executionTime='.(microtime(true) - $startTime));
         }
 
         return $response;
@@ -162,13 +202,21 @@ class Client extends Base
                 'timeout' => self::HTTP_TIMEOUT,
                 'max_redirects' => self::HTTP_MAX_REDIRECTS,
                 'header' => implode("\r\n", $headers),
-                'content' => $content
+                'content' => $content,
             )
         );
 
         if (HTTP_PROXY_HOSTNAME) {
             $context['http']['proxy'] = 'tcp://'.HTTP_PROXY_HOSTNAME.':'.HTTP_PROXY_PORT;
             $context['http']['request_fulluri'] = true;
+        }
+
+        if (HTTP_VERIFY_SSL_CERTIFICATE === false) {
+            $context['ssl'] = array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true,
+            );
         }
 
         return $context;

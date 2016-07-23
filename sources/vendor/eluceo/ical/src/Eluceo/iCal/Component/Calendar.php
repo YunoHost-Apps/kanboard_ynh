@@ -5,8 +5,8 @@
  *
  * (c) Markus Poerschke <markus@eluceo.de>
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace Eluceo\iCal\Component;
@@ -55,11 +55,11 @@ class Calendar extends Component
      *
      * @var string
      */
-    protected $prodId = null;
-    protected $method = null;
-    protected $name = null;
+    protected $prodId      = null;
+    protected $method      = null;
+    protected $name        = null;
     protected $description = null;
-    protected $timezone = null;
+    protected $timezone    = null;
 
     /**
      * This property defines the calendar scale used for the
@@ -77,7 +77,7 @@ class Calendar extends Component
     /**
      * Specifies whether or not the iCalendar file only contains one appointment.
      *
-     * @var boolean
+     * @var bool
      *
      * @see http://msdn.microsoft.com/en-us/library/ee203486(v=exchg.80).aspx
      */
@@ -101,6 +101,15 @@ class Calendar extends Component
      * @see http://msdn.microsoft.com/en-us/library/ee178699(v=exchg.80).aspx
      */
     protected $publishedTTL = 'P1W';
+
+    /**
+     * Specifies a color for the calendar in calendar for Apple/Outlook.
+     *
+     * @var string
+     *
+     * @see http://msdn.microsoft.com/en-us/library/ee179588(v=exchg.80).aspx
+     */
+    protected $calendarColor = null;
 
     public function __construct($prodId)
     {
@@ -168,6 +177,18 @@ class Calendar extends Component
     }
 
     /**
+     * @param $calendarColor
+     *
+     * @return $this
+     */
+    public function setCalendarColor($calendarColor)
+    {
+        $this->calendarColor = $calendarColor;
+
+        return $this;
+    }
+
+    /**
      * @param $calendarScale
      *
      * @return $this
@@ -180,7 +201,7 @@ class Calendar extends Component
     }
 
     /**
-     * @param boolean $forceInspectOrOpen
+     * @param bool $forceInspectOrOpen
      *
      * @return $this
      */
@@ -226,6 +247,12 @@ class Calendar extends Component
 
         if ($this->method) {
             $propertyBag->set('METHOD', $this->method);
+        }
+
+        if ($this->calendarColor) {
+            $propertyBag->set('X-APPLE-CALENDAR-COLOR', $this->calendarColor);
+            $propertyBag->set('X-OUTLOOK-COLOR', $this->calendarColor);
+            $propertyBag->set('X-FUNAMBOL-COLOR', $this->calendarColor);
         }
 
         if ($this->calendarScale) {

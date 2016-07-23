@@ -45,10 +45,12 @@ Kanboard.Popover.prototype.isOpen = function() {
 Kanboard.Popover.prototype.open = function(link) {
     var self = this;
 
-    $.get(link, function(content) {
-        $("body").prepend('<div id="popover-container"><div id="popover-content">' + content + '</div></div>');
-        self.executeOnOpenedListeners();
-    });
+    if (!self.isOpen()) {
+        $.get(link, function(content) {
+            $("body").prepend('<div id="popover-container"><div id="popover-content">' + content + '</div></div>');
+            self.executeOnOpenedListeners();
+        });
+    }
 };
 
 Kanboard.Popover.prototype.close = function(e) {
@@ -65,10 +67,13 @@ Kanboard.Popover.prototype.close = function(e) {
 Kanboard.Popover.prototype.ajaxReload = function(data, request, self) {
     var redirect = request.getResponseHeader("X-Ajax-Redirect");
 
-    if (redirect) {
-        window.location = redirect === 'self' ? window.location.href.split("#")[0] : redirect;
-    }
-    else {
+    if (redirect === 'self') {
+        window.location.reload();
+    } else if (redirect && redirect.indexOf('#') > -1) {
+        window.location = redirect.split('#')[0];
+    } else if (redirect) {
+        window.location = redirect;
+    } else {
         $("#popover-content").html(data);
         $("#popover-content input[autofocus]").focus();
         self.executeOnOpenedListeners();
@@ -142,4 +147,5 @@ Kanboard.Popover.prototype.afterOpen = function() {
 
     this.app.datePicker();
     this.app.autoComplete();
+    this.app.tagAutoComplete();
 };

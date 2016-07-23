@@ -33,7 +33,7 @@ From command line:
 
 Infos
 -----
-Kanboard v1.0.27
+Kanboard v1.0.31
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
 
@@ -63,7 +63,7 @@ Test it
 Test or upgrade to dev version:
 ```
 su - admin
-git clone -b dev https://github.com/mbugeia/kanboard_ynh
+git clone -b dev https://github.com/YunoHost-Apps/kanboard_ynh
 # to install
 sudo yunohost app install -l Kanboard /home/admin/kanboard_ynh
 # to upgrade

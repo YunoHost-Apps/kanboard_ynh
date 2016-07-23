@@ -106,7 +106,6 @@ class ContainerAwareEventDispatcherTest extends AbstractEventDispatcherTest
 
     /**
      * @expectedException \InvalidArgumentException
-     * @group legacy
      */
     public function testTriggerAListenerServiceOutOfScope()
     {
@@ -126,9 +125,6 @@ class ContainerAwareEventDispatcherTest extends AbstractEventDispatcherTest
         $dispatcher->dispatch('onEvent');
     }
 
-    /**
-     * @group legacy
-     */
     public function testReEnteringAScope()
     {
         $event = new Event();

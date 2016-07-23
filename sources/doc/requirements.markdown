@@ -6,17 +6,18 @@ Server side
 
 ### Compatible Operating Systems
 
-| Operating System               |
-|--------------------------------|
-| Linux Ubuntu Trusty 14.04 LTS  |
-| Linux Centos 6.x               |
-| Linux Centos 7.x               |
-| Linux Redhat 6.x               |
-| Linux Redhat 7.x               |
-| Linux Debian 8                 |
-| FreeBSD 10.x                   |
-| Microsoft Windows 2012 R2      |
-| Microsoft Windows 2008         |
+| Operating System                     |
+|--------------------------------------|
+| Linux Ubuntu Xenial Xerus 16.04 LTS  |
+| Linux Ubuntu Trusty 14.04 LTS        |
+| Linux Centos 6.x                     |
+| Linux Centos 7.x                     |
+| Linux Redhat 6.x                     |
+| Linux Redhat 7.x                     |
+| Linux Debian 8                       |
+| FreeBSD 10.x                         |
+| Microsoft Windows 2012 R2            |
+| Microsoft Windows 2008               |
 
 ### Compatible Databases
 
@@ -50,7 +51,7 @@ Kanboard is pre-configured to work with Apache (URL rewriting).
 
 | PHP Version    |
 |----------------|
-| PHP >= 5.3.3   |
+| PHP >= 5.3.9   |
 | PHP 5.4        |
 | PHP 5.5        |
 | PHP 5.6        |
@@ -72,6 +73,12 @@ Kanboard is pre-configured to work with Apache (URL rewriting).
 | session                    |                               |
 | ldap                       | Only for LDAP authentication  |
 | Zend OPcache               | Recommended                   |
+
+### Optional PHP extensions
+
+| PHP Extensions required    | Note                                       |
+|----------------------------|--------------------------------------------|
+| zip                        | Used to install plugins from Kanboard      |
 
 ### Recommendations
 

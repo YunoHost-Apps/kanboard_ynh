@@ -7,7 +7,7 @@
     <?php endif ?>
 
     <?php if (! HIDE_LOGIN_FORM): ?>
-    <form method="post" action="<?= $this->url->href('auth', 'check') ?>">
+    <form method="post" action="<?= $this->url->href('AuthController', 'check') ?>">
 
         <?= $this->form->csrf() ?>
 
@@ -19,7 +19,7 @@
 
         <?php if (isset($captcha) && $captcha): ?>
             <?= $this->form->label(t('Enter the text below'), 'captcha') ?>
-            <img src="<?= $this->url->href('Captcha', 'image') ?>"/>
+            <img src="<?= $this->url->href('CaptchaController', 'image') ?>" alt="Captcha">
             <?= $this->form->text('captcha', array(), $errors, array('required')) ?>
         <?php endif ?>
 
@@ -32,7 +32,7 @@
         </div>
         <?php if ($this->app->config('password_reset') == 1): ?>
             <div class="reset-password">
-                <?= $this->url->link(t('Forgot password?'), 'PasswordReset', 'create') ?>
+                <?= $this->url->link(t('Forgot password?'), 'PasswordResetController', 'create') ?>
             </div>
         <?php endif ?>
     </form>

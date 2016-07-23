@@ -31,6 +31,7 @@ Available commands:
   cronjob                            Execute daily cronjob
   help                               Displays help for a command
   list                               Lists commands
+  worker                             Execute queue worker
  export
   export:daily-project-column-stats  Daily project column stats CSV export (number of tasks per column and per day)
   export:subtasks                    Subtasks CSV export
@@ -41,10 +42,17 @@ Available commands:
   locale:sync                        Synchronize all translations based on the fr_FR locale
  notification
   notification:overdue-tasks         Send notifications for overdue tasks
+ plugin
+  plugin:install                     Install a plugin from a remote Zip archive
+  plugin:uninstall                   Remove a plugin
+  plugin:upgrade                     Update all installed plugins
  projects
   projects:daily-stats               Calculate daily statistics for all projects
  trigger
   trigger:tasks                      Trigger scheduler event for all tasks
+ user
+  user:reset-2fa                     Remove two-factor authentication for a user
+  user:reset-password                Change user password
 ```
 
 Available commands
@@ -116,6 +124,12 @@ Emails will be sent to all users with notifications enabled.
 ./kanboard notification:overdue-tasks
 ```
 
+Optional parameters:
+
+- `--show`: Display notifications sent
+- `--group`: Group all overdue tasks for one user (from all projects) in one email
+- `--manager`: Send all overdue tasks to project manager(s) in one email
+
 You can also display the overdue tasks with the flag `--show`:
 
 ```bash
@@ -146,4 +160,46 @@ This command send a "daily cronjob event" to all open tasks of each project.
 ```bash
 ./kanboard trigger:tasks
 Trigger task event: project_id=2, nb_tasks=1
+```
+
+### Reset user password
+
+```bash
+./kanboard user:reset-password my_user
+```
+
+You will be prompted for a password and confirmation. Characters are not printed to the screen.
+
+### Remove two-factor authentication for a user
+
+```bash
+./kanboard user:reset-2fa my_user
+```
+
+### Install a plugin
+
+```bash
+./kanboard plugin:install https://github.com/kanboard/plugin-github-auth/releases/download/v1.0.1/GithubAuth-1.0.1.zip
+```
+
+Note: Installed files will have the same permissions as the current user
+
+### Remove a plugin
+
+```bash
+./kanboard plugin:uninstall Budget
+```
+
+### Upgrade all plugins
+
+```bash
+./kanboard plugin:upgrade
+* Updating plugin: Budget Planning
+* Plugin up to date: Github Authentication
+```
+
+### Run Background worker
+
+```bash
+./kanboard worker
 ```

@@ -1,4 +1,4 @@
-<form method="post" action="<?= $this->url->href('comment', 'save', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>" autocomplete="off">
+<form method="post" action="<?= $this->url->href('CommentController', 'save', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>" autocomplete="off">
     <?= $this->form->csrf() ?>
     <?= $this->form->hidden('task_id', $values) ?>
     <?= $this->form->hidden('user_id', $values) ?>
@@ -12,7 +12,7 @@
                 'data-markdown-editor-disable-toolbar="true"',
                 'required',
                 'placeholder="'.t('Leave a comment').'"',
-                'data-mention-search-url="'.$this->url->href('UserHelper', 'mention', array('project_id' => $task['project_id'])).'"',
+                'data-mention-search-url="'.$this->url->href('UserAjaxController', 'mention', array('project_id' => $task['project_id'])).'"',
             ),
             'markdown-editor'
         ) ?>

@@ -3,6 +3,7 @@
 namespace Kanboard\Helper;
 
 use Kanboard\Core\Base;
+use Kanboard\Core\Security\Role;
 
 /**
  * User helpers
@@ -20,7 +21,7 @@ class UserHelper extends Base
      */
     public function hasNotifications()
     {
-        return $this->userUnreadNotification->hasNotifications($this->userSession->getId());
+        return $this->userUnreadNotificationModel->hasNotifications($this->userSession->getId());
     }
 
     /**
@@ -35,10 +36,21 @@ class UserHelper extends Base
         $initials = '';
 
         foreach (explode(' ', $name, 2) as $string) {
-            $initials .= mb_substr($string, 0, 1);
+            $initials .= mb_substr($string, 0, 1, 'UTF-8');
         }
 
-        return mb_strtoupper($initials);
+        return mb_strtoupper($initials, 'UTF-8');
+    }
+
+    /**
+     * Return the user full name
+     *
+     * @param  array    $user   User properties
+     * @return string
+     */
+    public function getFullname(array $user = array())
+    {
+        return $this->userModel->getFullname(empty($user) ? $this->userSession->getAll() : $user);
     }
 
     /**
@@ -95,6 +107,10 @@ class UserHelper extends Base
      */
     public function hasAccess($controller, $action)
     {
+        if (! $this->userSession->isLogged()) {
+            return false;
+        }
+
         $key = 'app_access:'.$controller.$action;
         $result = $this->memoryCache->get($key);
 
@@ -116,6 +132,10 @@ class UserHelper extends Base
      */
     public function hasProjectAccess($controller, $action, $project_id)
     {
+        if (! $this->userSession->isLogged()) {
+            return false;
+        }
+
         if ($this->userSession->isAdmin()) {
             return true;
         }
@@ -145,17 +165,28 @@ class UserHelper extends Base
      */
     public function getProjectUserRole($project_id)
     {
-        return $this->memoryCache->proxy($this->projectUserRole, 'getUserRole', $project_id, $this->userSession->getId());
+        return $this->memoryCache->proxy($this->projectUserRoleModel, 'getUserRole', $project_id, $this->userSession->getId());
     }
 
     /**
-     * Return the user full name
+     * Return true if the user can remove a task
      *
-     * @param  array    $user   User properties
-     * @return string
+     * Regular users can't remove tasks from other people
+     *
+     * @public
+     * @param  array $task
+     * @return bool
      */
-    public function getFullname(array $user = array())
+    public function canRemoveTask(array $task)
     {
-        return $this->user->getFullname(empty($user) ? $this->userSession->getAll() : $user);
+        if (isset($task['creator_id']) && $task['creator_id'] == $this->userSession->getId()) {
+            return true;
+        }
+
+        if ($this->userSession->isAdmin() || $this->getProjectUserRole($task['project_id']) === Role::PROJECT_MANAGER) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -73,4 +73,17 @@ abstract class Base extends AbstractLogger
         // interpolate replacement values into the message and return
         return strtr($message, $replace);
     }
+
+    /**
+     * Format log message
+     *
+     * @param  mixed  $level
+     * @param  string $message
+     * @param  array  $context
+     * @return string
+     */
+    protected function formatMessage($level, $message, array $context = array())
+    {
+        return '['.date('Y-m-d H:i:s').'] ['.$level.'] '.$this->interpolate($message, $context).PHP_EOL;
+    }
 }

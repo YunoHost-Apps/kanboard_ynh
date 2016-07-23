@@ -28,15 +28,6 @@ Some hooks can have only one listener:
     - `$start` (DateTime)
     - `$end` (DateTime)
 
-#### model:subtask-time-tracking:calendar:events
-
-- Override subtask time tracking events to display the calendar
-- Arguments:
-    - `$user_id` (integer)
-    - `$events` (array)
-    - `$start` (string, ISO-8601 format)
-    - `$end` (string, ISO-8601 format)
-
 ### Merge hooks
 
 "Merge hooks" act in the same way as the function `array_merge`. The hook callback must return an array. This array will be merged with the default one.
@@ -166,9 +157,12 @@ List of template hooks:
 | `template:board:task:icons`                | Task in board: tooltip icon                        |
 | `template:config:sidebar`                  | Sidebar on settings page                           |
 | `template:config:application `             | Application settings form                          |
+| `template:config:email`                    | Email settings page                                |
 | `template:config:integrations`             | Integration page in global settings                |
 | `template:dashboard:sidebar`               | Sidebar on dashboard page                          |
 | `template:export:sidebar`                  | Sidebar on export pages                            |
+| `template:import:sidebar`                  | Sidebar on import pages                            |
+| `template:header:dropdown`                 | Dropdown on header                                 |
 | `template:layout:head`                     | Page layout `<head/>` tag                          |
 | `template:layout:top`                      | Page layout top header                             |
 | `template:layout:bottom`                   | Page layout footer                                 |
@@ -178,17 +172,26 @@ List of template hooks:
 | `template:project:integrations`            | Integration page in projects settings              |
 | `template:project:sidebar`                 | Sidebar in project settings                        |
 | `template:project-user:sidebar`            | Sidebar on project user overview page              |
+| `template:task:layout:top`                 | Task layout top (after page header)                |
+| `template:task:details:top`                | Task summary top                                   |
+| `template:task:details:bottom`             | Task summary bottom                                |
+| `template:task:details:first-column`       | Task summary first column                          |
+| `template:task:details:second-column`      | Task summary second column                         |
+| `template:task:details:third-column`       | Task summary third column                          |
+| `template:task:details:fourth-column`      | Task summary fourth column                         |
 | `template:task:dropdown`                   | Task dropdown menu in listing pages                |
-| `template:task:sidebar`                    | Sidebar on task page                               |
-| `template:task:form:left-column`           | Left column in task form                           |
-| `template:task:form:right-column`          | Right column in task form                          |
+| `template:task:sidebar:actions`            | Sidebar on task page (section actions)             |
+| `template:task:sidebar:information`        | Sidebar on task page (section information)         |
+| `template:task:form:first-column`          | 1st column in task form                            |
+| `template:task:form:second-column`         | 2nd column in task form                            |
+| `template:task:form:third-column`          | 3nd column in task form                            |
 | `template:task:show:top   `                | Show task page: top                                |
 | `template:task:show:bottom`                | Show task page: bottom                             |
 | `template:task:show:before-description`    | Show task page: before description                 |
 | `template:task:show:before-tasklinks`      | Show task page: before tasklinks                   |
 | `template:task:show:before-subtasks`       | Show task page: before subtasks                    |
 | `template:task:show:before-timetracking`   | Show task page: before timetracking                |
-| `template:task:show:before-attachements`   | Show task page: before attachments                 |
+| `template:task:show:before-attachments`    | Show task page: before attachments                 |
 | `template:task:show:before-comments`       | Show task page: before comments                    |
 | `template:user:authentication:form`        | "Edit authentication" form in user profile         |
 | `template:user:create-remote:form`         | "Create remote user" form                          |

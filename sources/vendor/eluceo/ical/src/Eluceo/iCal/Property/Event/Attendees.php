@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the eluceo/iCal package.
+ *
+ * (c) Markus Poerschke <markus@eluceo.de>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Eluceo\iCal\Property\Event;
 
 use Eluceo\iCal\Property;
@@ -9,7 +18,7 @@ class Attendees extends Property
     /** @var Property[] */
     protected $attendees = array();
 
-    const PROPERTY_NAME = "ATTENDEES";
+    const PROPERTY_NAME = 'ATTENDEES';
 
     public function __construct()
     {
@@ -50,7 +59,7 @@ class Attendees extends Property
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function toLines()
     {
@@ -84,7 +93,7 @@ class Attendees extends Property
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {

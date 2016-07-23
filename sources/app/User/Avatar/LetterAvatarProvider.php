@@ -31,7 +31,7 @@ class LetterAvatarProvider extends Base implements AvatarProviderInterface
     public function render(array $user, $size)
     {
         $initials = $this->helper->user->getInitials($user['name'] ?: $user['username']);
-        $rgb = $this->getBackgroundColor($initials);
+        $rgb = $this->getBackgroundColor($user['name'] ?: $user['username']);
 
         return sprintf(
             '<div class="avatar-letter" style="background-color: rgb(%d, %d, %d)" title="%s">%s</div>',
@@ -142,14 +142,14 @@ class LetterAvatarProvider extends Base implements AvatarProviderInterface
 
         // Make hash more sensitive for short string like 'a', 'b', 'c'
         $str .= 'x';
-        $max = intval(9007199254740991 / $seed2);
+        $max = intval(PHP_INT_MAX / $seed2);
 
-        for ($i = 0, $ilen = mb_strlen($str); $i < $ilen; $i++) {
+        for ($i = 0, $ilen = mb_strlen($str, 'UTF-8'); $i < $ilen; $i++) {
             if ($hash > $max) {
                 $hash = intval($hash / $seed2);
             }
 
-            $hash = $hash * $seed + $this->getCharCode($str[$i]);
+            $hash = $hash * $seed + $this->getCharCode(mb_substr($str, $i, 1, 'UTF-8'));
         }
 
         return $hash;

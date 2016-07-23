@@ -1,26 +1,36 @@
 <?php
+
+/*
+ * This file is part of the eluceo/iCal package.
+ *
+ * (c) Markus Poerschke <markus@eluceo.de>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Eluceo\iCal\Property\Event;
 
 use Eluceo\iCal\Property;
 
+/**
+ * Class Organizer.
+ */
 class Organizer extends Property
 {
     const PROPERTY_NAME = 'ORGANIZER';
 
     /**
-     * @param string $name
-     * @param string $email
+     * @param string $value
+     * @param array  $params
      */
-    public function __construct($name, $email = '')
+    public function __construct($value, $params = array())
     {
-        $name = $name ? array('CN' => $name) : array();
-        $email = !$email ?: sprintf('MAILTO:%s', $email);
-
-        return parent::__construct($this->getName(), $email, $name);
+        parent::__construct(self::PROPERTY_NAME, $value, $params);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {

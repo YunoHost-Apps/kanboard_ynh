@@ -8,7 +8,8 @@ use PDOException;
 /**
  * Postgres Driver
  *
- * @author   Frederic Guillot
+ * @package PicoDb\Driver
+ * @author  Frederic Guillot
  */
 class Postgres extends Base
 {
@@ -18,7 +19,7 @@ class Postgres extends Base
      * @access protected
      * @var array
      */
-    protected $requiredAtttributes = array(
+    protected $requiredAttributes = array(
         'hostname',
         'username',
         'password',

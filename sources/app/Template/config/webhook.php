@@ -2,7 +2,7 @@
     <h2><?= t('Webhook settings') ?></h2>
 </div>
 <section>
-<form method="post" action="<?= $this->url->href('config', 'webhook') ?>" autocomplete="off">
+<form method="post" action="<?= $this->url->href('ConfigController', 'save', array('redirect' => 'webhook')) ?>" autocomplete="off">
 
     <?= $this->form->csrf() ?>
 
@@ -16,7 +16,7 @@
 </section>
 
 <div class="page-header">
-    <h2><?= t('URL and token') ?></h2>
+    <h2><?= t('Webhook token') ?></h2>
 </div>
 <section class="listing">
     <ul>
@@ -25,11 +25,7 @@
             <strong><?= $this->text->e($values['webhook_token']) ?></strong>
         </li>
         <li>
-            <?= t('URL for task creation:') ?>
-            <input type="text" class="auto-select" readonly="readonly" value="<?= $this->url->href('webhook', 'task', array('token' => $values['webhook_token']), false, '', true) ?>">
-        </li>
-        <li>
-            <?= $this->url->link(t('Reset token'), 'config', 'token', array('type' => 'webhook'), true) ?>
+            <?= $this->url->link(t('Reset token'), 'ConfigController', 'token', array('type' => 'webhook'), true) ?>
         </li>
     </ul>
 </section>

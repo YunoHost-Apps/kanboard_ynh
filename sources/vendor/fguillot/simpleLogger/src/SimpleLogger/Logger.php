@@ -23,7 +23,7 @@ class Logger extends AbstractLogger implements LoggerAwareInterface
     private $loggers = array();
 
     /**
-     * Get level priority (same values as Monolog)
+     * Get level priority
      *
      * @param  mixed  $level
      * @return integer
@@ -53,7 +53,8 @@ class Logger extends AbstractLogger implements LoggerAwareInterface
     /**
      * Sets a logger instance on the object
      *
-     * @param LoggerInterface $logger
+     * @param  LoggerInterface $logger
+     * @return null
      */
     public function setLogger(LoggerInterface $logger)
     {
@@ -66,12 +67,11 @@ class Logger extends AbstractLogger implements LoggerAwareInterface
      * @param  mixed   $level
      * @param  string  $message
      * @param  array   $context
+     * @return null
      */
     public function log($level, $message, array $context = array())
     {
         foreach ($this->loggers as $logger) {
-
-            // Call the logger only if necessary
             if ($this->getLevelPriority($level) >= $this->getLevelPriority($logger->getLevel())) {
                 $logger->log($level, $message, $context);
             }

@@ -4,15 +4,15 @@ namespace Kanboard\ServiceProvider;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Kanboard\Model\UserNotificationType;
-use Kanboard\Model\ProjectNotificationType;
-use Kanboard\Notification\Mail as MailNotification;
-use Kanboard\Notification\Web as WebNotification;
+use Kanboard\Model\UserNotificationTypeModel;
+use Kanboard\Model\ProjectNotificationTypeModel;
+use Kanboard\Notification\MailNotification as MailNotification;
+use Kanboard\Notification\WebNotification as WebNotification;
 
 /**
  * Notification Provider
  *
- * @package serviceProvider
+ * @package Kanboard\ServiceProvider
  * @author  Frederic Guillot
  */
 class NotificationProvider implements ServiceProviderInterface
@@ -26,17 +26,17 @@ class NotificationProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
-        $container['userNotificationType'] = function ($container) {
-            $type = new UserNotificationType($container);
-            $type->setType(MailNotification::TYPE, t('Email'), '\Kanboard\Notification\Mail');
-            $type->setType(WebNotification::TYPE, t('Web'), '\Kanboard\Notification\Web');
+        $container['userNotificationTypeModel'] = function ($container) {
+            $type = new UserNotificationTypeModel($container);
+            $type->setType(MailNotification::TYPE, t('Email'), '\Kanboard\Notification\MailNotification');
+            $type->setType(WebNotification::TYPE, t('Web'), '\Kanboard\Notification\WebNotification');
             return $type;
         };
 
-        $container['projectNotificationType'] = function ($container) {
-            $type = new ProjectNotificationType($container);
-            $type->setType('webhook', 'Webhook', '\Kanboard\Notification\Webhook', true);
-            $type->setType('activity_stream', 'ActivityStream', '\Kanboard\Notification\ActivityStream', true);
+        $container['projectNotificationTypeModel'] = function ($container) {
+            $type = new ProjectNotificationTypeModel($container);
+            $type->setType('webhook', 'Webhook', '\Kanboard\Notification\WebhookNotification', true);
+            $type->setType('activity_stream', 'ActivityStream', '\Kanboard\Notification\ActivityStreamNotification', true);
             return $type;
         };
 

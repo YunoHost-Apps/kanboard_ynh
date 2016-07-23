@@ -2,6 +2,7 @@
 
 namespace Kanboard\ServiceProvider;
 
+use Kanboard\Action\TaskAssignColorPriority;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Kanboard\Core\Action\ActionManager;
@@ -35,7 +36,7 @@ use Kanboard\Action\TaskCloseNoActivity;
 /**
  * Action Provider
  *
- * @package serviceProvider
+ * @package Kanboard\ServiceProvider
  * @author  Frederic Guillot
  */
 class ActionProvider implements ServiceProviderInterface
@@ -59,6 +60,7 @@ class ActionProvider implements ServiceProviderInterface
         $container['actionManager']->register(new TaskAssignColorColumn($container));
         $container['actionManager']->register(new TaskAssignColorLink($container));
         $container['actionManager']->register(new TaskAssignColorUser($container));
+        $container['actionManager']->register(new TaskAssignColorPriority($container));
         $container['actionManager']->register(new TaskAssignCurrentUser($container));
         $container['actionManager']->register(new TaskAssignCurrentUserColumn($container));
         $container['actionManager']->register(new TaskAssignSpecificUser($container));

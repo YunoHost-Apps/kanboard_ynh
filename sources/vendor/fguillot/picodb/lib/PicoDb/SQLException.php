@@ -7,7 +7,8 @@ use Exception;
 /**
  * SQLException
  *
- * @author   Frederic Guillot
+ * @package PicoDb
+ * @author  Frederic Guillot
  */
 class SQLException extends Exception
 {

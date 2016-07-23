@@ -1,7 +1,7 @@
 <ul>
-    <?php if ($task['recurrence_status'] == \Kanboard\Model\Task::RECURRING_STATUS_PENDING): ?>
+    <?php if ($task['recurrence_status'] == \Kanboard\Model\TaskModel::RECURRING_STATUS_PENDING): ?>
         <li><?= t('Recurrent task is scheduled to be generated') ?></li>
-    <?php elseif ($task['recurrence_status'] == \Kanboard\Model\Task::RECURRING_STATUS_PROCESSED): ?>
+    <?php elseif ($task['recurrence_status'] == \Kanboard\Model\TaskModel::RECURRING_STATUS_PROCESSED): ?>
         <li><?= t('Recurrent task has been generated:') ?>
             <ul>
                 <li>
@@ -24,13 +24,13 @@
         <?php if ($task['recurrence_parent']): ?>
         <li>
             <?= t('This task has been created by: ') ?>
-            <?= $this->url->link('#'.$task['recurrence_parent'], 'task', 'show', array('task_id' => $task['recurrence_parent'], 'project_id' => $task['project_id'])) ?>
+            <?= $this->url->link('#'.$task['recurrence_parent'], 'TaskViewController', 'show', array('task_id' => $task['recurrence_parent'], 'project_id' => $task['project_id'])) ?>
         </li>
         <?php endif ?>
         <?php if ($task['recurrence_child']): ?>
         <li>
             <?= t('This task has created this child task: ') ?>
-            <?= $this->url->link('#'.$task['recurrence_child'], 'task', 'show', array('task_id' => $task['recurrence_child'], 'project_id' => $task['project_id'])) ?>
+            <?= $this->url->link('#'.$task['recurrence_child'], 'TaskViewController', 'show', array('task_id' => $task['recurrence_child'], 'project_id' => $task['project_id'])) ?>
         </li>
         <?php endif ?>
     <?php endif ?>

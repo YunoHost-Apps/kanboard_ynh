@@ -12,29 +12,7 @@
 
     <div class="comment-content">
         <div class="markdown">
-            <?php if (isset($is_public) && $is_public): ?>
-                <?= $this->text->markdown(
-                    $comment['comment'],
-                    array(
-                        'controller' => 'task',
-                        'action' => 'readonly',
-                        'params' => array(
-                            'token' => $project['token']
-                        )
-                    )
-                ) ?>
-            <?php else: ?>
-                <?= $this->text->markdown(
-                    $comment['comment'],
-                    array(
-                        'controller' => 'task',
-                        'action' => 'show',
-                        'params' => array(
-                            'project_id' => $task['project_id']
-                        )
-                    )
-                ) ?>
-            <?php endif ?>
+            <?= $this->text->markdown($comment['comment'], isset($is_public) && $is_public) ?>
         </div>
     </div>
 
@@ -48,11 +26,11 @@
                 <?php if ($editable && ($this->user->isAdmin() || $this->user->isCurrentUser($comment['user_id']))): ?>
                     <li>
                         <i class="fa fa-remove fa-fw"></i>
-                        <?= $this->url->link(t('remove'), 'comment', 'confirm', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'comment_id' => $comment['id']), false, 'popover') ?>
+                        <?= $this->url->link(t('remove'), 'CommentController', 'confirm', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'comment_id' => $comment['id']), false, 'popover') ?>
                     </li>
                     <li>
                         <i class="fa fa-edit fa-fw"></i>
-                        <?= $this->url->link(t('edit'), 'comment', 'edit', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'comment_id' => $comment['id']), false, 'popover') ?>
+                        <?= $this->url->link(t('edit'), 'CommentController', 'edit', array('task_id' => $task['id'], 'project_id' => $task['project_id'], 'comment_id' => $comment['id']), false, 'popover') ?>
                     </li>
                 <?php endif ?>
             </ul>

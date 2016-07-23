@@ -35,6 +35,7 @@ Kanboard.App.prototype.execute = function() {
     this.keyboardShortcuts();
     this.datePicker();
     this.autoComplete();
+    this.tagAutoComplete();
 };
 
 Kanboard.App.prototype.keyboardShortcuts = function() {
@@ -42,7 +43,17 @@ Kanboard.App.prototype.keyboardShortcuts = function() {
 
     // Submit form
     Mousetrap.bindGlobal("mod+enter", function() {
-        $("form").submit();
+        var forms = $("form");
+
+        if (forms.length == 1) {
+            forms.submit();
+        } else if (forms.length > 1) {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                $(document.activeElement).parents("form").submit();
+            } else if (self.get("Popover").isOpen()) {
+                $("#popover-container form").submit();
+            }
+        }
     });
 
     // Open board selector
@@ -97,25 +108,34 @@ Kanboard.App.prototype.chosen = function() {
 };
 
 Kanboard.App.prototype.datePicker = function() {
-    // Datepicker translation
-    $.datepicker.setDefaults($.datepicker.regional[$("body").data("js-lang")]);
+    var bodyElement = $("body");
+    var dateFormat = bodyElement.data("js-date-format");
+    var timeFormat = bodyElement.data("js-time-format");
+    var lang = bodyElement.data("js-lang");
+
+    $.datepicker.setDefaults($.datepicker.regional[lang]);
+    $.timepicker.setDefaults($.timepicker.regional[lang]);
 
     // Datepicker
     $(".form-date").datepicker({
         showOtherMonths: true,
         selectOtherMonths: true,
-        dateFormat: 'yy-mm-dd',
+        dateFormat: dateFormat,
         constrainInput: false
     });
 
     // Datetime picker
     $(".form-datetime").datetimepicker({
-        controlType: 'select',
-        oneLine: true,
-        dateFormat: 'yy-mm-dd',
-        // timeFormat: 'h:mm tt',
+        dateFormat: dateFormat,
+        timeFormat: timeFormat,
         constrainInput: false
     });
+};
+
+Kanboard.App.prototype.tagAutoComplete = function() {
+    $(".tag-autocomplete").select2({
+        tags: true
+    })
 };
 
 Kanboard.App.prototype.autoComplete = function() {

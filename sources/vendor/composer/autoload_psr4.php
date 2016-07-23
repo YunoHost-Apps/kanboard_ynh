@@ -9,7 +9,7 @@ return array(
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Component\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher'),
     'Symfony\\Component\\Console\\' => array($vendorDir . '/symfony/console'),
-    'Kanboard\\Plugin\\' => array($baseDir . '/plugins'),
+    'SimpleQueue\\' => array($vendorDir . '/fguillot/simple-queue/src'),
     'Kanboard\\' => array($baseDir . '/app'),
     'Gregwar\\Captcha\\' => array($vendorDir . '/gregwar/captcha'),
     'Base32\\' => array($vendorDir . '/christian-riesen/base32/src'),

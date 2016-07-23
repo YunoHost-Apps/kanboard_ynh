@@ -25,7 +25,7 @@ class UrlHelper extends Base
      */
     public function doc($label, $file)
     {
-        return $this->link($label, 'doc', 'show', array('file' => $file), false, '', '', true);
+        return $this->link($label, 'DocumentationController', 'show', array('file' => $file), false, '', '', true);
     }
 
     /**
@@ -109,7 +109,7 @@ class UrlHelper extends Base
     public function base()
     {
         if (empty($this->base)) {
-            $this->base = $this->config->get('application_url') ?: $this->server();
+            $this->base = $this->configModel->get('application_url') ?: $this->server();
         }
 
         return $this->base;

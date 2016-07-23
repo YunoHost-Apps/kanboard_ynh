@@ -5,8 +5,8 @@
  *
  * (c) Markus Poerschke <markus@eluceo.de>
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace Eluceo\iCal\Component;
@@ -17,7 +17,10 @@ use Eluceo\iCal\Property\DateTimeProperty;
 use Eluceo\iCal\Property\Event\Attendees;
 use Eluceo\iCal\Property\Event\Organizer;
 use Eluceo\iCal\Property\Event\RecurrenceRule;
+use Eluceo\iCal\Property\Event\Description;
 use Eluceo\iCal\PropertyBag;
+use Eluceo\iCal\Property\Event\RecurrenceId;
+use Eluceo\iCal\Property\DateTimesProperty;
 
 /**
  * Implementation of the EVENT component.
@@ -64,7 +67,7 @@ class Event extends Component
     protected $duration;
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $noTime = false;
 
@@ -130,6 +133,11 @@ class Event extends Component
     /**
      * @var string
      */
+    protected $descriptionHTML;
+
+    /**
+     * @var string
+     */
     protected $status;
 
     /**
@@ -181,11 +189,23 @@ class Event extends Component
     protected $categories;
 
     /**
-     * https://tools.ietf.org/html/rfc5545#section-3.8.1.3
+     * https://tools.ietf.org/html/rfc5545#section-3.8.1.3.
      *
      * @var bool
      */
     protected $isPrivate = false;
+
+    /**
+     * Dates to be excluded from a series of events.
+     *
+     * @var \DateTime[]
+     */
+    protected $exDates = array();
+
+    /**
+     * @var RecurrenceId
+     */
+    protected $recurrenceId;
 
     public function __construct($uniqueId = null)
     {
@@ -250,6 +270,7 @@ class Event extends Component
                         )
                     )
                 );
+                $propertyBag->set('GEO', str_replace(',', ';', $this->locationGeo));
             }
         }
 
@@ -264,11 +285,32 @@ class Event extends Component
         $propertyBag->set('CLASS', $this->isPrivate ? 'PRIVATE' : 'PUBLIC');
 
         if (null != $this->description) {
-            $propertyBag->set('DESCRIPTION', $this->description);
+            $propertyBag->set('DESCRIPTION', new Description($this->description));
+        }
+
+        if (null != $this->descriptionHTML) {
+            $propertyBag->add(
+                new Property(
+                    'X-ALT-DESC',
+                    $this->descriptionHTML,
+                    array(
+                        'FMTTYPE' => 'text/html',
+                    )
+                )
+            );
         }
 
         if (null != $this->recurrenceRule) {
             $propertyBag->set('RRULE', $this->recurrenceRule);
+        }
+
+        if (null != $this->recurrenceId) {
+            $this->recurrenceId->applyTimeSettings($this->noTime, $this->useTimezone, $this->useUtc);
+            $propertyBag->add($this->recurrenceId);
+        }
+
+        if (!empty($this->exDates)) {
+            $propertyBag->add(new DateTimesProperty('EXDATE', $this->exDates, $this->noTime, $this->useTimezone, $this->useUtc));
         }
 
         if ($this->cancelled) {
@@ -399,13 +441,13 @@ class Event extends Component
     }
 
     /**
-     * @param string $name
-     * @param string $email
+     * @param Organizer $organizer
+     *
      * @return $this
      */
-    public function setOrganizer($name, $email = '')
+    public function setOrganizer(Organizer $organizer)
     {
-        $this->organizer = new Organizer($name, $email);
+        $this->organizer = $organizer;
 
         return $this;
     }
@@ -523,6 +565,18 @@ class Event extends Component
     }
 
     /**
+     * @param $descriptionHTML
+     *
+     * @return $this
+     */
+    public function setDescriptionHTML($descriptionHTML)
+    {
+        $this->descriptionHTML = $descriptionHTML;
+
+        return $this;
+    }
+
+    /**
      * @param bool $useUtc
      *
      * @return $this
@@ -540,6 +594,14 @@ class Event extends Component
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescriptionHTML()
+    {
+        return $this->descriptionHTML;
     }
 
     /**
@@ -654,14 +716,67 @@ class Event extends Component
     }
 
     /**
-     * Sets the event privacy
+     * Sets the event privacy.
      *
      * @param bool $flag
+     *
      * @return $this
      */
     public function setIsPrivate($flag)
     {
         $this->isPrivate = (bool) $flag;
+
+        return $this;
+    }
+
+    /**
+     * @param \DateTime $dateTime
+     *
+     * @return \Eluceo\iCal\Component\Event
+     */
+    public function addExDate(\DateTime $dateTime)
+    {
+        $this->exDates[] = $dateTime;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime[]
+     */
+    public function getExDates()
+    {
+        return $this->exDates;
+    }
+
+    /**
+     * @param \DateTime[]
+     *
+     * @return \Eluceo\iCal\Component\Event
+     */
+    public function setExDates(array $exDates)
+    {
+        $this->exDates = $exDates;
+
+        return $this;
+    }
+
+    /**
+     * @return \Eluceo\iCal\Property\Event\RecurrenceId
+     */
+    public function getRecurrenceId()
+    {
+        return $this->recurrenceId;
+    }
+
+    /**
+     * @param RecurrenceId $recurrenceId
+     *
+     * @return \Eluceo\iCal\Component\Event
+     */
+    public function setRecurrenceId(RecurrenceId $recurrenceId)
+    {
+        $this->recurrenceId = $recurrenceId;
 
         return $this;
     }

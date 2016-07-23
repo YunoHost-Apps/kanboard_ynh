@@ -5,10 +5,11 @@ namespace PicoDb;
 use PDO;
 
 /**
- * Hashtable (key/value)
+ * HashTable (key/value)
  *
- * @author   Frederic Guillot
- * @author   Mathias Kresin
+ * @package PicoDb
+ * @author  Frederic Guillot
+ * @author  Mathias Kresin
  */
 class Hashtable extends Table
 {
@@ -33,7 +34,7 @@ class Hashtable extends Table
      *
      * @access public
      * @param  string  $column
-     * @return Table
+     * @return $this
      */
     public function columnKey($column)
     {
@@ -46,7 +47,7 @@ class Hashtable extends Table
      *
      * @access public
      * @param  string  $column
-     * @return Table
+     * @return $this
      */
     public function columnValue($column)
     {
@@ -84,7 +85,7 @@ class Hashtable extends Table
         // setup to select columns in case that there are more than two
         $this->columns($this->keyColumn, $this->valueColumn);
 
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->condition->getValues());
+        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
         $rows = $rq->fetchAll(PDO::FETCH_NUM);
 
         foreach ($rows as $row) {

@@ -1,6 +1,6 @@
 <div class="
         task-board
-        <?= $task['is_active'] == 1 ? ($this->user->hasProjectAccess('board', 'save', $task['project_id']) ? 'draggable-item ' : '').'task-board-status-open '.($task['date_modification'] > (time() - $board_highlight_period) ? 'task-board-recent' : '') : 'task-board-status-closed' ?>
+        <?= $task['is_active'] == 1 ? ($this->user->hasProjectAccess('BoardViewController', 'save', $task['project_id']) ? 'draggable-item ' : '').'task-board-status-open '.($task['date_modification'] > (time() - $board_highlight_period) ? 'task-board-recent' : '') : 'task-board-status-closed' ?>
         color-<?= $task['color_id'] ?>"
      data-task-id="<?= $task['id'] ?>"
      data-column-id="<?= $task['column_id'] ?>"
@@ -9,15 +9,15 @@
      data-owner-id="<?= $task['owner_id'] ?>"
      data-category-id="<?= $task['category_id'] ?>"
      data-due-date="<?= $task['date_due'] ?>"
-     data-task-url="<?= $this->url->href('task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>">
+     data-task-url="<?= $this->url->href('TaskViewController', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id'])) ?>">
 
     <div class="task-board-sort-handle" style="display: none;"><i class="fa fa-arrows-alt"></i></div>
 
     <?php if ($this->board->isCollapsed($task['project_id'])): ?>
         <div class="task-board-collapsed">
             <div class="task-board-saving-icon" style="display: none;"><i class="fa fa-spinner fa-pulse"></i></div>
-            <?php if ($this->user->hasProjectAccess('taskmodification', 'edit', $task['project_id'])): ?>
-                <?= $this->render('board/task_menu', array('task' => $task)) ?>
+            <?php if ($this->user->hasProjectAccess('TaskModificationController', 'edit', $task['project_id'])): ?>
+                <?= $this->render('task/dropdown', array('task' => $task)) ?>
             <?php else: ?>
                 <strong><?= '#'.$task['id'] ?></strong>
             <?php endif ?>
@@ -27,13 +27,13 @@
                     <?= $this->text->e($this->user->getInitials($task['assignee_name'] ?: $task['assignee_username'])) ?>
                 </span> -
             <?php endif ?>
-            <?= $this->url->link($this->text->e($task['title']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, 'task-board-collapsed-title tooltip', $this->text->e($task['title'])) ?>
+            <?= $this->url->link($this->text->e($task['title']), 'TaskViewController', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, 'task-board-collapsed-title tooltip', $this->text->e($task['title'])) ?>
         </div>
     <?php else: ?>
         <div class="task-board-expanded">
             <div class="task-board-saving-icon" style="display: none;"><i class="fa fa-spinner fa-pulse fa-2x"></i></div>
-            <?php if ($this->user->hasProjectAccess('taskmodification', 'edit', $task['project_id'])): ?>
-                <?= $this->render('board/task_menu', array('task' => $task)) ?>
+            <?php if ($this->user->hasProjectAccess('TaskModificationController', 'edit', $task['project_id'])): ?>
+                <?= $this->render('task/dropdown', array('task' => $task)) ?>
             <?php else: ?>
                 <strong><?= '#'.$task['id'] ?></strong>
             <?php endif ?>
@@ -48,7 +48,7 @@
 
             <?= $this->hook->render('template:board:private:task:before-title', array('task' => $task)) ?>
             <div class="task-board-title">
-                <?= $this->url->link($this->text->e($task['title']), 'task', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, '', t('View this task')) ?>
+                <?= $this->url->link($this->text->e($task['title']), 'TaskViewController', 'show', array('task_id' => $task['id'], 'project_id' => $task['project_id']), false, '', t('View this task')) ?>
             </div>
             <?= $this->hook->render('template:board:private:task:after-title', array('task' => $task)) ?>
 

@@ -1,40 +1,44 @@
-<li>
-    <i class="fa fa-dashboard fa-fw"></i>&nbsp;
-    <?= $this->url->link(t('Activity'), 'activity', 'project', array('project_id' => $project['id'])) ?>
-</li>
+<div class="dropdown">
+    <a href="#" class="dropdown-menu dashboard-table-link">#<?= $project['id'] ?></a>
+    <ul>
+        <li>
+            <i class="fa fa-th fa-fw"></i>
+            <?= $this->url->link(t('Board'), 'BoardViewController', 'show', array('project_id' => $project['id'])) ?>
+        </li>
+        <li>
+            <i class="fa fa-calendar fa-fw"></i>
+            <?= $this->url->link(t('Calendar'), 'CalendarController', 'show', array('project_id' => $project['id'])) ?>
+        </li>
+        <li>
+            <i class="fa fa-list fa-fw"></i>
+            <?= $this->url->link(t('Listing'), 'TaskListController', 'show', array('project_id' => $project['id'])) ?>
+        </li>
+        <?php if ($this->user->hasProjectAccess('TaskGanttController', 'show', $project['id'])): ?>
+        <li>
+            <i class="fa fa-sliders fa-fw"></i>
+            <?= $this->url->link(t('Gantt'), 'TaskGanttController', 'show', array('project_id' => $project['id'])) ?>
+        </li>
+        <?php endif ?>
 
-<?php if ($this->user->hasProjectAccess('customfilter', 'index', $project['id'])): ?>
-<li>
-    <i class="fa fa-filter fa-fw"></i>&nbsp;
-    <?= $this->url->link(t('Custom filters'), 'customfilter', 'index', array('project_id' => $project['id'])) ?>
-</li>
-<?php endif ?>
+        <li>
+            <i class="fa fa-dashboard fa-fw"></i>&nbsp;
+            <?= $this->url->link(t('Activity'), 'ActivityController', 'project', array('project_id' => $project['id'])) ?>
+        </li>
 
-<?php if ($project['is_public']): ?>
-<li>
-    <i class="fa fa-share-alt fa-fw"></i>&nbsp;<?= $this->url->link(t('Public link'), 'board', 'readonly', array('token' => $project['token']), false, '', '', true) ?>
-</li>
-<?php endif ?>
+        <?php if ($this->user->hasProjectAccess('AnalyticController', 'tasks', $project['id'])): ?>
+            <li>
+                <i class="fa fa-line-chart fa-fw"></i>&nbsp;
+                <?= $this->url->link(t('Analytics'), 'AnalyticController', 'tasks', array('project_id' => $project['id'])) ?>
+            </li>
+        <?php endif ?>
 
-<?= $this->hook->render('template:project:dropdown', array('project' => $project)) ?>
+        <?= $this->hook->render('template:project:dropdown', array('project' => $project)) ?>
 
-<?php if ($this->user->hasProjectAccess('analytic', 'tasks', $project['id'])): ?>
-    <li>
-        <i class="fa fa-line-chart fa-fw"></i>&nbsp;
-        <?= $this->url->link(t('Analytics'), 'analytic', 'tasks', array('project_id' => $project['id'])) ?>
-    </li>
-<?php endif ?>
-
-<?php if ($this->user->hasProjectAccess('export', 'tasks', $project['id'])): ?>
-    <li>
-        <i class="fa fa-download fa-fw"></i>&nbsp;
-        <?= $this->url->link(t('Exports'), 'export', 'tasks', array('project_id' => $project['id'])) ?>
-    </li>
-<?php endif ?>
-
-<?php if ($this->user->hasProjectAccess('ProjectEdit', 'edit', $project['id'])): ?>
-    <li>
-        <i class="fa fa-cog fa-fw"></i>&nbsp;
-        <?= $this->url->link(t('Settings'), 'project', 'show', array('project_id' => $project['id'])) ?>
-    </li>
-<?php endif ?>
+        <?php if ($this->user->hasProjectAccess('ProjectEditController', 'edit', $project['id'])): ?>
+            <li>
+                <i class="fa fa-cog fa-fw"></i>
+                <?= $this->url->link(t('Settings'), 'ProjectViewController', 'show', array('project_id' => $project['id'])) ?>
+            </li>
+        <?php endif ?>
+    </ul>
+</div>

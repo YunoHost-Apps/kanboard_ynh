@@ -5,15 +5,16 @@ namespace PicoDb;
 use Closure;
 use PDOException;
 use LogicException;
-use PicoDb\Driver\Sqlite;
 use PicoDb\Driver\Mssql;
+use PicoDb\Driver\Sqlite;
 use PicoDb\Driver\Mysql;
 use PicoDb\Driver\Postgres;
 
 /**
  * Database
  *
- * @author   Frederic Guillot
+ * @package PicoDb
+ * @author  Frederic Guillot
  */
 class Database
 {
@@ -25,6 +26,14 @@ class Database
      * @var array
      */
     private static $instances = array();
+
+    /**
+     * Statement object
+     *
+     * @access protected
+     * @var StatementHandler
+     */
+    protected $statementHandler;
 
     /**
      * Queries logs
@@ -42,73 +51,15 @@ class Database
     private $driver;
 
     /**
-     * Flag to calculate query time
-     *
-     * @access public
-     * @var boolean
-     */
-    public $stopwatch = false;
-
-    /**
-     * Execution time of all queries
-     *
-     * @access public
-     * @var float
-     */
-    public $executionTime = 0;
-
-    /**
-     * Flag to log generated SQL queries
-     *
-     * @access public
-     * @var boolean
-     */
-    public $logQueries = false;
-
-    /**
-     * Run explain command on each query
-     *
-     * @access public
-     * @var boolean
-     */
-    public $explain = false;
-
-    /**
-     * Number of SQL queries executed
-     *
-     * @access public
-     * @var integer
-     */
-    public $nbQueries = 0;
-
-    /**
      * Initialize the driver
      *
      * @access public
-     * @param  array     $settings    Connection settings
+     * @param  array   $settings
      */
-    public function __construct(array $settings)
+    public function __construct(array $settings = array())
     {
-        if (! isset($settings['driver'])) {
-            throw new LogicException('You must define a database driver');
-        }
-
-        switch ($settings['driver']) {
-            case 'sqlite':
-                $this->driver = new Sqlite($settings);
-                break;
-            case 'mssql':
-                $this->driver = new Mssql($settings);
-                break;
-            case 'mysql':
-                $this->driver = new Mysql($settings);
-                break;
-            case 'postgres':
-                $this->driver = new Postgres($settings);
-                break;
-            default:
-                throw new LogicException('This database driver is not supported');
-        }
+        $this->driver = DriverFactory::getDriver($settings);
+        $this->statementHandler = new StatementHandler($this);
     }
 
     /**
@@ -210,7 +161,7 @@ class Database
      * Get the Driver instance
      *
      * @access public
-     * @return Sqlite|Postgres|Mysql
+     * @return Mssql|Sqlite|Postgres|Mysql
      */
     public function getDriver()
     {
@@ -225,7 +176,18 @@ class Database
      */
     public function getLastId()
     {
-        return $this->driver->getLastId();
+        return (int) $this->driver->getLastId();
+    }
+
+    /**
+     * Get statement object
+     *
+     * @access public
+     * @return StatementHandler
+     */
+    public function getStatementHandler()
+    {
+        return $this->statementHandler;
     }
 
     /**
@@ -289,36 +251,10 @@ class Database
      */
     public function execute($sql, array $values = array())
     {
-        try {
-
-            if ($this->logQueries) {
-                $this->setLogMessage($sql);
-            }
-
-            if ($this->stopwatch) {
-                $start = microtime(true);
-            }
-
-            $rq = $this->getConnection()->prepare($sql);
-            $rq->execute($values);
-
-            if ($this->stopwatch) {
-                $duration = microtime(true) - $start;
-                $this->executionTime += $duration;
-                $this->setLogMessage('QUERY_DURATION='.$duration.' ALL_QUERIES_DURATION='.$this->executionTime);
-            }
-
-            if ($this->explain) {
-                $this->setLogMessages($this->getDriver()->explain($sql, $values));
-            }
-
-            $this->nbQueries++;
-
-            return $rq;
-        }
-        catch (PDOException $e) {
-            return $this->handleSqlError($e);
-        }
+        return $this->statementHandler
+            ->withSql($sql)
+            ->withPositionalParams($values)
+            ->execute();
     }
 
     /**
@@ -337,30 +273,9 @@ class Database
             $this->closeTransaction();
 
             return $result === null ? true : $result;
+        } catch (PDOException $e) {
+            return $this->statementHandler->handleSqlError($e);
         }
-        catch (PDOException $e) {
-            return $this->handleSqlError($e);
-        }
-    }
-
-    /**
-     * Handle PDOException
-     *
-     * @access private
-     * @param  PDOException $e
-     * @return bool
-     * @throws SQLException
-     */
-    private function handleSqlError(PDOException $e)
-    {
-        $this->cancelTransaction();
-        $this->setLogMessage($e->getMessage());
-
-        if ($this->driver->isDuplicateKeyError($e->getCode())) {
-            return false;
-        }
-
-        throw new SQLException('SQL error'.($this->logQueries ? ': '.$e->getMessage() : ''));
     }
 
     /**
@@ -395,42 +310,61 @@ class Database
     public function cancelTransaction()
     {
         if ($this->getConnection()->inTransaction()) {
-            $this->getConnection()->rollback();
+            $this->getConnection()->rollBack();
         }
     }
 
     /**
-     * Get a table instance
+     * Get a table object
      *
      * @access public
-     * @param  string $table_name
+     * @param  string $table
      * @return Table
      */
-    public function table($table_name)
+    public function table($table)
     {
-        return new Table($this, $table_name);
+        return new Table($this, $table);
     }
 
     /**
-     * Get a hashtable instance
+     * Get a hashtable object
      *
      * @access public
-     * @param  string    $table_name
+     * @param  string $table
      * @return Hashtable
      */
-    public function hashtable($table_name)
+    public function hashtable($table)
     {
-        return new Hashtable($this, $table_name);
+        return new Hashtable($this, $table);
     }
 
     /**
-     * Get a schema instance
+     * Get a LOB object
      *
      * @access public
+     * @param  string $table
+     * @return LargeObject
+     */
+    public function largeObject($table)
+    {
+        return new LargeObject($this, $table);
+    }
+
+    /**
+     * Get a schema object
+     *
+     * @access public
+     * @param  string $namespace
      * @return Schema
      */
-    public function schema()
+    public function schema($namespace = null)
     {
-        return new Schema($this);
+        $schema = new Schema($this);
+
+        if ($namespace !== null) {
+            $schema->setNamespace($namespace);
+        }
+
+        return $schema;
     }
 }

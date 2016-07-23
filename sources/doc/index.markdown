@@ -22,6 +22,7 @@ Using Kanboard
 - [Project Types](project-types.markdown)
 - [Creating projects](creating-projects.markdown)
 - [Editing projects](editing-projects.markdown)
+- [Removing projects](removing-projects.markdown)
 - [Sharing boards and tasks](sharing-projects.markdown)
 - [Automatic actions](automatic-actions.markdown)
 - [Project permissions](project-permissions.markdown)
@@ -46,6 +47,7 @@ Using Kanboard
 - [Subtasks](subtasks.markdown)
 - [Analytics for tasks](analytics-tasks.markdown)
 - [User mentions](user-mentions.markdown)
+- [Tags](tags.markdown)
 
 ### Working with users and groups
 
@@ -101,14 +103,18 @@ Technical details
 - [Run Kanboard with Docker](docker.markdown)
 - [Run Kanboard with Vagrant](vagrant.markdown)
 - [Run Kanboard on Cloudron](cloudron.markdown)
+- [Run Kanboard on Nitrous](nitrous.markdown)
 
 ### Configuration
 
+- [Performances](performances.markdown)
 - [Daily background job](cronjob.markdown)
+- [Background Worker](worker.markdown)
 - [Config file](config.markdown)
 - [Environment variables](env.markdown)
 - [Email configuration](email-configuration.markdown)
 - [URL rewriting](nice-urls.markdown)
+- [Plugin Directory](plugin-directory.markdown)
 
 ### Database
 
@@ -120,7 +126,9 @@ Technical details
 
 - [LDAP authentication](ldap-authentication.markdown)
 - [LDAP group synchronization](ldap-group-sync.markdown)
+- [LDAP profile picture](ldap-profile-picture.markdown)
 - [LDAP parameters](ldap-parameters.markdown)
+- [LDAP configuration examples](ldap-configuration-examples.markdown)
 - [Reverse proxy authentication](reverse-proxy-authentication.markdown)
 
 ### Contributors

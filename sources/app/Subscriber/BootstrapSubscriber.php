@@ -16,12 +16,12 @@ class BootstrapSubscriber extends BaseSubscriber implements EventSubscriberInter
     public function execute()
     {
         $this->logger->debug('Subscriber executed: '.__METHOD__);
-        $this->config->setupTranslations();
-        $this->config->setupTimezone();
+        $this->languageModel->loadCurrentLanguage();
+        $this->timezoneModel->setCurrentTimezone();
         $this->actionManager->attachEvents();
 
         if ($this->userSession->isLogged()) {
-            $this->sessionStorage->hasSubtaskInProgress = $this->subtask->hasSubtaskInProgress($this->userSession->getId());
+            $this->sessionStorage->hasSubtaskInProgress = $this->subtaskModel->hasSubtaskInProgress($this->userSession->getId());
         }
     }
 
@@ -29,13 +29,13 @@ class BootstrapSubscriber extends BaseSubscriber implements EventSubscriberInter
     {
         if (DEBUG) {
             foreach ($this->db->getLogMessages() as $message) {
-                $this->logger->debug($message);
+                $this->logger->debug('SQL: ' . $message);
             }
 
-            $this->logger->debug('SQL_QUERIES={nb}', array('nb' => $this->container['db']->nbQueries));
-            $this->logger->debug('RENDERING={time}', array('time' => microtime(true) - $this->request->getStartTime()));
-            $this->logger->debug('MEMORY='.$this->helper->text->bytes(memory_get_usage()));
-            $this->logger->debug('URI='.$this->request->getUri());
+            $this->logger->debug('APP: nb_queries={nb}', array('nb' => $this->db->getStatementHandler()->getNbQueries()));
+            $this->logger->debug('APP: rendering_time={time}', array('time' => microtime(true) - $this->request->getStartTime()));
+            $this->logger->debug('APP: memory_usage='.$this->helper->text->bytes(memory_get_usage()));
+            $this->logger->debug('APP: uri='.$this->request->getUri());
             $this->logger->debug('###############################################');
         }
     }

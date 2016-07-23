@@ -16,12 +16,12 @@ class Syslog extends Base
     /**
      * Setup Syslog configuration
      *
-     * @param  string $syslog_ident       Application name
-     * @param  int    $syslog_facility    See http://php.net/manual/en/function.openlog.php
+     * @param  string $ident    Application name
+     * @param  int    $facility See http://php.net/manual/en/function.openlog.php
      */
-    public function __construct($syslog_ident = 'PHP', $syslog_facility = LOG_USER)
+    public function __construct($ident = 'PHP', $facility = LOG_USER)
     {
-        if (! openlog($syslog_ident, LOG_ODELAY | LOG_PID, $syslog_facility)) {
+        if (! openlog($ident, LOG_ODELAY | LOG_PID, $facility)) {
             throw new RuntimeException('Unable to connect to syslog.');
         }
     }
@@ -60,12 +60,13 @@ class Syslog extends Base
      * @param  mixed   $level
      * @param  string  $message
      * @param  array   $context
+     * @return null
      */
     public function log($level, $message, array $context = array())
     {
-        $syslog_priority = $this->getSyslogPriority($level);
-        $syslog_message = $this->interpolate($message, $context);
+        $syslogPriority = $this->getSyslogPriority($level);
+        $syslogMessage = $this->interpolate($message, $context);
 
-        syslog($syslog_priority, $syslog_message);
+        syslog($syslogPriority, $syslogMessage);
     }
 }

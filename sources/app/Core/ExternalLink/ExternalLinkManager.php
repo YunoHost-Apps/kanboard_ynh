@@ -23,7 +23,7 @@ class ExternalLinkManager extends Base
      * Registered providers
      *
      * @access private
-     * @var array
+     * @var ExternalLinkProviderInterface[]
      */
     private $providers = array();
 
@@ -149,6 +149,30 @@ class ExternalLinkManager extends Base
     {
         $this->userInputType = empty($values['type']) ? self::TYPE_AUTO : $values['type'];
         $this->userInputText = empty($values['text']) ? '' : trim($values['text']);
+        return $this;
+    }
+
+    /**
+     * Set provider type
+     *
+     * @access public
+     * @param  string $userInputType
+     * @return ExternalLinkManager
+     */
+    public function setUserInputType($userInputType)
+    {
+        $this->userInputType = $userInputType;
+        return $this;
+    }
+
+    /**
+     * Set external link
+     * @param  string $userInputText
+     * @return ExternalLinkManager
+     */
+    public function setUserInputText($userInputText)
+    {
+        $this->userInputText = $userInputText;
         return $this;
     }
 

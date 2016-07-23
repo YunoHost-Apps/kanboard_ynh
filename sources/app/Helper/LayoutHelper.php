@@ -27,7 +27,7 @@ class LayoutHelper extends Base
         }
 
         if (! isset($params['no_layout']) && ! isset($params['board_selector'])) {
-            $params['board_selector'] = $this->projectUserRole->getActiveProjectsByUser($this->userSession->getId());
+            $params['board_selector'] = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
         }
 
         return $this->pageLayout($template, $params);
@@ -47,7 +47,7 @@ class LayoutHelper extends Base
             $params['title'] = '#'.$params['user']['id'].' '.($params['user']['name'] ?: $params['user']['username']);
         }
 
-        return $this->subLayout('user/layout', 'user/sidebar', $template, $params);
+        return $this->subLayout('user_view/layout', 'user_view/sidebar', $template, $params);
     }
 
     /**
@@ -60,6 +60,7 @@ class LayoutHelper extends Base
      */
     public function task($template, array $params)
     {
+        $params['page_title'] = $params['task']['project_name'].', #'.$params['task']['id'].' - '.$params['task']['title'];
         $params['title'] = $params['task']['project_name'];
         return $this->subLayout('task/layout', 'task/sidebar', $template, $params);
     }
@@ -95,7 +96,7 @@ class LayoutHelper extends Base
     public function projectUser($template, array $params)
     {
         $params['filter'] = array('user_id' => $params['user_id']);
-        return $this->subLayout('project_user/layout', 'project_user/sidebar', $template, $params);
+        return $this->subLayout('project_user_overview/layout', 'project_user_overview/sidebar', $template, $params);
     }
 
     /**
@@ -109,7 +110,7 @@ class LayoutHelper extends Base
     public function config($template, array $params)
     {
         if (! isset($params['values'])) {
-            $params['values'] = $this->config->getAll();
+            $params['values'] = $this->configModel->getAll();
         }
 
         if (! isset($params['errors'])) {
@@ -117,6 +118,19 @@ class LayoutHelper extends Base
         }
 
         return $this->subLayout('config/layout', 'config/sidebar', $template, $params);
+    }
+
+    /**
+     * Common layout for plugin views
+     *
+     * @access public
+     * @param  string $template
+     * @param  array  $params
+     * @return string
+     */
+    public function plugin($template, array $params)
+    {
+        return $this->subLayout('plugin/layout', 'plugin/sidebar', $template, $params);
     }
 
     /**
@@ -129,7 +143,7 @@ class LayoutHelper extends Base
      */
     public function dashboard($template, array $params)
     {
-        return $this->subLayout('app/layout', 'app/sidebar', $template, $params);
+        return $this->subLayout('dashboard/layout', 'dashboard/sidebar', $template, $params);
     }
 
     /**

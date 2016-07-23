@@ -18,7 +18,7 @@ class ActionManager extends Base
      * List of automatic actions
      *
      * @access private
-     * @var array
+     * @var ActionBase[]
      */
     private $actions = array();
 
@@ -121,9 +121,9 @@ class ActionManager extends Base
     public function attachEvents()
     {
         if ($this->userSession->isLogged()) {
-            $actions = $this->action->getAllByUser($this->userSession->getId());
+            $actions = $this->actionModel->getAllByUser($this->userSession->getId());
         } else {
-            $actions = $this->action->getAll();
+            $actions = $this->actionModel->getAll();
         }
 
         foreach ($actions as $action) {
