@@ -11,7 +11,6 @@ source /usr/share/yunohost/helpers
 # Drop MySQL database and user
 ynh_mysql_drop_db "$dbname" 2>/dev/null || true
 ynh_mysql_drop_user "$dbuser" 2>/dev/null || true
-mysql -u root -p$root_pwd -e "DROP DATABASE $app ; DROP USER $app@localhost ;"
 
 # Retrieve domain from app settings
 domain=$(ynh_app_setting_get "$app" domain)

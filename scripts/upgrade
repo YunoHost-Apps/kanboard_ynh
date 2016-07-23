@@ -4,6 +4,10 @@ set -eu
 
 app="kanboard"
 
+# Set app specific variables
+dbname=$app
+dbuser=$app
+
 # Source app helpers
 source /usr/share/yunohost/helpers
 
@@ -12,7 +16,7 @@ domain=$(ynh_app_setting_get "$app" domain)
 path=$(ynh_app_setting_get "$app" path)
 admin=$(ynh_app_setting_get "$app" adminusername)
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
-db_pwd=$(ynh_app_setting_get "$app"  mysqlpwd)
+dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 is_public=$(ynh_app_setting_get "$app"  is_public)
 if [ -z $is_public ]
 then	# Old version doesnt have is_public settings

@@ -19,10 +19,6 @@ dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 DESTDIR="/var/www/$app"
 ynh_backup "$DESTDIR" "www"
 
-# Copy the data directory
-DATADIR="/home/yunohost.app/${app}/data"
-ynh_backup "$DATADIR" "data" 1
-
 # Copy the conf files
 mkdir ./conf
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf" "conf/nginx.conf"
