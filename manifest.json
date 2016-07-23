@@ -4,12 +4,12 @@
     "packaging_format": 1,
     "description": {
         "en": "Kanboard is a simple visual task board web application",
-        "fr": "Kanboard est une application web de management de tâches simples" 
+        "fr": "Kanboard est une application web de management de tâches simples"
     },
     "url": "http://kanboard.net/",
     "maintainer": {
         "name": "mbugeia",
-        "email": "kanboard@mbugeia.eu"
+        "email": "maxime@max.privy.place"
     },
     "multi_instance": "false",
     "services": [

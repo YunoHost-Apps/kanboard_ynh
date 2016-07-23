@@ -1,41 +1,56 @@
 #!/bin/bash
 
-set -e
+set -eu
 
-# The parameter $1 is the backup directory location dedicated to the app
-BACKUP_DIR=$1
+app="kanboard"
 
-# The parameter $2 is the id of the app instance ex: strut__2
-APP=$2
+# Set app specific variables
+dbname=$app
+dbuser=$app
 
-# retrieve useful param
-domain=$(sudo yunohost app setting ${APP} domain)
-db_pwd=$(sudo yunohost app setting ${APP} mysqlpwd)
-path=$(sudo yunohost app setting ${APP} path)
+# Source app helpers
+source /usr/share/yunohost/helpers
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a ${APP}  \
-    || (echo "Path not available: $domain$path" && exit 1)
+# Retrieve old app settings
+domain=$(ynh_app_setting_get "$app" domain)
+path=$(ynh_app_setting_get "$app" path)
+dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 
-# Restore sources & data
-final_path=/var/www/${APP}
-sudo mkdir $final_path
-sudo cp -a ${BACKUP_DIR}/www/. $final_path
+# TODO: Check domain/path availability with app helper
+sudo yunohost app checkurl "${domain}${path}" -a "$app" \
+  || ynh_die "The path ${domain}${path} is not available for app installation."
+
+# Check destination directory
+DESTDIR="/var/www/$app"
+[[ -d $DESTDIR ]] && ynh_die \
+"The destination directory '$DESTDIR' already exists.\
+ You should safely delete it before restoring this app."
+
+# Check configuration files
+nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
+[[ -f $nginx_conf ]] && ynh_die \
+"The NGINX configuration already exists at '${nginx_conf}'.
+You should safely delete it before restoring this app."
+phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
+[[ -f $phpfpm_conf ]] && ynh_die \
+"The PHP FPM configuration already exists at '${phpfpm_conf}'.
+You should safely delete it before restoring this app."
+
+# Restore the app files
+sudo cp -a ./www "$DESTDIR"
+
+# Create and restore the database
+ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
+ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
 # Restore permissions
-sudo chown -R root:root $final_path
-sudo chown -R www-data:www-data $final_path/data
+sudo chown -R root:root "$DESTDIR"
+sudo chown -R www-data:www-data "$DESTDIR"/data
 
-# Restore conf files
-sudo cp -a "${BACKUP_DIR}/conf/${APP}.conf" /etc/nginx/conf.d/$domain.d/${APP}.conf
-sudo cp -a "${BACKUP_DIR}/conf/php-fpm.conf" /etc/php5/fpm/pool.d/${APP}.conf
+# Restore configuration files
+sudo cp -a ./conf/nginx.conf   "$nginx_conf"
+sudo cp -a ./conf/php-fpm.conf "$phpfpm_conf"
 
-# Restore mysql dump
-sudo su -c "mysql -u ${APP} -p$db_pwd ${APP} < ${BACKUP_DIR}/${APP}.dmp"
-
-# Reload Nginx, PHP5-FPM and regenerate SSOwat conf
-sudo service php5-fpm restart
-sudo service nginx reload
-sudo yunohost app ssowatconf
-
-exit 0
+# Reload services
+sudo service php5-fpm restart || true
+sudo service nginx reload || true

@@ -1,27 +1,32 @@
 #!/bin/bash
 
-set -e
+set -eu
 
-# The parameter $1 is the backup directory location dedicated to the app
-BACKUP_DIR=$1
+app="kanboard"
 
-# The parameter $2 is the id of the app instance ex: strut__2
-APP=$2
+# Set app specific variables
+dbname=$app
+dbuser=$app
 
-# retrieve useful param
-domain=$(sudo yunohost app setting ${APP} domain)
-db_pwd=$(sudo yunohost app setting ${APP} mysqlpwd)
+# Source app helpers
+source /usr/share/yunohost/helpers
 
-# Backup app files
-sudo mkdir -p "${BACKUP_DIR}/www"
-sudo cp -a /var/www/${APP}/. "${BACKUP_DIR}/www"
+# Retrieve app settings
+domain=$(ynh_app_setting_get "$app" domain)
+dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 
-# Backup conf files
-sudo mkdir -p "${BACKUP_DIR}/conf"
-sudo cp -a /etc/nginx/conf.d/$domain.d/${APP}.conf "${BACKUP_DIR}/conf/${APP}.conf"
-sudo cp -a /etc/php5/fpm/pool.d/${APP}.conf "${BACKUP_DIR}/conf/php-fpm.conf"
+# Copy the app source files
+DESTDIR="/var/www/$app"
+ynh_backup "$DESTDIR" "www"
 
-# Backup mysql
-mysqldump -u ${APP} -p$db_pwd ${APP} | sudo dd of=${BACKUP_DIR}/${APP}.dmp
+# Copy the data directory
+DATADIR="/home/yunohost.app/${app}/data"
+ynh_backup "$DATADIR" "data" 1
 
-exit 0
+# Copy the conf files
+mkdir ./conf
+ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf" "conf/nginx.conf"
+ynh_backup "/etc/php5/fpm/pool.d/${app}.conf" "conf/php-fpm.conf"
+
+# Dump the database
+mysqldump -u "$dbuser" -p"$dbpass" --no-create-db "$dbname" > ./db.sql

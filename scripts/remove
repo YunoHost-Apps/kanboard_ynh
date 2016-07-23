@@ -1,21 +1,26 @@
 #!/bin/bash
-app=kanboard
 
-# Retrieve arguments
-domain=$(sudo yunohost app setting $app domain)
-root_pwd=$(sudo cat /etc/yunohost/mysql)
+app="kanboard"
 
-# Remove sources
-sudo rm -rf /var/www/$app
+dbname=$app
+dbuser=$app
 
-# Remove database
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+# Drop MySQL database and user
+ynh_mysql_drop_db "$dbname" 2>/dev/null || true
+ynh_mysql_drop_user "$dbuser" 2>/dev/null || true
 mysql -u root -p$root_pwd -e "DROP DATABASE $app ; DROP USER $app@localhost ;"
 
-# Remove configuration files
-sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
-sudo rm -f /etc/php5/fpm/pool.d/$app.conf
+# Retrieve domain from app settings
+domain=$(ynh_app_setting_get "$app" domain)
 
-# Restart services
-sudo service php5-fpm restart
-sudo service nginx reload
-sudo yunohost app ssowatconf
+# Delete app directory and configurations
+sudo rm -rf "/var/www/${app}"
+sudo rm -f "/etc/php5/fpm/pool.d/${app}.conf"
+[[ -n $domain ]] && sudo rm -f "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+
+# Reload services
+sudo service php5-fpm restart || true
+sudo service nginx reload || true
