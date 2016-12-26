@@ -3,7 +3,6 @@ Kanboard for Yunohost
 
 Kanboard is a simple visual task board web application.
 Official website: <http://kanboard.net>
-Repport your issues here: https://dev.yunohost.org/projects/apps/issues (you don't need to create an account and you can use you github credentials if you want)
 
 Requirements
 ------------
