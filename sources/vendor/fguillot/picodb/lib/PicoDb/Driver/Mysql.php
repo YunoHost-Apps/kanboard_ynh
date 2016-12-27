@@ -183,7 +183,7 @@ class Mysql extends Base
      */
     public function getSchemaVersion()
     {
-        $this->pdo->exec("CREATE TABLE IF NOT EXISTS `".$this->schemaTable."` (`version` INT DEFAULT '0')");
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS `".$this->schemaTable."` (`version` INT DEFAULT '0') ENGINE=InnoDB CHARSET=utf8");
 
         $rq = $this->pdo->prepare('SELECT `version` FROM `'.$this->schemaTable.'`');
         $rq->execute();

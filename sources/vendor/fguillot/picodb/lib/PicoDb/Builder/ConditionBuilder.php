@@ -30,10 +30,10 @@ class ConditionBuilder
     private $values = array();
 
     /**
-     * SQL conditions
+     * SQL AND conditions
      *
      * @access private
-     * @var    array
+     * @var    string[]
      */
     private $conditions = array();
 
@@ -41,17 +41,17 @@ class ConditionBuilder
      * SQL OR conditions
      *
      * @access private
-     * @var    array
+     * @var    OrConditionBuilder[]
      */
-    private $or = array();
+    private $orConditions = array();
 
     /**
-     * OR condition started
+     * SQL condition offset
      *
      * @access private
-     * @var    boolean
+     * @var int
      */
-    private $beginOr = false;
+    private $orConditionOffset = 0;
 
     /**
      * Constructor
@@ -105,8 +105,8 @@ class ConditionBuilder
      */
     public function addCondition($sql)
     {
-        if ($this->beginOr) {
-            $this->or[] = $sql;
+        if ($this->orConditionOffset > 0) {
+            $this->orConditions[$this->orConditionOffset]->withCondition($sql);
         }
         else {
             $this->conditions[] = $sql;
@@ -120,9 +120,10 @@ class ConditionBuilder
      */
     public function beginOr()
     {
-        $this->beginOr = true;
-        $this->or = array();
+        $this->orConditionOffset++;
+        $this->orConditions[$this->orConditionOffset] = new OrConditionBuilder();
     }
+
     /**
      * Close OR condition
      *
@@ -130,10 +131,13 @@ class ConditionBuilder
      */
     public function closeOr()
     {
-        $this->beginOr = false;
+        $condition = $this->orConditions[$this->orConditionOffset]->build();
+        $this->orConditionOffset--;
 
-        if (! empty($this->or)) {
-            $this->conditions[] = '('.implode(' OR ', $this->or).')';
+        if ($this->orConditionOffset > 0) {
+            $this->orConditions[$this->orConditionOffset]->withCondition($condition);
+        } else {
+            $this->conditions[] = $condition;
         }
     }
 

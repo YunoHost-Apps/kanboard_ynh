@@ -37,6 +37,16 @@ sudo rm -rf /var/lib/php5/session/*
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
 sudo mkdir -p ${DESTDIR}
+
+# Download sources 
+sudo wget -q https://github.com/kanboard/kanboard/archive/v1.0.35.zip -O kanboard.zip
+
+# Uncompress
+sudo unzip -qq kanboard.zip -d ..
+
+# Copy sources
+sudo cp -a ../kanboard*/. ${DESTDIR}
+# Copy dependencies
 sudo cp -a ../sources/. ${DESTDIR}
 # restore data
 sudo cp -a ${DESTDIR}.old/data ${DESTDIR}
