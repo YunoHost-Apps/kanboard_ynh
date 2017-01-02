@@ -4,6 +4,9 @@ set -eu
 
 app="kanboard"
 
+# Source local helpers
+source ./_common.sh
+
 # Source app helpers
 source /usr/share/yunohost/helpers
 
@@ -42,17 +45,12 @@ ynh_app_setting_set $app mysqlpwd $dbpass
 ynh_app_setting_set $app adminusername $admin
 ynh_app_setting_set $app is_public $is_public
 
-# Download sources 
-sudo wget -q https://github.com/kanboard/kanboard/archive/v1.0.35.zip -O kanboard.zip
+# Create tmp directory and install app inside
+TMPDIR=$(ynh_mkdir_tmp)
+extract_application "$TMPDIR"
+init_composer "$TMPDIR"
 
-# Uncompress
-sudo unzip -qq kanboard.zip -d ..
-
-# Copy sources
-sudo mkdir -p $DESTDIR
-sudo cp -a ../kanboard*/. $DESTDIR
-# Copy dependencies
-sudo cp -a ../sources/. ${DESTDIR}
+sudo mv "$TMPDIR" "$DESTDIR"
 
 # Copy and edit config.php
 sudo cp ../conf/config.php ${DESTDIR}

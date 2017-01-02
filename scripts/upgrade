@@ -4,6 +4,9 @@ set -eu
 
 app="kanboard"
 
+# Source local helpers
+source ./_common.sh
+
 # Set app specific variables
 dbname=$app
 dbuser=$app
@@ -36,20 +39,16 @@ sudo rm -rf /var/lib/php5/session/*
 # Move old app dir
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
-sudo mkdir -p ${DESTDIR}
+# Create tmp directory and install app inside
+TMPDIR=$(ynh_mkdir_tmp)
+extract_application "$TMPDIR"
+init_composer "$TMPDIR"
 
-# Download sources 
-sudo wget -q https://github.com/kanboard/kanboard/archive/v1.0.35.zip -O kanboard.zip
+sudo mv "$TMPDIR" "$DESTDIR"
 
-# Uncompress
-sudo unzip -qq kanboard.zip -d ..
-
-# Copy sources
-sudo cp -a ../kanboard*/. ${DESTDIR}
-# Copy dependencies
-sudo cp -a ../sources/. ${DESTDIR}
 # restore data
 sudo cp -a ${DESTDIR}.old/data ${DESTDIR}
+
 # restore plugins
 if [ -e ${DESTDIR}.old/plugins ]
 then
