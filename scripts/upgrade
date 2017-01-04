@@ -39,11 +39,7 @@ sudo rm -rf /var/lib/php5/session/*
 # Move old app dir
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
-# Create tmp directory and install app inside
-TMPDIR=`mktemp -d`
-extract_application "$TMPDIR"
-
-sudo mv "$TMPDIR" "$DESTDIR"
+extract_application "$DESTDIR"
 
 # restore data
 sudo cp -a ${DESTDIR}.old/data ${DESTDIR}

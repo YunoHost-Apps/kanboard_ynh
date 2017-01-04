@@ -45,12 +45,7 @@ ynh_app_setting_set $app mysqlpwd $dbpass
 ynh_app_setting_set $app adminusername $admin
 ynh_app_setting_set $app is_public $is_public
 
-# Create tmp directory and install app inside
-TMPDIR=`mktemp -d`
-
-extract_application "$TMPDIR"
-
-sudo mv "$TMPDIR" "$DESTDIR"
+extract_application "$DESTDIR"
 
 # Copy and edit config.php
 sudo cp ../conf/config.php ${DESTDIR}
