@@ -40,9 +40,8 @@ sudo rm -rf /var/lib/php5/session/*
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
 # Create tmp directory and install app inside
-TMPDIR=$(ynh_mkdir_tmp)
+TMPDIR=`mktemp -d`
 extract_application "$TMPDIR"
-init_composer "$TMPDIR"
 
 sudo mv "$TMPDIR" "$DESTDIR"
 

@@ -46,9 +46,9 @@ ynh_app_setting_set $app adminusername $admin
 ynh_app_setting_set $app is_public $is_public
 
 # Create tmp directory and install app inside
-TMPDIR=$(ynh_mkdir_tmp)
+TMPDIR=`mktemp -d`
+
 extract_application "$TMPDIR"
-init_composer "$TMPDIR"
 
 sudo mv "$TMPDIR" "$DESTDIR"
 
@@ -89,6 +89,7 @@ then
 fi
 
 # Init database
+#sudo chmod o+x ${DESTDIR} ${DESTDIR}/app/ ${DESTDIR}/app/Schema/ ${DESTDIR}/app/Schema/Sql
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${DESTDIR}/app/Schema/Sql/mysql.sql
 
 # Reload services
