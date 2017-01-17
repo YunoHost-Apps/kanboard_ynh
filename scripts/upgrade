@@ -4,6 +4,9 @@ set -eu
 
 app="kanboard"
 
+# Source local helpers
+source ./_common.sh
+
 # Set app specific variables
 dbname=$app
 dbuser=$app
@@ -36,10 +39,11 @@ sudo rm -rf /var/lib/php5/session/*
 # Move old app dir
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
-sudo mkdir -p ${DESTDIR}
-sudo cp -a ../sources/. ${DESTDIR}
+extract_application "$DESTDIR"
+
 # restore data
 sudo cp -a ${DESTDIR}.old/data ${DESTDIR}
+
 # restore plugins
 if [ -e ${DESTDIR}.old/plugins ]
 then

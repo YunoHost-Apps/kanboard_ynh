@@ -4,6 +4,9 @@ set -eu
 
 app="kanboard"
 
+# Source local helpers
+source ./_common.sh
+
 # Source app helpers
 source /usr/share/yunohost/helpers
 
@@ -42,9 +45,7 @@ ynh_app_setting_set $app mysqlpwd $dbpass
 ynh_app_setting_set $app adminusername $admin
 ynh_app_setting_set $app is_public $is_public
 
-# Copy sources
-sudo mkdir -p $DESTDIR
-sudo cp -a ../sources/. $DESTDIR
+extract_application "$DESTDIR"
 
 # Copy and edit config.php
 sudo cp ../conf/config.php ${DESTDIR}
@@ -83,6 +84,7 @@ then
 fi
 
 # Init database
+#sudo chmod o+x ${DESTDIR} ${DESTDIR}/app/ ${DESTDIR}/app/Schema/ ${DESTDIR}/app/Schema/Sql
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${DESTDIR}/app/Schema/Sql/mysql.sql
 
 # Reload services
