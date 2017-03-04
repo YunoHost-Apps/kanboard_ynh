@@ -1,7 +1,7 @@
 <?php
 
-// Data folder (must be writeable by the web server user)
-define('DATA_DIR', 'data');
+// Data folder (must be writeable by the web server user and absolute)
+define('DATA_DIR', __DIR__.DIRECTORY_SEPARATOR.'data');
 
 // Enable/Disable debug
 define('DEBUG', false);
@@ -29,6 +29,9 @@ define('CACHE_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'cache');
 
 // Folder for uploaded files (must be writeable by the web server user)
 define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
+
+// Enable/disable email configuration from the user interface
+define('MAIL_CONFIGURATION', true);
 
 // E-mail address for the "From" header (notifications)
 define('MAIL_FROM', 'yuno_email');
@@ -224,6 +227,9 @@ define('HTTP_PROXY_HOSTNAME', '');
 define('HTTP_PROXY_PORT', '3128');
 define('HTTP_PROXY_USERNAME', '');
 define('HTTP_PROXY_PASSWORD', '');
+
+// Set to false to allow self-signed certificates
+define('HTTP_VERIFY_SSL_CERTIFICATE', false);
 
 // TOTP (2FA) issuer name
 define('TOTP_ISSUER', 'Kanboard');

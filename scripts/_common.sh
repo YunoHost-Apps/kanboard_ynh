@@ -3,7 +3,7 @@
 #
 
 # Application version
-VERSION="1.0.36"
+VERSION="1.0.40"
 
 # Remote URL to fetch application source archive
 APPLICATION_SOURCE_URL="https://kanboard.net/kanboard-${VERSION}.zip"

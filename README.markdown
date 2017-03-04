@@ -33,7 +33,7 @@ From command line:
 
 Infos
 -----
-Kanboard v1.0.36
+Kanboard v1.0.40
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
 
@@ -42,25 +42,21 @@ Kanboard and SSOwat
 Kanboard use SSOwat for user authentification (it means it use the user that the web server (nginx) sent him throught SSOwat), but can't list all user of the system.
 If you wish to add a user, just log in with that user into Kanboard so the software knows him and displays it.
 
-Developper infos
+Developer infos
 ----------------
 
 Please do your pull request to the dev branch.
 
-Update package:
-```
-wget http://kanboard.net/kanboard-latest.zip
-unzip kanboard-latest.zip
-rm -Rf sources
-mv kanboard sources
-```
-Then do a manual diff between `conf/config.php` and `sources/config.default.php` to see if there are new config options
+Update package version in `scripts/_common.sh`
+
+Then do a manual diff between `conf/config.php` and `config.default.php` [from upstream Kanboard project](https://github.com/kanboard/kanboard/blob/master/config.default.php) to see if there are new config options
 
 Update readme with the new version
 
 Test it
 
 Test or upgrade to dev version:
+
 ```
 su - admin
 git clone -b dev https://github.com/YunoHost-Apps/kanboard_ynh
