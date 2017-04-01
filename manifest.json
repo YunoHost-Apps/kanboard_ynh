@@ -6,6 +6,7 @@
         "en": "Kanboard is a simple visual task board web application",
         "fr": "Kanboard est une application web de management de tâches simples"
     },
+    "version": "1.0.41",
     "url": "http://kanboard.net/",
     "maintainer": {
         "name": "mbugeia",

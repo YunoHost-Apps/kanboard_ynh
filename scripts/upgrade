@@ -64,6 +64,9 @@ sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
 sudo chown -R root:root ${DESTDIR}
 sudo chown -R www-data:www-data ${DESTDIR}/data
 
+# Launch database migration
+sudo ${DESTDIR}/cli db:migrate
+
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
 sed -i "s@#USER#@${app}@g"         ../conf/php-fpm.conf
