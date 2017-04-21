@@ -62,7 +62,7 @@ sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
 
 # Set permissions to kanboard and data directory
 sudo chown -R root:root ${DESTDIR}
-sudo chown -R www-data:www-data ${DESTDIR}/data
+sudo chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Launch database migration
 sudo ${DESTDIR}/cli db:migrate
