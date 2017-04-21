@@ -45,7 +45,7 @@ ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
 # Restore permissions
 sudo chown -R root:root "$DESTDIR"
-sudo chown -R www-data:www-data "$DESTDIR"/data
+sudo chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Restore configuration files
 sudo cp -a ./conf/nginx.conf   "$nginx_conf"

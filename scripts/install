@@ -57,7 +57,7 @@ sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
 
 # Set permissions to kanboard and data directory
 sudo chown -R root:root ${DESTDIR}
-sudo chown -R www-data:www-data ${DESTDIR}/data
+sudo chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
