@@ -28,9 +28,6 @@ ynh_app_setting_set $app admin_user $admin
 # Retrieve admin email
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 
-# Installation des dépendance
-sudo apt install -y php5-gd
-
 # Check destination directory
 DESTDIR="/var/www/$app"
 [[ -d $DESTDIR ]] && ynh_die \
