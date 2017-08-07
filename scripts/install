@@ -29,7 +29,7 @@ ynh_app_setting_set $app admin_user $admin
 email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
 
 # Installation of the dependance
-sudo apt install php5-gd
+ynh_install_app_dependencies php5-gd
 
 # Check destination directory
 DESTDIR="/var/www/$app"
