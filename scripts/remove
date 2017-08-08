@@ -20,7 +20,7 @@ sudo rm -rf "/var/www/${app}"
 sudo rm -f "/etc/php5/fpm/pool.d/${app}.conf"
 [[ -n $domain ]] && sudo rm -f "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 
-ynh_remove_app_dependencies php5-gd
+ynh_remove_app_dependencies
 
 # Reload services
 sudo service php5-fpm restart || true
