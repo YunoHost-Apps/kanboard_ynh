@@ -6,7 +6,7 @@
 VERSION="1.0.41"
 
 # Remote URL to fetch application source archive
-APPLICATION_SOURCE_URL="https://kanboard.net/kanboard-${VERSION}.zip"
+APPLICATION_SOURCE_URL="https://github.com/kanboard/kanboard/releases/download/v${VERSION}/kanboard-${VERSION}.zip"
 
 #
 # Common helpers
