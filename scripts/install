@@ -18,14 +18,14 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 app=$YNH_APP_INSTANCE_NAME
 
 # Normalize the url path syntax
-path=$(ynh_normalize_url_path "$path_url")
+path_url=$(ynh_normalize_url_path "$path_url")
 
 # Check web path availability
 ynh_webpath_available "$domain" "$path_url"
 # Register (book) web path
 ynh_webpath_register "$app" "$domain" "$path_url"
 
-ynh_app_setting_set $app admin_user $admin
+ynh_app_setting_set "$app" admin_user "$admin"
 
 # Retrieve admin email
 email=$(ynh_user_get_info "$admin" mail)
@@ -34,7 +34,7 @@ email=$(ynh_user_get_info "$admin" mail)
 final_path="/var/www/$app"
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
-ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set "$app" final_path "$final_path"
 
 # Generate random password
 dbpass=$(ynh_string_random)
@@ -43,9 +43,9 @@ dbuser=$app
 
 # Initialize database and store mysql password for upgrade
 ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
-ynh_app_setting_set $app mysqlpwd $dbpass
-ynh_app_setting_set $app adminusername $admin
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set "$app" mysqlpwd "$dbpass"
+ynh_app_setting_set "$app" adminusername "$admin"
+ynh_app_setting_set "$app" is_public "$is_public"
 
 ynh_setup_source "$final_path"
 
@@ -60,8 +60,8 @@ ynh_replace_string "yuno_email"  "$email"  "$config_php"
 ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Set permissions to kanboard and data directory
-chown -R root:root ${final_path}
-chown -R www-data ${final_path}/{data,plugins}
+chown -R root:root "$final_path"
+chown -R www-data "$final_path"/{data,plugins}
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
@@ -70,8 +70,8 @@ cp ../conf/php-fpm.conf "$phpfpm_conf"
 ynh_replace_string "#POOLNAME#" "$app"        "$phpfpm_conf"
 ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
 
-chown root: $phpfpm_conf
-chmod 644 $phpfpm_conf
+chown root: "$phpfpm_conf"
+chmod 644 "$phpfpm_conf"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -80,7 +80,7 @@ chmod 644 $phpfpm_conf
 # Create a dedicated nginx config
 ynh_add_nginx_config
 
-if [ "$path_url" == "/" ]
+if [[ "$path_url" == "/" ]]
 then
 	# ynh panel is only comptable with non-root installation
 	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
@@ -99,7 +99,7 @@ then
 fi
 
 # Init database
-ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${final_path}/app/Schema/Sql/mysql.sql
+ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/Sql/mysql.sql"
 
 # Reload services
 service php5-fpm restart

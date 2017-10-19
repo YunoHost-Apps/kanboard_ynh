@@ -36,7 +36,7 @@ ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
 # Restore permissions
 chown -R root:root "$final_path"
-chown -R www-data ${final_path}/{data,plugins}
+chown -R www-data "$final_path"/{data,plugins}
 
 # Restore configuration files
 ynh_restore_file "/etc/nginx/conf.d/${domain}.d/${app}.conf"

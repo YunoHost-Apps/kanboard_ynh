@@ -12,7 +12,6 @@ ynh_abort_if_errors
 app=$YNH_APP_INSTANCE_NAME
 
 # Set app specific variables
-dbname=$app
 dbuser=$app
 
 # Source app helpers
@@ -27,34 +26,35 @@ dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 is_public=$(ynh_app_setting_get "$app"  is_public)
 final_path=$(ynh_app_setting_get "$app" final_path)
 
-if [ -z $is_public ]
+if [[ -z "$is_public" ]]
 then	# Old version doesnt have is_public settings
 	is_public=0
-	ynh_app_setting_set $app is_public $is_public
+	ynh_app_setting_set "$app" is_public "$is_public"
 fi
 
 # flush php sessions before upgrade
 ynh_secure_remove /var/lib/php5/session/*
 
 # Move old app dir
-mv ${final_path} ${final_path}.old
+mv "$final_path" "$final_path.old"
 
 ynh_setup_source "$final_path"
 
 # restore data
-cp -a ${final_path}.old/data ${final_path}
+cp -a "$final_path.old/data" "$final_path"
 
 # restore plugins
-if [ -e ${final_path}.old/plugins ]
+if [ -e "$final_path.old/plugins" ]
 then
-	cp -a ${final_path}.old/plugins ${final_path}
+	cp -a "$final_path.old/plugins" "$final_path"
 fi
 # delete temp directory
-ynh_secure_remove "${final_path}.old"
+ynh_secure_remove "$final_path.old"
 
 # Copy and edit config.php
-config_php=${final_path}/config.php
+config_php="$final_path/config.php"
 cp ../conf/config.php "$config_php"
+
 ynh_replace_string "yuno_dbpdw"  "$dbpass" "$config_php"
 ynh_replace_string "yuno_dbuser" "$dbuser" "$config_php"
 ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
@@ -62,11 +62,11 @@ ynh_replace_string "yuno_email"  "$email"  "$config_php"
 ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Set permissions to kanboard and data directory
-chown -R root:root ${final_path}
-chown -R www-data ${final_path}/{data,plugins}
+chown -R root:root "$final_path"
+chown -R www-data "$final_path"/{data,plugins}
 
 # Launch database migration
-${final_path}/cli db:migrate
+"$final_path"/cli db:migrate
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
@@ -77,12 +77,12 @@ ynh_replace_string "#GROUP#"    "$app"        "$phpfpm_conf"
 ynh_replace_string "#POOLNAME#" "$app"        "$phpfpm_conf"
 ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
 
-chown root: $phpfpm_conf
-chmod 644 $phpfpm_conf
+chown root: "$phpfpm_conf"
+chmod 644 "$phpfpm_conf"
 
 ynh_add_nginx_config
 
-if [ "$path_url" == "/" ]
+if [[ "$path_url" == "/" ]]
 then
 	# ynh panel is only comptable with non-root installation
 	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
