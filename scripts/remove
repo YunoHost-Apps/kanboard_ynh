@@ -19,10 +19,10 @@ ynh_mysql_drop_user "$dbuser" 2>/dev/null || true
 domain=$(ynh_app_setting_get "$app" domain)
 
 # Delete app directory and configurations
-sudo rm -rf "/var/www/${app}"
-sudo rm -f "/etc/php5/fpm/pool.d/${app}.conf"
-[[ -n $domain ]] && sudo rm -f "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+rm -rf "/var/www/${app}"
+rm -f "/etc/php5/fpm/pool.d/${app}.conf"
+[[ -n $domain ]] && rm -f "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 
 # Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+service php5-fpm restart || true
+service nginx reload || true

@@ -18,7 +18,7 @@ admin=$3
 is_public=$4
 
 # TODO: Check domain/path availability with app helper
-sudo yunohost app checkurl "${domain}${path}" -a "$app" \
+yunohost app checkurl "${domain}${path}" -a "$app" \
   || ynh_die "The path ${domain}${path} is not available for app installation."
 
 # Check user parameter
@@ -27,7 +27,7 @@ ynh_user_exists "$admin" \
 ynh_app_setting_set $app admin_user $admin
 
 # Retrieve admin email
-email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
+email=$(yunohost user info $admin | grep mail: | sed "s/mail: //g")
 
 # Check destination directory
 DESTDIR="/var/www/$app"
@@ -49,24 +49,24 @@ ynh_app_setting_set $app is_public $is_public
 ynh_setup_source "$DESTDIR"
 
 # Copy and edit config.php
-sudo cp ../conf/config.php ${DESTDIR}
-sudo sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
+cp ../conf/config.php ${DESTDIR}
+sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
 
 # Set permissions to kanboard and data directory
-sudo chown -R root:root ${DESTDIR}
-sudo chown -R www-data ${DESTDIR}/{data,plugins}
+chown -R root:root ${DESTDIR}
+chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
 sed -i "s@#POOLNAME#@${app}@g"     ../conf/php-fpm.conf
 sed -i "s@#DESTDIR#@${DESTDIR}/@g" ../conf/php-fpm.conf
-sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
-sudo chown root: $phpfpm_conf
-sudo chmod 644 $phpfpm_conf
+cp ../conf/php-fpm.conf "$phpfpm_conf"
+chown root: $phpfpm_conf
+chmod 644 $phpfpm_conf
 
 finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 
@@ -74,7 +74,7 @@ finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 sed -i "s@NAMETOCHANGE@${app}@g" ../conf/nginx.conf*
 sed -i "s@PATHTOCHANGE@${path}@g" ../conf/nginx.conf*
 sed -i "s@ALIASTOCHANGE@${DESTDIR}/@g" ../conf/nginx.conf*
-sudo cp ../conf/nginx.conf "$finalnginxconf"
+cp ../conf/nginx.conf "$finalnginxconf"
 
 if [ "$path" == "/" ]
 then
@@ -85,17 +85,17 @@ fi
 # Make app public or private
 if [[ "$is_public" -eq 1 ]];
 then
-	sudo yunohost app setting ${app} unprotected_uris -v "/"
-	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
+	yunohost app setting ${app} unprotected_uris -v "/"
+	sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
+	sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
+	sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
+	sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
 fi
 
 # Init database
-#sudo chmod o+x ${DESTDIR} ${DESTDIR}/app/ ${DESTDIR}/app/Schema/ ${DESTDIR}/app/Schema/Sql
+#chmod o+x ${DESTDIR} ${DESTDIR}/app/ ${DESTDIR}/app/Schema/ ${DESTDIR}/app/Schema/Sql
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${DESTDIR}/app/Schema/Sql/mysql.sql
 
 # Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+service php5-fpm restart || true
+service nginx reload || true

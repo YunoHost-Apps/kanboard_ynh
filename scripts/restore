@@ -21,7 +21,7 @@ path=$(ynh_app_setting_get "$app" path)
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 
 # TODO: Check domain/path availability with app helper
-sudo yunohost app checkurl "${domain}${path}" -a "$app" \
+yunohost app checkurl "${domain}${path}" -a "$app" \
   || ynh_die "The path ${domain}${path} is not available for app installation."
 
 # Check destination directory
@@ -41,20 +41,20 @@ phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
 You should safely delete it before restoring this app."
 
 # Restore the app files
-sudo cp -a ./www "$DESTDIR"
+cp -a ./www "$DESTDIR"
 
 # Create and restore the database
 ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
 # Restore permissions
-sudo chown -R root:root "$DESTDIR"
-sudo chown -R www-data ${DESTDIR}/{data,plugins}
+chown -R root:root "$DESTDIR"
+chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Restore configuration files
-sudo cp -a ./conf/nginx.conf   "$nginx_conf"
-sudo cp -a ./conf/php-fpm.conf "$phpfpm_conf"
+cp -a ./conf/nginx.conf   "$nginx_conf"
+cp -a ./conf/php-fpm.conf "$phpfpm_conf"
 
 # Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+service php5-fpm restart || true
+service nginx reload || true

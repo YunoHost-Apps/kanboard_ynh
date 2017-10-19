@@ -22,7 +22,7 @@ source /usr/share/yunohost/helpers
 domain=$(ynh_app_setting_get "$app" domain)
 path=$(ynh_app_setting_get "$app" path)
 admin=$(ynh_app_setting_get "$app" adminusername)
-email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
+email=$(yunohost user info $admin | grep mail: | sed "s/mail: //g")
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 is_public=$(ynh_app_setting_get "$app"  is_public)
 if [ -z $is_public ]
@@ -38,38 +38,38 @@ DESTDIR="/var/www/$app"
  The app is not correctly installed, you should remove it first."
 
 # flush php sessions before upgrade
-sudo rm -rf /var/lib/php5/session/*
+rm -rf /var/lib/php5/session/*
 
 # Move old app dir
-sudo mv ${DESTDIR} ${DESTDIR}.old
+mv ${DESTDIR} ${DESTDIR}.old
 
 ynh_setup_source "$DESTDIR"
 
 # restore data
-sudo cp -a ${DESTDIR}.old/data ${DESTDIR}
+cp -a ${DESTDIR}.old/data ${DESTDIR}
 
 # restore plugins
 if [ -e ${DESTDIR}.old/plugins ]
 then
-	sudo cp -a ${DESTDIR}.old/plugins ${DESTDIR}
+	cp -a ${DESTDIR}.old/plugins ${DESTDIR}
 fi
 # delete temp directory
-sudo rm -Rf ${DESTDIR}.old
+rm -Rf ${DESTDIR}.old
 
 # Copy and edit config.php
-sudo cp ../conf/config.php ${DESTDIR}
-sudo sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
+cp ../conf/config.php ${DESTDIR}
+sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
+sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
 
 # Set permissions to kanboard and data directory
-sudo chown -R root:root ${DESTDIR}
-sudo chown -R www-data ${DESTDIR}/{data,plugins}
+chown -R root:root ${DESTDIR}
+chown -R www-data ${DESTDIR}/{data,plugins}
 
 # Launch database migration
-sudo ${DESTDIR}/cli db:migrate
+${DESTDIR}/cli db:migrate
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
@@ -77,9 +77,9 @@ sed -i "s@#USER#@${app}@g"         ../conf/php-fpm.conf
 sed -i "s@#GROUP#@${app}@g"        ../conf/php-fpm.conf
 sed -i "s@#POOLNAME#@${app}@g"     ../conf/php-fpm.conf
 sed -i "s@#DESTDIR#@${DESTDIR}/@g" ../conf/php-fpm.conf
-sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
-sudo chown root: $phpfpm_conf
-sudo chmod 644 $phpfpm_conf
+cp ../conf/php-fpm.conf "$phpfpm_conf"
+chown root: $phpfpm_conf
+chmod 644 $phpfpm_conf
 
 finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 
@@ -87,7 +87,7 @@ finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 sed -i "s@NAMETOCHANGE@${app}@g" ../conf/nginx.conf*
 sed -i "s@PATHTOCHANGE@${path}@g" ../conf/nginx.conf*
 sed -i "s@ALIASTOCHANGE@${DESTDIR}/@g" ../conf/nginx.conf*
-sudo cp ../conf/nginx.conf "$finalnginxconf"
+cp ../conf/nginx.conf "$finalnginxconf"
 
 if [ "$path" == "/" ]
 then
@@ -98,13 +98,13 @@ fi
 # Make app public or private
 if [[ "$is_public" -eq 1 ]];
 then
-	sudo yunohost app setting ${app} unprotected_uris -v "/"
-	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
+	yunohost app setting ${app} unprotected_uris -v "/"
+	sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
+	sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
+	sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
+	sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
 fi
 
 # Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+service php5-fpm restart || true
+service nginx reload || true
