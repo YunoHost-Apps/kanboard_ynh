@@ -20,9 +20,8 @@ domain=$(ynh_app_setting_get "$app" domain)
 path=$(ynh_app_setting_get "$app" path)
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 
-# TODO: Check domain/path availability with app helper
-yunohost app checkurl "${domain}${path}" -a "$app" \
-  || ynh_die "The path ${domain}${path} is not available for app installation."
+# Check web path availability
+ynh_webpath_available "$domain" "$path_url"
 
 # Check destination directory
 DESTDIR="/var/www/$app"
