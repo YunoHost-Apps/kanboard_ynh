@@ -1,7 +1,5 @@
 #!/bin/bash
 
-app="kanboard"
-
 # Source local helpers
 source ./_common.sh
 
@@ -12,10 +10,12 @@ source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 
 # Retrieve arguments
-domain=$1
-path=$2
-admin=$3
-is_public=$4
+domain=$YNH_APP_ARG_DOMAIN
+path=$YNH_APP_ARG_PATH
+admin=$YNH_APP_ARG_ADMIN
+is_public=$YNH_APP_ARG_IS_PUBLIC
+
+app=$YNH_APP_INSTANCE_NAME
 
 # TODO: Check domain/path availability with app helper
 yunohost app checkurl "${domain}${path}" -a "$app" \

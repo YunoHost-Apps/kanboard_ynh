@@ -6,7 +6,7 @@ source ./_common.sh
 # Source app helpers
 source /usr/share/yunohost/helpers
 
-app="kanboard"
+app=$YNH_APP_INSTANCE_NAME
 
 dbname=$app
 dbuser=$app

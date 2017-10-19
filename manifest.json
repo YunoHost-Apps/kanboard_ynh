@@ -15,7 +15,7 @@
     "name": "mbugeia",
     "email": "maxime@max.privy.place"
   },
-  "multi_instance": false,
+  "multi_instance": true,
   "services": [
     "nginx",
     "php5-fpm",

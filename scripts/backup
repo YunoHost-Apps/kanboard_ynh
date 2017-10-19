@@ -13,7 +13,7 @@ source /usr/share/yunohost/helpers
 # Abort script if errors
 ynh_abort_if_errors
 
-app="kanboard"
+app=$YNH_APP_INSTANCE_NAME
 
 # Set app specific variables
 dbname=$app
