@@ -22,72 +22,71 @@ source /usr/share/yunohost/helpers
 domain=$(ynh_app_setting_get "$app" domain)
 path=$(ynh_app_setting_get "$app" path)
 admin=$(ynh_app_setting_get "$app" adminusername)
-email=$(yunohost user info $admin | grep mail: | sed "s/mail: //g")
+email=$(ynh_user_get_info "$admin" mail)
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 is_public=$(ynh_app_setting_get "$app"  is_public)
+final_path=$(ynh_app_setting_get "$app" final_path)
+
 if [ -z $is_public ]
 then	# Old version doesnt have is_public settings
 	is_public=0
 	ynh_app_setting_set $app is_public $is_public
 fi
 
-# Check destination directory
-DESTDIR="/var/www/$app"
-[[ ! -d $DESTDIR ]] && ynh_die \
-"The destination directory '$DESTDIR' does not exist.\
- The app is not correctly installed, you should remove it first."
-
 # flush php sessions before upgrade
-rm -rf /var/lib/php5/session/*
+ynh_secure_remove /var/lib/php5/session/*
 
 # Move old app dir
-mv ${DESTDIR} ${DESTDIR}.old
+mv ${final_path} ${final_path}.old
 
-ynh_setup_source "$DESTDIR"
+ynh_setup_source "$final_path"
 
 # restore data
-cp -a ${DESTDIR}.old/data ${DESTDIR}
+cp -a ${final_path}.old/data ${final_path}
 
 # restore plugins
-if [ -e ${DESTDIR}.old/plugins ]
+if [ -e ${final_path}.old/plugins ]
 then
-	cp -a ${DESTDIR}.old/plugins ${DESTDIR}
+	cp -a ${final_path}.old/plugins ${final_path}
 fi
 # delete temp directory
-rm -Rf ${DESTDIR}.old
+ynh_secure_remove "${final_path}.old"
 
 # Copy and edit config.php
-cp ../conf/config.php ${DESTDIR}
-sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
-sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
-sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
-sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
-sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
+config_php=${final_path}/config.php
+cp ../conf/config.php "$config_php"
+ynh_replace_string "yuno_dbpdw"  "$dbpass" "$config_php"
+ynh_replace_string "yuno_dbuser" "$dbuser" "$config_php"
+ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
+ynh_replace_string "yuno_email"  "$email"  "$config_php"
+ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Set permissions to kanboard and data directory
-chown -R root:root ${DESTDIR}
-chown -R www-data ${DESTDIR}/{data,plugins}
+chown -R root:root ${final_path}
+chown -R www-data ${final_path}/{data,plugins}
 
 # Launch database migration
-${DESTDIR}/cli db:migrate
+${final_path}/cli db:migrate
 
 # Copy and set php-fpm configuration
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
-sed -i "s@#USER#@${app}@g"         ../conf/php-fpm.conf
-sed -i "s@#GROUP#@${app}@g"        ../conf/php-fpm.conf
-sed -i "s@#POOLNAME#@${app}@g"     ../conf/php-fpm.conf
-sed -i "s@#DESTDIR#@${DESTDIR}/@g" ../conf/php-fpm.conf
 cp ../conf/php-fpm.conf "$phpfpm_conf"
+
+ynh_replace_string "#USER#"     "$app"        "$phpfpm_conf"
+ynh_replace_string "#GROUP#"    "$app"        "$phpfpm_conf"
+ynh_replace_string "#POOLNAME#" "$app"        "$phpfpm_conf"
+ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
+
 chown root: $phpfpm_conf
 chmod 644 $phpfpm_conf
 
 finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
+cp ../conf/nginx.conf "$finalnginxconf"
 
 # Modify Nginx configuration file and copy it to Nginx conf directory
-sed -i "s@NAMETOCHANGE@${app}@g" ../conf/nginx.conf*
-sed -i "s@PATHTOCHANGE@${path}@g" ../conf/nginx.conf*
-sed -i "s@ALIASTOCHANGE@${DESTDIR}/@g" ../conf/nginx.conf*
-cp ../conf/nginx.conf "$finalnginxconf"
+ynh_replace_string "NAMETOCHANGE"  "${app}"        "$finalnginxconf"
+ynh_replace_string "PATHTOCHANGE"  "${path}"       "$finalnginxconf"
+ynh_replace_string "ALIASTOCHANGE" "${final_path}" "$finalnginxconf"
 
 if [ "$path" == "/" ]
 then
@@ -98,11 +97,11 @@ fi
 # Make app public or private
 if [[ "$is_public" -eq 1 ]];
 then
-	yunohost app setting ${app} unprotected_uris -v "/"
-	sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
-	sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
-	sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
-	sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
+	ynh_app_setting_set "$app" unprotected_uris "/"
+	ynh_replace_string "define('LDAP_AUTH'.*$"        "define('LDAP_AUTH', true);"        "$config_php"
+	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
+	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
+	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
 fi
 
 # Reload services

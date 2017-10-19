@@ -22,15 +22,14 @@ dbuser=$app
 # Retrieve app settings
 domain=$(ynh_app_setting_get "$app" domain)
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
+final_path=$(ynh_app_setting_get "$app" final_path)
 
 # Copy the app source files
-DESTDIR="/var/www/$app"
-ynh_backup "$DESTDIR" "www"
+ynh_backup "$final_path" > ./db.sql
 
 # Copy the conf files
-mkdir ./conf
-ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf" "conf/nginx.conf"
-ynh_backup "/etc/php5/fpm/pool.d/${app}.conf" "conf/php-fpm.conf"
+ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+ynh_backup "/etc/php5/fpm/pool.d/${app}.conf"
 
 # Dump the database
-mysqldump -u "$dbuser" -p"$dbpass" --no-create-db "$dbname" > ./db.sql
+ynh_mysql_dump_db "$dbname"
