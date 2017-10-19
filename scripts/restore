@@ -43,5 +43,5 @@ ynh_restore_file "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 ynh_restore_file "/etc/php5/fpm/pool.d/${app}.conf"
 
 # Reload services
-service php5-fpm restart || true
-service nginx reload || true
+service php5-fpm restart
+service nginx reload

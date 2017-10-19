@@ -102,5 +102,5 @@ fi
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${final_path}/app/Schema/Sql/mysql.sql
 
 # Reload services
-service php5-fpm restart || true
-service nginx reload || true
+service php5-fpm restart
+service nginx reload

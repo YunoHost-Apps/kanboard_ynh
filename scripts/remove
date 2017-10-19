@@ -12,8 +12,8 @@ dbname=$app
 dbuser=$app
 
 # Drop MySQL database and user
-ynh_mysql_drop_db "$dbname" 2>/dev/null || true
-ynh_mysql_drop_user "$dbuser" 2>/dev/null || true
+ynh_mysql_drop_db "$dbname"
+ynh_mysql_drop_user "$dbuser"
 
 # Retrieve domain from app settings
 domain=$(ynh_app_setting_get "$app" domain)
@@ -24,5 +24,5 @@ ynh_secure_remove "/etc/php5/fpm/pool.d/${app}.conf"
 ynh_secure_remove "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 
 # Reload services
-service php5-fpm restart || true
-service nginx reload || true
+service php5-fpm restart
+service nginx reload

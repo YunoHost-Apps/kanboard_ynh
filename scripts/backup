@@ -25,11 +25,11 @@ dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 final_path=$(ynh_app_setting_get "$app" final_path)
 
 # Copy the app source files
-ynh_backup "$final_path" > ./db.sql
+ynh_backup "$final_path"
 
 # Copy the conf files
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 ynh_backup "/etc/php5/fpm/pool.d/${app}.conf"
 
 # Dump the database
-ynh_mysql_dump_db "$dbname"
+ynh_mysql_dump_db "$dbname" > ./db.sql

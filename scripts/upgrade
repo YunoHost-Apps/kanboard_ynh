@@ -101,5 +101,5 @@ then
 fi
 
 # Reload services
-service php5-fpm restart || true
-service nginx reload || true
+service php5-fpm restart
+service nginx reload
