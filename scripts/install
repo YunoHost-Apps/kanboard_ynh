@@ -11,19 +11,19 @@ ynh_abort_if_errors
 
 # Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
-path=$YNH_APP_ARG_PATH
+path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 
 app=$YNH_APP_INSTANCE_NAME
 
 # Normalize the url path syntax
-path=$(ynh_normalize_url_path "$path")
+path=$(ynh_normalize_url_path "$path_url")
 
 # Check web path availability
-ynh_webpath_available "$domain" "$path"
+ynh_webpath_available "$domain" "$path_url"
 # Register (book) web path
-ynh_webpath_register "$app" "$domain" "$path"
+ynh_webpath_register "$app" "$domain" "$path_url"
 
 ynh_app_setting_set $app admin_user $admin
 
@@ -73,18 +73,19 @@ ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
 chown root: $phpfpm_conf
 chmod 644 $phpfpm_conf
 
-finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
-cp ../conf/nginx.conf "$finalnginxconf"
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
 
-# Modify Nginx configuration file and copy it to Nginx conf directory
-ynh_replace_string "NAMETOCHANGE"  "$app"        "$finalnginxconf"
-ynh_replace_string "PATHTOCHANGE"  "$path"       "$finalnginxconf"
-ynh_replace_string "ALIASTOCHANGE" "$final_path" "$finalnginxconf"
+# Create a dedicated nginx config
+ynh_add_nginx_config
 
-if [ "$path" == "/" ]
+if [ "$path_url" == "/" ]
 then
 	# ynh panel is only comptable with non-root installation
 	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
+
+	ynh_store_file_checksum "$finalnginxconf"
 fi
 
 # Make app public or private
