@@ -1,62 +1,61 @@
 {
-    "name": "Kanboard",
-    "id": "kanboard",
-    "packaging_format": 1,
-    "description": {
-        "en": "Kanboard is a simple visual task board web application",
-        "fr": "Kanboard est une application web de management de tâches simples"
-    },
-    "version": "1.0.41",
-    "url": "http://kanboard.net/",
-    "maintainer": {
-        "name": "mbugeia",
-        "email": "maxime@max.privy.place"
-    },
-    "multi_instance": "false",
-    "services": [
-        "nginx",
-        "php5-fpm",
-        "mysql"
-    ],
-    "arguments": {
-        "install" : [
-            {
-                "name": "domain",
-                "ask": {
-                    "en": "Choose a domain for Kanboard",
-                    "fr": "Choisissez un domaine pour Kanboard"
-                },
-                "example": "domain.org",
-                "type": "domain"
-            },
-            {
-                "name": "path",
-                "ask": {
-                    "en": "Choose a path for Kanboard",
-                    "fr": "Choisissez un chemin pour Kanboard"
-                },
-                "type": "path",
-                "example": "/kanboard",
-                "default": "/kanboard"
-            },
-			{
-			   "name": "admin",
-                "ask": {
-                    "en": "Choose the admin user for Kanboard",
-                    "fr": "Choisissez l'administrateur de Kanboard"
-                },
-                "type": "user",
-                "example": "johndoe"
-            },
-			{
-				"name": "is_public",
-				"ask": {
-					"en": "Is it a public site ?",
-					"fr": "Est-ce un site public ?"
-				},
-				"choices": ["Yes", "No"],
-				"default": "No"
-			}
-        ]
-    }
+  "name": "Kanboard",
+  "id": "kanboard",
+  "packaging_format": 1,
+  "description": {
+    "en": "Kanboard is a simple visual task board web application"
+  },
+  "version": "1.0.41",
+  "url": "https://kanboard.net/",
+  "license": "AGPL-3.0",
+  "requirements": {
+		"yunohost": ">= 2.7.0"
+  },
+  "maintainer": {
+    "name": "mbugeia",
+    "email": "maxime@max.privy.place"
+  },
+  "multi_instance": false,
+  "services": [
+    "nginx",
+    "php5-fpm",
+    "mysql"
+  ],
+  "arguments": {
+    "install": [
+      {
+        "name": "domain",
+        "ask": {
+          "en": "Choose a domain for Kanboard"
+        },
+        "example": "domain.org",
+        "type": "domain"
+      },
+      {
+        "name": "path",
+        "ask": {
+          "en": "Choose a path for Kanboard"
+        },
+        "type": "path",
+        "example": "/kanboard",
+        "default": "/kanboard"
+      },
+      {
+        "name": "admin",
+        "ask": {
+          "en": "Choose the admin user for Kanboard"
+        },
+        "type": "user",
+        "example": "johndoe"
+      },
+      {
+        "name": "is_public",
+        "ask": {
+          "en": "Is it a public site ?"
+        },
+        "type": "boolean",
+        "default": "0"
+      }
+    ]
+  }
 }

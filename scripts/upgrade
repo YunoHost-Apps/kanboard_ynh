@@ -1,11 +1,15 @@
 #!/bin/bash
 
-set -eu
-
-app="kanboard"
-
 # Source local helpers
 source ./_common.sh
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+# Abort script if errors
+ynh_abort_if_errors
+
+app="kanboard"
 
 # Set app specific variables
 dbname=$app
@@ -23,7 +27,7 @@ dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 is_public=$(ynh_app_setting_get "$app"  is_public)
 if [ -z $is_public ]
 then	# Old version doesnt have is_public settings
-	is_public=No
+	is_public=0
 	ynh_app_setting_set $app is_public $is_public
 fi
 
@@ -77,14 +81,22 @@ sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
 sudo chown root: $phpfpm_conf
 sudo chmod 644 $phpfpm_conf
 
+finalnginxconf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
+
 # Modify Nginx configuration file and copy it to Nginx conf directory
 sed -i "s@NAMETOCHANGE@${app}@g" ../conf/nginx.conf*
 sed -i "s@PATHTOCHANGE@${path}@g" ../conf/nginx.conf*
 sed -i "s@ALIASTOCHANGE@${DESTDIR}/@g" ../conf/nginx.conf*
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/${domain}.d/${app}.conf
+sudo cp ../conf/nginx.conf "$finalnginxconf"
+
+if [ "$path" == "/" ]
+then
+	# ynh panel is only comptable with non-root installation
+	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
+fi
 
 # Make app public or private
-if [ "$is_public" = "Yes" ];
+if [[ "$is_public" -eq 1 ]];
 then
 	sudo yunohost app setting ${app} unprotected_uris -v "/"
 	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php

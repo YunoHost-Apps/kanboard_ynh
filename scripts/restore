@@ -1,15 +1,19 @@
 #!/bin/bash
 
-set -eu
+# Source local helpers
+source ./_common.sh
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+# Abort script if errors
+ynh_abort_if_errors
 
 app="kanboard"
 
 # Set app specific variables
 dbname=$app
 dbuser=$app
-
-# Source app helpers
-source /usr/share/yunohost/helpers
 
 # Retrieve old app settings
 domain=$(ynh_app_setting_get "$app" domain)

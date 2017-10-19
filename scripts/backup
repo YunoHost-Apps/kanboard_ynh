@@ -1,15 +1,23 @@
 #!/bin/bash
 
-set -eu
+# Source local helpers
+if [ ! -e _common.sh ]; then
+	# Get the _common.sh file if it's not in the current directory
+	cp ../settings/scripts/_common.sh ./_common.sh
+	chmod a+rx _common.sh
+fi
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+# Abort script if errors
+ynh_abort_if_errors
 
 app="kanboard"
 
 # Set app specific variables
 dbname=$app
 dbuser=$app
-
-# Source app helpers
-source /usr/share/yunohost/helpers
 
 # Retrieve app settings
 domain=$(ynh_app_setting_get "$app" domain)

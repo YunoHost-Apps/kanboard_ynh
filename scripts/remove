@@ -1,12 +1,15 @@
 #!/bin/bash
 
+# Source local helpers
+source ./_common.sh
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
 app="kanboard"
 
 dbname=$app
 dbuser=$app
-
-# Source app helpers
-source /usr/share/yunohost/helpers
 
 # Drop MySQL database and user
 ynh_mysql_drop_db "$dbname" 2>/dev/null || true
