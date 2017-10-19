@@ -45,7 +45,7 @@ ynh_app_setting_set $app mysqlpwd $dbpass
 ynh_app_setting_set $app adminusername $admin
 ynh_app_setting_set $app is_public $is_public
 
-extract_application "$DESTDIR"
+ynh_setup_source "$DESTDIR"
 
 # Copy and edit config.php
 sudo cp ../conf/config.php ${DESTDIR}

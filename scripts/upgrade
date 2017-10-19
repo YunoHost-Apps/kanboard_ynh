@@ -39,7 +39,7 @@ sudo rm -rf /var/lib/php5/session/*
 # Move old app dir
 sudo mv ${DESTDIR} ${DESTDIR}.old
 
-extract_application "$DESTDIR"
+ynh_setup_source "$DESTDIR"
 
 # restore data
 sudo cp -a ${DESTDIR}.old/data ${DESTDIR}
