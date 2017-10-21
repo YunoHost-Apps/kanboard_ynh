@@ -1,13 +1,24 @@
 #!/bin/bash
 
-# Source local helpers
-source ./_common.sh
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers
+source _common.sh
 source /usr/share/yunohost/helpers
 
-# Abort script if errors
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
 
 # Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
@@ -17,6 +28,14 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 
 app=$YNH_APP_INSTANCE_NAME
 
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
+
+# Check destination directory
+final_path="/var/www/$app"
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
+
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path "$path_url")
 
@@ -25,16 +44,24 @@ ynh_webpath_available "$domain" "$path_url"
 # Register (book) web path
 ynh_webpath_register "$app" "$domain" "$path_url"
 
-ynh_app_setting_set "$app" admin_user "$admin"
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
 
-# Retrieve admin email
-email=$(ynh_user_get_info "$admin" mail)
-
-# Check destination directory
-final_path="/var/www/$app"
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
-
+ynh_app_setting_set "$app" domain "$domain"
 ynh_app_setting_set "$app" final_path "$final_path"
+ynh_app_setting_set "$app" adminusername "$admin"
+ynh_app_setting_set "$app" is_public "$is_public"
+
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+
+
+#=================================================
+# CREATE A MYSQL DATABASE
+#================================================
 
 # Generate random password
 dbpass=$(ynh_string_random)
@@ -44,10 +71,40 @@ dbuser=$app
 # Initialize database and store mysql password for upgrade
 ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 ynh_app_setting_set "$app" mysqlpwd "$dbpass"
-ynh_app_setting_set "$app" adminusername "$admin"
-ynh_app_setting_set "$app" is_public "$is_public"
 
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
+# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+
+
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_add_fpm_config
+
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# Create config.php
+#=================================================
+
+# Retrieve admin email
+email=$(ynh_user_get_info "$admin" mail)
 
 # Copy and edit config.php
 config_php="${final_path}/config.php"
@@ -59,26 +116,26 @@ ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
 ynh_replace_string "yuno_email"  "$email"  "$config_php"
 ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
+#=================================================
+# Database initialization
+#=================================================
+
+# Init database
+ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/Sql/mysql.sql"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#================================================
+
 # Set permissions to kanboard and data directory
 chown -R root:root "$final_path"
 chown -R www-data "$final_path"/{data,plugins}
 
-# Copy and set php-fpm configuration
-phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
-
-cp ../conf/php-fpm.conf "$phpfpm_conf"
-ynh_replace_string "#POOLNAME#" "$app"        "$phpfpm_conf"
-ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
-
-chown root: "$phpfpm_conf"
-chmod 644 "$phpfpm_conf"
-
 #=================================================
-# NGINX CONFIGURATION
+# SETUP SSOWAT
 #=================================================
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
 
 if [[ "$path_url" == "/" ]]
 then
@@ -98,8 +155,9 @@ then
 	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
 fi
 
-# Init database
-ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/Sql/mysql.sql"
+#=================================================
+# RELOAD NGINX & PHP5-FPM
+#=================================================
 
 # Reload services
 service php5-fpm restart

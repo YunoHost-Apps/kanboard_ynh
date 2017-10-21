@@ -1,21 +1,29 @@
 #!/bin/bash
 
-# Source local helpers
-source ./_common.sh
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers
+source _common.sh
 source /usr/share/yunohost/helpers
 
-# Abort script if errors
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
 
 app=$YNH_APP_INSTANCE_NAME
 
 # Set app specific variables
 dbuser=$app
-
-# Source app helpers
-source /usr/share/yunohost/helpers
 
 # Retrieve settings
 domain=$(ynh_app_setting_get "$app" domain)
@@ -32,8 +40,18 @@ then	# Old version doesnt have is_public settings
 	ynh_app_setting_set "$app" is_public "$is_public"
 fi
 
-# flush php sessions before upgrade
-ynh_secure_remove /var/lib/php5/session/*
+#=================================================
+# CHECK THE PATH
+#=================================================
+
+# Normalize the URL path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
 
 # Move old app dir
 mv "$final_path" "$final_path.old"
@@ -51,6 +69,30 @@ fi
 # delete temp directory
 ynh_secure_remove "$final_path.old"
 
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
+
+
+# flush php sessions before upgrade
+ynh_secure_remove /var/lib/php5/session/*
+
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+
+# Create a dedicated php-fpm config
+ynh_add_fpm_config
+
+#=================================================
+# SPECIFIC UPGRADE
+#=================================================
+# Create config.php
+#=================================================
+
 # Copy and edit config.php
 config_php="$final_path/config.php"
 cp ../conf/config.php "$config_php"
@@ -61,26 +103,26 @@ ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
 ynh_replace_string "yuno_email"  "$email"  "$config_php"
 ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
-# Set permissions to kanboard and data directory
-chown -R root:root "$final_path"
-chown -R www-data "$final_path"/{data,plugins}
+#=================================================
+# Database initialization
+#=================================================
 
 # Launch database migration
 "$final_path"/cli db:migrate
 
-# Copy and set php-fpm configuration
-phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
-cp ../conf/php-fpm.conf "$phpfpm_conf"
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
 
-ynh_replace_string "#USER#"     "$app"        "$phpfpm_conf"
-ynh_replace_string "#GROUP#"    "$app"        "$phpfpm_conf"
-ynh_replace_string "#POOLNAME#" "$app"        "$phpfpm_conf"
-ynh_replace_string "#DESTDIR#"  "$final_path" "$phpfpm_conf"
+# Set permissions to kanboard and data directory
+chown -R root:root "$final_path"
+chown -R www-data "$final_path"/{data,plugins}
 
-chown root: "$phpfpm_conf"
-chmod 644 "$phpfpm_conf"
-
-ynh_add_nginx_config
+#=================================================
+# SETUP SSOWAT
+#=================================================
 
 if [[ "$path_url" == "/" ]]
 then
@@ -100,6 +142,9 @@ then
 	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
 fi
 
-# Reload services
+#=================================================
+# RELOAD NGINX
+#=================================================
+
 service php5-fpm restart
-service nginx reload
+systemctl reload nginx

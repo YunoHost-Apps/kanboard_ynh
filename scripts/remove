@@ -1,28 +1,48 @@
 #!/bin/bash
 
-# Source local helpers
-source ./_common.sh
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers
+source _common.sh
 source /usr/share/yunohost/helpers
 
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
 app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get "$app" domain)
+final_path=$(ynh_app_setting_get "$app" final_path)
 
 dbname=$app
 dbuser=$app
 
-# Drop MySQL database and user
-ynh_mysql_drop_db "$dbname"
-ynh_mysql_drop_user "$dbuser"
+#=================================================
+# REMOVE THE MYSQL DATABASE
+#=================================================
 
-# Retrieve domain from app settings
-domain=$(ynh_app_setting_get "$app" domain)
+# Remove a database if it exists, along with the associated user
+ynh_mysql_remove_db "$dbuser" "$dbname"
 
-# Delete app directory and configurations
-ynh_secure_remove "/var/www/${app}"
-ynh_secure_remove "/etc/php5/fpm/pool.d/${app}.conf"
-ynh_secure_remove "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
 
-# Reload services
-service php5-fpm restart
-service nginx reload
+ynh_secure_remove "$final_path"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# REMOVE PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_remove_fpm_config

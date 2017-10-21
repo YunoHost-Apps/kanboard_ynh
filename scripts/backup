@@ -1,17 +1,29 @@
 #!/bin/bash
 
-# Source local helpers
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
 if [ ! -e _common.sh ]; then
 	# Get the _common.sh file if it's not in the current directory
 	cp ../settings/scripts/_common.sh ./_common.sh
 	chmod a+rx _common.sh
 fi
-
-# Source app helpers
+source _common.sh
 source /usr/share/yunohost/helpers
 
-# Abort script if errors
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -22,12 +34,29 @@ dbname=$app
 domain=$(ynh_app_setting_get "$app" domain)
 final_path=$(ynh_app_setting_get "$app" final_path)
 
+#=================================================
+# STANDARD BACKUP STEPS
+#=================================================
+# BACKUP THE APP MAIN DIR
+#=================================================
+
 # Copy the app source files
 ynh_backup "$final_path"
 
-# Copy the conf files
+#=================================================
+# BACKUP THE NGINX CONFIGURATION
+#=================================================
+
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+
+#=================================================
+# BACKUP THE PHP-FPM CONFIGURATION
+#=================================================
+
 ynh_backup "/etc/php5/fpm/pool.d/${app}.conf"
 
-# Dump the database
+#=================================================
+# BACKUP THE MYSQL DATABASE
+#=================================================
+
 ynh_mysql_dump_db "$dbname" > ./db.sql

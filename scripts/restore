@@ -1,13 +1,30 @@
 #!/bin/bash
 
-# Source local helpers
-source ./_common.sh
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers
+if [ ! -e _common.sh ]; then
+	# Get the _common.sh file if it's not in the current directory
+	cp ../settings/scripts/_common.sh ./_common.sh
+	chmod a+rx _common.sh
+fi
+source _common.sh
 source /usr/share/yunohost/helpers
 
-# Abort script if errors
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -21,27 +38,56 @@ path_url=$(ynh_app_setting_get "$app" path)
 dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 final_path=$(ynh_app_setting_get "$app" final_path)
 
-# Check web path availability
-ynh_webpath_available "$domain" "$path_url"
+#=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
 
-# Check destination directory
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
+ynh_webpath_available $domain $path_url \
+	|| ynh_die "Path not available: ${domain}${path_url}"
+
+test ! -d $final_path \
+|| ynh_die "There is already a directory: $final_path "
+
+#=================================================
+# STANDARD RESTORATION STEPS
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
 
 # Restore the app files
 ynh_restore_file "$final_path"
 
-# Create and restore the database
-ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
+#=================================================
+# RESTORE THE MYSQL DATABASE
+#=================================================
+
+ynh_mysql_setup_db "$dbuser" "$dbname" "$dbpass"
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
-# Restore permissions
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
+
 chown -R root:root "$final_path"
 chown -R www-data "$final_path"/{data,plugins}
 
-# Restore configuration files
-ynh_restore_file "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+#=================================================
+# RESTORE THE PHP-FPM CONFIGURATION
+#=================================================
+
 ynh_restore_file "/etc/php5/fpm/pool.d/${app}.conf"
 
-# Reload services
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# RELOAD NGINX AND PHP-FPM
+#=================================================
+
 service php5-fpm restart
 service nginx reload
