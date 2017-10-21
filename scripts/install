@@ -89,7 +89,8 @@ ynh_add_nginx_config
 # CREATE DEDICATED USER
 #=================================================
 
-
+# Create a system user
+ynh_system_user_create "$app"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -131,7 +132,7 @@ ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/S
 
 # Set permissions to kanboard and data directory
 chown -R root:root "$final_path"
-chown -R www-data "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins}
 
 #=================================================
 # SETUP SSOWAT

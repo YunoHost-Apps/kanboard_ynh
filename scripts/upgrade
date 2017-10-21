@@ -76,6 +76,12 @@ ynh_secure_remove "$final_path.old"
 # Create a dedicated nginx config
 ynh_add_nginx_config
 
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create "$app"
 
 # flush php sessions before upgrade
 ynh_secure_remove /var/lib/php5/session/*
@@ -118,7 +124,7 @@ ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Set permissions to kanboard and data directory
 chown -R root:root "$final_path"
-chown -R www-data "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins}
 
 #=================================================
 # SETUP SSOWAT

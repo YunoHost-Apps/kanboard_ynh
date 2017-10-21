@@ -71,11 +71,18 @@ ynh_mysql_setup_db "$dbuser" "$dbname" "$dbpass"
 ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ./db.sql
 
 #=================================================
+# RECREATE THE DEDICATED USER
+#=================================================
+
+# Create the dedicated user (if not existing)
+ynh_system_user_create "$app"
+
+#=================================================
 # RESTORE USER RIGHTS
 #=================================================
 
 chown -R root:root "$final_path"
-chown -R www-data "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins}
 
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
