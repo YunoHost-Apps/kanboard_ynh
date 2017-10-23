@@ -51,6 +51,13 @@ test ! -d $final_path \
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
+# REINSTALL DEPENDENCIES
+#=================================================
+
+# Define and install dependencies
+ynh_install_app_dependencies php5-gd
+
+#=================================================
 # RESTORE THE NGINX CONFIGURATION
 #=================================================
 
