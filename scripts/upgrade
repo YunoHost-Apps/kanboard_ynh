@@ -40,6 +40,22 @@ then	# Old version doesnt have is_public settings
 	ynh_app_setting_set "$app" is_public "$is_public"
 fi
 
+# Fix is_public as a boolean value
+if [ "$is_public" = "Yes" ]; then
+	ynh_app_setting_set "$app" is_public 1
+	is_public=1
+elif [ "$is_public" = "No" ]; then
+	ynh_app_setting_set "$app" is_public 0
+	is_public=0
+fi
+
+# If final_path doesn't exist, create it
+if [[ -z "$final_path" ]]
+then
+	final_path="/var/www/$app"
+	ynh_app_setting_set "$app" final_path "$final_path"
+fi
+
 #=================================================
 # CHECK THE PATH
 #=================================================
