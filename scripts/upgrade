@@ -140,6 +140,8 @@ ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Launch database migration
 "$final_path"/cli db:migrate
+# Launch database migration
+"$final_path"/cli plugin:upgrade
 
 #=================================================
 # GENERIC FINALIZATION
