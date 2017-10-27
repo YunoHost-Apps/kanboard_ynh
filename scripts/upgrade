@@ -109,7 +109,7 @@ ynh_add_nginx_config
 ynh_system_user_create "$app"
 
 # flush php sessions before upgrade
-ynh_secure_remove /var/lib/php5/session/*
+/usr/lib/php5/sessionclean
 
 #=================================================
 # PHP-FPM CONFIGURATION
