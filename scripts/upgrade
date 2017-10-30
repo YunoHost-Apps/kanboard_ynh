@@ -82,6 +82,7 @@ ynh_abort_if_errors
 mv "$final_path" "$final_path.old"
 
 ynh_setup_source "$final_path"
+mkdir -p "$final_path"/sessions
 
 # restore data
 cp -a "$final_path.old/data" "$final_path"
@@ -107,9 +108,6 @@ ynh_add_nginx_config
 
 # Create a system user
 ynh_system_user_create "$app"
-
-# flush php sessions before upgrade
-/usr/lib/php5/sessionclean
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -138,10 +136,13 @@ ynh_replace_string "yuno_domain" "$domain" "$config_php"
 # Database initialization
 #=================================================
 
-# Launch database migration
-"$final_path"/cli db:migrate
-# Launch database migration
-"$final_path"/cli plugin:upgrade
+(
+        cd "$final_path"
+        # Launch database migratio
+        php cli db:migrate --no-interaction --verbose
+        # Launch plugins migration
+        php cli plugin:upgrade --no-interaction --verbose
+)
 
 #=================================================
 # GENERIC FINALIZATION
@@ -151,7 +152,8 @@ ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
 # Set permissions to kanboard and data directory
 chown -R root:root "$final_path"
-chown -R "$app" "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins,sessions}
+chmod -R 700 "$final_path"/sessions
 
 #=================================================
 # SETUP SSOWAT

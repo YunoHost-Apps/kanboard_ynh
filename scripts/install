@@ -83,6 +83,7 @@ ynh_app_setting_set "$app" mysqlpwd "$dbpass"
 
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
+mkdir -p "$final_path"/sessions/
 
 #=================================================
 # NGINX CONFIGURATION
@@ -137,7 +138,8 @@ ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/S
 
 # Set permissions to kanboard and data directory
 chown -R root:root "$final_path"
-chown -R "$app" "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins,sessions}
+chmod -R 700 "$final_path"/sessions
 
 #=================================================
 # SETUP SSOWAT
