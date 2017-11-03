@@ -1,38 +1,72 @@
 #!/bin/bash
 
-set -eu
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-app="kanboard"
-
-# Source local helpers
-source ./_common.sh
-
-# Source app helpers
+source _common.sh
 source /usr/share/yunohost/helpers
 
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
 # Retrieve arguments
-domain=$1
-path=$2
-admin=$3
-is_public=$4
+domain=$YNH_APP_ARG_DOMAIN
+path_url=$YNH_APP_ARG_PATH
+admin=$YNH_APP_ARG_ADMIN
+is_public=$YNH_APP_ARG_IS_PUBLIC
 
-# TODO: Check domain/path availability with app helper
-sudo yunohost app checkurl "${domain}${path}" -a "$app" \
-  || ynh_die "The path ${domain}${path} is not available for app installation."
+app=$YNH_APP_INSTANCE_NAME
 
-# Check user parameter
-ynh_user_exists "$admin" \
-  || ynh_die "The chosen admin user does not exist."
-ynh_app_setting_set $app admin_user $admin
-
-# Retrieve admin email
-email=$(sudo yunohost user info $admin | grep mail: | sed "s/mail: //g")
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
 
 # Check destination directory
-DESTDIR="/var/www/$app"
-[[ -d $DESTDIR ]] && ynh_die \
-"The destination directory '$DESTDIR' already exists.\
- You should safely delete it before installing this app."
+final_path="/var/www/$app"
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
+
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path "$path_url")
+
+# Check web path availability
+ynh_webpath_available "$domain" "$path_url"
+# Register (book) web path
+ynh_webpath_register "$app" "$domain" "$path_url"
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+
+ynh_app_setting_set "$app" domain "$domain"
+ynh_app_setting_set "$app" final_path "$final_path"
+ynh_app_setting_set "$app" adminusername "$admin"
+ynh_app_setting_set "$app" is_public "$is_public"
+
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+ynh_install_app_dependencies php5-gd
+
+#=================================================
+# CREATE A MYSQL DATABASE
+#================================================
 
 # Generate random password
 dbpass=$(ynh_string_random)
@@ -41,52 +75,98 @@ dbuser=$app
 
 # Initialize database and store mysql password for upgrade
 ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
-ynh_app_setting_set $app mysqlpwd $dbpass
-ynh_app_setting_set $app adminusername $admin
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set "$app" mysqlpwd "$dbpass"
 
-extract_application "$DESTDIR"
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source "$final_path"
+mkdir -p "$final_path"/sessions/
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create "$app"
+
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_add_fpm_config
+
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# Create config.php
+#=================================================
+
+# Retrieve admin email
+email=$(ynh_user_get_info "$admin" mail)
 
 # Copy and edit config.php
-sudo cp ../conf/config.php ${DESTDIR}
-sudo sed -i "s/yuno_dbpdw/${dbpass}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_dbuser/${dbuser}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_admin/${admin}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_email/${email}/g" ${DESTDIR}/config.php
-sudo sed -i "s/yuno_domain/${domain}/g" ${DESTDIR}/config.php
+config_php="${final_path}/config.php"
 
-# Set permissions to kanboard and data directory
-sudo chown -R root:root ${DESTDIR}
-sudo chown -R www-data ${DESTDIR}/{data,plugins}
+cp ../conf/config.php "$config_php"
+ynh_replace_string "yuno_dbpdw"  "$dbpass" "$config_php"
+ynh_replace_string "yuno_dbuser" "$dbuser" "$config_php"
+ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
+ynh_replace_string "yuno_email"  "$email"  "$config_php"
+ynh_replace_string "yuno_domain" "$domain" "$config_php"
 
-# Copy and set php-fpm configuration
-phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
-sed -i "s@#POOLNAME#@${app}@g"     ../conf/php-fpm.conf
-sed -i "s@#DESTDIR#@${DESTDIR}/@g" ../conf/php-fpm.conf
-sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
-sudo chown root: $phpfpm_conf
-sudo chmod 644 $phpfpm_conf
-
-# Modify Nginx configuration file and copy it to Nginx conf directory
-sed -i "s@NAMETOCHANGE@${app}@g" ../conf/nginx.conf*
-sed -i "s@PATHTOCHANGE@${path}@g" ../conf/nginx.conf*
-sed -i "s@ALIASTOCHANGE@${DESTDIR}/@g" ../conf/nginx.conf*
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/${domain}.d/${app}.conf
-
-# Make app public or private
-if [ "$is_public" = "Yes" ];
-then
-	sudo yunohost app setting ${app} unprotected_uris -v "/"
-	sudo sed -i "s/define('LDAP_AUTH'.*$/define('LDAP_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('HIDE_LOGIN_FORM'.*$/define('HIDE_LOGIN_FORM', false);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('REMEMBER_ME_AUTH'.*$/define('REMEMBER_ME_AUTH', true);/g" ${DESTDIR}/config.php
-	sudo sed -i "s/define('DISABLE_LOGOUT'.*$/define('DISABLE_LOGOUT', false);/g" ${DESTDIR}/config.php
-fi
+#=================================================
+# Database initialization
+#=================================================
 
 # Init database
-#sudo chmod o+x ${DESTDIR} ${DESTDIR}/app/ ${DESTDIR}/app/Schema/ ${DESTDIR}/app/Schema/Sql
-ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < ${DESTDIR}/app/Schema/Sql/mysql.sql
+ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/Sql/mysql.sql"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#================================================
+
+# Set permissions to kanboard and data directory
+chown -R root:root "$final_path"
+chown -R "$app" "$final_path"/{data,plugins,sessions}
+chmod -R 700 "$final_path"/sessions
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+
+if [[ "$path_url" == "/" ]]
+then
+	# ynh panel is only comptable with non-root installation
+	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
+
+	ynh_store_file_checksum "$finalnginxconf"
+fi
+
+# Make app public or private
+if [[ "$is_public" -eq 1 ]];
+then
+	ynh_app_setting_set "$app" unprotected_uris "/"
+	ynh_replace_string "define('LDAP_AUTH'.*$"        "define('LDAP_AUTH', true);"        "$config_php"
+	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
+	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
+	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
+fi
+
+#=================================================
+# RELOAD NGINX & PHP5-FPM
+#=================================================
 
 # Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+service php5-fpm restart
+service nginx reload

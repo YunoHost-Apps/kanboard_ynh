@@ -1,0 +1,4 @@
+SOURCE_URL=https://github.com/kanboard/kanboard/releases/download/v1.0.48/kanboard-1.0.48.zip
+SOURCE_SUM=a15f63f7582869fd9c777313bbb3cefbe3e4db34bae550b76e1e37d9c4b35a67
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=zip
