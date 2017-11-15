@@ -1,25 +1,55 @@
 #!/bin/bash
 
-app="kanboard"
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get "$app" domain)
+final_path=$(ynh_app_setting_get "$app" final_path)
 
 dbname=$app
 dbuser=$app
 
-# Source app helpers
-source /usr/share/yunohost/helpers
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
 
-# Drop MySQL database and user
-ynh_mysql_drop_db "$dbname" 2>/dev/null || true
-ynh_mysql_drop_user "$dbuser" 2>/dev/null || true
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
 
-# Retrieve domain from app settings
-domain=$(ynh_app_setting_get "$app" domain)
+#=================================================
+# REMOVE THE MYSQL DATABASE
+#=================================================
 
-# Delete app directory and configurations
-sudo rm -rf "/var/www/${app}"
-sudo rm -f "/etc/php5/fpm/pool.d/${app}.conf"
-[[ -n $domain ]] && sudo rm -f "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+# Remove a database if it exists, along with the associated user
+ynh_mysql_remove_db "$dbuser" "$dbname"
 
-# Reload services
-sudo service php5-fpm restart || true
-sudo service nginx reload || true
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+
+ynh_secure_remove "$final_path"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# REMOVE PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_remove_fpm_config
