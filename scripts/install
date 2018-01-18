@@ -151,6 +151,8 @@ then
 	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
 
 	ynh_store_file_checksum "$finalnginxconf"
+else
+	ynh_replace_string "^#sub_path_only"      ""   "$finalnginxconf"
 fi
 
 # Make app public or private
@@ -161,6 +163,8 @@ then
 	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
 	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
 	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
+else
+	ynh_app_setting_set "$app" unprotected_uris "/jsonrpc.php"
 fi
 
 #=================================================
