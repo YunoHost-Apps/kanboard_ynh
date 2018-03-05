@@ -89,7 +89,8 @@ ynh_system_user_create "$app"
 #=================================================
 
 chown -R root:root "$final_path"
-chown -R "$app" "$final_path"/{data,plugins}
+chown -R "$app" "$final_path"/{data,plugins,sessions}
+chmod -R 700 "$final_path"/sessions
 
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
