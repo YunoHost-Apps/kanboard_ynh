@@ -117,6 +117,12 @@ ynh_system_user_create "$app"
 ynh_add_fpm_config
 
 #=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+ynh_install_app_dependencies php5-gd php5-zip
+
+#=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # Create config.php

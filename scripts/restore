@@ -55,7 +55,7 @@ test ! -d $final_path \
 #=================================================
 
 # Define and install dependencies
-ynh_install_app_dependencies php5-gd
+ynh_install_app_dependencies php5-gd php5-zip
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
