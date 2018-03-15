@@ -33,7 +33,7 @@ From command line:
 
 Infos
 -----
-Kanboard v1.0.48
+Kanboard v1.2.0
 
 Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
 
