@@ -66,3 +66,9 @@ sudo yunohost app install -l Kanboard /home/admin/kanboard_ynh
 sudo yunohost app upgrade -f /home/admin/kanboard_ynh kanboard
 
 ```
+
+Maintainers
+----------------
+
+Package creation was maid by [mbugeia](https://github.com/mbugeia) and maintained from 2014 to 2016.
+Package rewrote was done by [Jibec](https://github.com/Jibec), and the kind help of multiple contributors.
