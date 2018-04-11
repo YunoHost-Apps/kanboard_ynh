@@ -13,6 +13,7 @@
 		setup_private=1
 		setup_public=1
 		upgrade=1
+		upgrade=1	from_commit=f159f7a9bdbe470ec026edf09a6eebf10f23425e
 		backup_restore=1
 		multi_instance=1
 		wrong_user=1
@@ -33,3 +34,7 @@
 	Level 8=0
 	Level 9=0
 	Level 10=0
+;;; Upgrade options
+	; commit=f159f7a9bdbe470ec026edf09a6eebf10f23425e
+		name=Create check_process
+		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&is_public=1&
