@@ -55,7 +55,11 @@ test ! -d $final_path \
 #=================================================
 
 # Define and install dependencies
-ynh_install_app_dependencies php5-gd php5-zip
+pkg_dependencies=php5-gd
+if [ "$(lsb_release --codename --short)" != "jessie" ]; then
+	pkg_dependencies="$pkg_dependencies php-zip"
+fi
+ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
