@@ -5,13 +5,17 @@
   "description": {
     "en": "Kanboard is a simple visual task board web application"
   },
-  "version": "1.0.48",
+  "version": "1.2.0-0",
   "url": "https://kanboard.net/",
   "license": "AGPL-3.0",
   "requirements": {
 		"yunohost": ">= 2.7.0"
   },
   "maintainer": {
+    "name": "jibec",
+    "email": "jean-baptiste@holcroft.fr"
+  },
+  "previous_maintainers": {
     "name": "mbugeia",
     "email": "maxime@max.privy.place"
   },
