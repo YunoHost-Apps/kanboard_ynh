@@ -62,10 +62,6 @@ ynh_app_setting_set "$app" is_public "$is_public"
 # INSTALL DEPENDENCIES
 #=================================================
 
-pkg_dependencies="php-gd php-dom php-mbstring"
-if [ "$(lsb_release --codename --short)" != "jessie" ]; then
-	pkg_dependencies="$pkg_dependencies php-zip"
-fi
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
