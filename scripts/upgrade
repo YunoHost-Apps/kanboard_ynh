@@ -120,10 +120,6 @@ ynh_add_fpm_config
 # INSTALL DEPENDENCIES
 #=================================================
 
-pkg_dependencies=php5-gd
-if [ "$(lsb_release --codename --short)" != "jessie" ]; then
-	pkg_dependencies="$pkg_dependencies php-zip"
-fi
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
