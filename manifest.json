@@ -12,12 +12,14 @@
 		"yunohost": ">= 2.7.0"
   },
   "maintainer": {
-    "name": "jibec",
-    "email": "jean-baptiste@holcroft.fr"
+    "name": "yunohost-apps"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
     "email": "maxime@max.privy.place"
+  },
+  {"name": "jibec",
+    "email": "jean-baptiste@holcroft.fr"
   }],
   "multi_instance": true,
   "services": [
