@@ -56,6 +56,13 @@ ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
 ynh_backup "/etc/php5/fpm/pool.d/${app}.conf"
 
 #=================================================
+# BACKUP FAIL2BAN CONFIGURATION
+#=================================================
+
+ynh_backup "/etc/fail2ban/jail.d/$app.conf"
+ynh_backup "/etc/fail2ban/filter.d/$app.conf"
+
+#=================================================
 # BACKUP THE MYSQL DATABASE
 #=================================================
 

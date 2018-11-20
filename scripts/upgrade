@@ -189,6 +189,12 @@ else
 fi
 
 #=================================================
+# SETUP FAIL2BAN
+#=================================================
+
+ynh_add_fail2ban_config "/var/log/nginx/$domain-error.log" "^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" 5
+
+#=================================================
 # RELOAD NGINX
 #=================================================
 

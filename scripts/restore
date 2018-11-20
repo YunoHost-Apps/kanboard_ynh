@@ -99,6 +99,14 @@ chmod -R 700 "$final_path"/sessions
 ynh_restore_file "/etc/php5/fpm/pool.d/${app}.conf"
 
 #=================================================
+# RESTORE FAIL2BAN CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/fail2ban/jail.d/$app.conf"
+ynh_restore_file "/etc/fail2ban/filter.d/$app.conf"
+systemctl restart fail2ban
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX AND PHP-FPM
