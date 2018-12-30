@@ -1,4 +1,4 @@
-SOURCE_URL=https://github.com/kanboard/kanboard/archive/v1.2.3.tar.gz
-SOURCE_SUM=e0b013df560bf5f60a6f43bf5499e90ca6e793808e5e0fb48e86ef31a234d062
+SOURCE_URL=https://github.com/kanboard/kanboard/archive/v1.2.7.tar.gz
+SOURCE_SUM=cee7aef1cc203796b99f8881f3f0870151c9aa4bce0a96c9e2ca9a5e54cd40f9
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
