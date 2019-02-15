@@ -8,6 +8,9 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+# Overload the helper ynh_handle_getopts_args to have fixes from unstable.
+# Needed for ynh_add_fail2ban_config
+source _getopts_fix.sh
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -137,7 +140,7 @@ chmod -R 700 $final_path/sessions
 # SETUP FAIL2BAN
 #=================================================
 
-ynh_add_fail2ban_config "/var/log/nginx/$domain-error.log" "^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" 5
+ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # SETUP SSOWAT

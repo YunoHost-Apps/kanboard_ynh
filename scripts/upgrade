@@ -8,6 +8,9 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+# Overload the helper ynh_handle_getopts_args to have fixes from unstable.
+# Needed for ynh_add_fail2ban_config
+source _getopts_fix.sh
 
 #=================================================
 # LOAD SETTINGS
@@ -171,6 +174,7 @@ if [[ "$path_url" == "/" ]]
 then
 	# ynh panel is only comptable with non-root installation
 	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
+ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 	ynh_store_file_checksum "$finalnginxconf"
 else
@@ -200,7 +204,6 @@ ynh_store_file_checksum "$config_php"
 # RELOAD NGINX
 #=================================================
 
-ynh_add_fail2ban_config "/var/log/nginx/$domain-error.log" "^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" 5
 systemctl reload nginx
 
 #=================================================
