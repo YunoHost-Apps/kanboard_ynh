@@ -8,12 +8,12 @@
   "version": "1.2.8~ynh1",
   "url": "https://kanboard.net/",
   "license": "AGPL-3.0",
-  "requirements": {
-		"yunohost": ">= 2.7.0"
-  },
   "maintainer": {
     "name": "YunoHost Contributors",
     "email": "apps@yunohost.org"
+  },
+  "requirements": {
+    "yunohost": ">= 3.0"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
@@ -26,7 +26,7 @@
   "multi_instance": true,
   "services": [
     "nginx",
-    "php5-fpm",
+    "php7.0-fpm",
     "mysql"
   ],
   "arguments": {

@@ -68,6 +68,7 @@ chown -R $app $final_path/{data,plugins,sessions}
 # RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
 
+ynh_restore_file "/etc/php/7.0/fpm/pool.d/$app.conf"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -99,6 +100,6 @@ systemctl restart fail2ban
 # RELOAD NGINX AND PHP-FPM
 #=================================================
 
-service php5-fpm restart
+systemctl reload php7.0-fpm
 systemctl reload nginx
 
