@@ -75,24 +75,12 @@ path_url=$(ynh_normalize_url_path $path_url)
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-
-# Move old app dir
-mv "$final_path" "$final_path.old"
+ynh_print_info "Upgrading source files..."
 
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
-mkdir -p "$final_path"/sessions
 
-# restore data
-cp -a "$final_path.old/data" "$final_path"
-
-# restore plugins
-if [ -e "$final_path.old/plugins" ]
-then
-	cp -a "$final_path.old/plugins" "$final_path"
-fi
-# delete temp directory
-ynh_secure_remove "$final_path.old"
+mkdir -p $final_path/sessions/
 
 #=================================================
 # NGINX CONFIGURATION
