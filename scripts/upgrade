@@ -10,58 +10,46 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
+# LOAD SETTINGS
 #=================================================
 
 app=$YNH_APP_INSTANCE_NAME
 
-# Set app specific variables
-dbuser=$app
+domain=$(ynh_app_setting_get $app domain)
+path_url=$(ynh_app_setting_get $app path)
+admin=$(ynh_app_setting_get $app adminusername)
+is_public=$(ynh_app_setting_get $app is_public)
+final_path=$(ynh_app_setting_get $app final_path)
+db_name=$(ynh_app_setting_get $app db_name)
 
-# Retrieve settings
-domain=$(ynh_app_setting_get "$app" domain)
-path_url=$(ynh_app_setting_get "$app" path)
-admin=$(ynh_app_setting_get "$app" adminusername)
-email=$(ynh_user_get_info "$admin" mail)
-dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
-is_public=$(ynh_app_setting_get "$app"  is_public)
-final_path=$(ynh_app_setting_get "$app" final_path)
-
-if [[ -z "$is_public" ]]
-then	# Old version doesnt have is_public settings
-	is_public=0
-	ynh_app_setting_set "$app" is_public "$is_public"
-fi
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
 
 # Fix is_public as a boolean value
 if [ "$is_public" = "Yes" ]; then
-	ynh_app_setting_set "$app" is_public 1
+	ynh_app_setting_set $app is_public 1
 	is_public=1
 elif [ "$is_public" = "No" ]; then
-	ynh_app_setting_set "$app" is_public 0
+	ynh_app_setting_set $app is_public 0
 	is_public=0
 fi
 
+# If db_name doesn't exist, create it
+if [ -z $db_name ]; then
+	db_name=$(ynh_sanitize_dbid $app)
+	ynh_app_setting_set $app db_name $db_name
+fi
+
 # If final_path doesn't exist, create it
-if [[ -z "$final_path" ]]
-then
-	final_path="/var/www/$app"
-	ynh_app_setting_set "$app" final_path "$final_path"
+if [ -z $final_path ]; then
+	final_path=/var/www/$app
+	ynh_app_setting_set $app final_path $final_path
 fi
 
 #=================================================
-# CHECK THE PATH
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-
-# Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path $path_url)
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -73,6 +61,13 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
+# CHECK THE PATH
+#=================================================
+
+# Normalize the URL path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+
+#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -81,6 +76,7 @@ ynh_abort_if_errors
 # Move old app dir
 mv "$final_path" "$final_path.old"
 
+# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
 mkdir -p "$final_path"/sessions
 
@@ -106,8 +102,8 @@ ynh_add_nginx_config
 # CREATE DEDICATED USER
 #=================================================
 
-# Create a system user
-ynh_system_user_create "$app"
+# Create a dedicated user (if not existing)
+ynh_system_user_create $app
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -117,7 +113,7 @@ ynh_system_user_create "$app"
 ynh_add_fpm_config
 
 #=================================================
-# INSTALL DEPENDENCIES
+# UPGRADE DEPENDENCIES
 #=================================================
 
 ynh_install_app_dependencies $pkg_dependencies
@@ -125,29 +121,35 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# Create config.php
+# CREATE CONFIG.PHP
 #=================================================
+
+# Retrieve admin email
+email=$(ynh_user_get_info $admin mail)
 
 # Copy and edit config.php
-config_php="$final_path/config.php"
-cp ../conf/config.php "$config_php"
+config_php="${final_path}/config.php"
 
-ynh_replace_string "yuno_dbpdw"  "$dbpass" "$config_php"
-ynh_replace_string "yuno_dbuser" "$dbuser" "$config_php"
-ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
-ynh_replace_string "yuno_email"  "$email"  "$config_php"
-ynh_replace_string "yuno_domain" "$domain" "$config_php"
+ynh_backup_if_checksum_is_different "$config_php"
+
+cp ../conf/config.php "$config_php"
+db_pwd=$(ynh_app_setting_get $app mysqlpwd)
+ynh_replace_string "__DB_PWD__" "$db_pwd" "$config_php"
+ynh_replace_string "__DB_NAME__" $db_name "$config_php"
+ynh_replace_string "__USER__"    $admin   "$config_php"
+ynh_replace_string "__EMAIL__"   $email   "$config_php"
+ynh_replace_string "__DOMAIN__"  $domain  "$config_php"
 
 #=================================================
-# Database initialization
+# UPGRADE KANBOARD
 #=================================================
 
 (
-        cd "$final_path"
-        # Launch database migratio
-        php cli db:migrate --no-interaction --verbose
-        # Launch plugins migration
-        php cli plugin:upgrade --no-interaction --verbose
+	cd "$final_path"
+	# Launch database migration
+	php cli db:migrate --no-interaction --verbose
+	# Launch plugins migration
+	php cli plugin:upgrade --no-interaction --verbose
 )
 
 #=================================================
@@ -156,13 +158,13 @@ ynh_replace_string "yuno_domain" "$domain" "$config_php"
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-# Set permissions to kanboard and data directory
-chown -R root:root "$final_path"
-chown -R "$app" "$final_path"/{data,plugins,sessions}
-chmod -R 700 "$final_path"/sessions
+# Set permissions to app files
+chown -R root: $final_path
+chown -R $app $final_path/{data,plugins,sessions}
+chmod -R 700 $final_path/sessions
 
 #=================================================
-# SETUP SSOWAT
+# SETUP FAIL2BAN
 #=================================================
 
 if [[ "$path_url" == "/" ]]
@@ -175,28 +177,33 @@ else
 	ynh_replace_string "^#sub_path_only"      ""   "$finalnginxconf"
 	ynh_store_file_checksum "$finalnginxconf"
 fi
+#=================================================
+# SETUP SSOWAT
+#=================================================
 
 # Make app public or private
-if [[ "$is_public" -eq 1 ]];
+if [ $is_public -eq 1 ]
 then
-	ynh_app_setting_set "$app" unprotected_uris "/"
+	ynh_app_setting_set $app unprotected_uris "/"
 	ynh_replace_string "define('LDAP_AUTH'.*$"        "define('LDAP_AUTH', true);"        "$config_php"
 	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
 	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
 	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
 else
-	ynh_app_setting_set "$app" unprotected_uris "/jsonrpc.php"
+	ynh_app_setting_set $app unprotected_uris "/jsonrpc.php"
 fi
 
-#=================================================
-# SETUP FAIL2BAN
-#=================================================
-
-ynh_add_fail2ban_config "/var/log/nginx/$domain-error.log" "^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" 5
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum "$config_php"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
 
-service php5-fpm restart
+ynh_add_fail2ban_config "/var/log/nginx/$domain-error.log" "^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" 5
 systemctl reload nginx
+
+#=================================================
+#=================================================
+
+service php5-fpm restart

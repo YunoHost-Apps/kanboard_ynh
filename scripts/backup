@@ -6,12 +6,7 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-if [ ! -e _common.sh ]; then
-	# Get the _common.sh file if it's not in the current directory
-	cp ../settings/scripts/_common.sh ./_common.sh
-	chmod a+rx _common.sh
-fi
-source _common.sh
+source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -27,12 +22,9 @@ ynh_abort_if_errors
 
 app=$YNH_APP_INSTANCE_NAME
 
-# Set app specific variables
-dbname=$app
-
-# Retrieve app settings
-domain=$(ynh_app_setting_get "$app" domain)
-final_path=$(ynh_app_setting_get "$app" final_path)
+domain=$(ynh_app_setting_get $app domain)
+final_path=$(ynh_app_setting_get $app final_path)
+db_name=$(ynh_app_setting_get $app db_name)
 
 #=================================================
 # STANDARD BACKUP STEPS
@@ -40,14 +32,13 @@ final_path=$(ynh_app_setting_get "$app" final_path)
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-# Copy the app source files
 ynh_backup "$final_path"
 
 #=================================================
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
 
-ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # BACKUP THE PHP-FPM CONFIGURATION
@@ -66,4 +57,5 @@ ynh_backup "/etc/fail2ban/filter.d/$app.conf"
 # BACKUP THE MYSQL DATABASE
 #=================================================
 
-ynh_mysql_dump_db "$dbname" > ./db.sql
+ynh_mysql_dump_db "$db_name" > db.sql
+

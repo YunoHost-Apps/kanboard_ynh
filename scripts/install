@@ -20,7 +20,6 @@ ynh_abort_if_errors
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-# Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
@@ -33,14 +32,12 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 
 # Check destination directory
-final_path="/var/www/$app"
+final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path "$path_url")
 
-# Check web path availability
-ynh_webpath_available "$domain" "$path_url"
 # Register (book) web path
 ynh_webpath_register "$app" "$domain" "$path_url"
 
@@ -48,16 +45,13 @@ ynh_webpath_register "$app" "$domain" "$path_url"
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-ynh_app_setting_set "$app" domain "$domain"
-ynh_app_setting_set "$app" final_path "$final_path"
-ynh_app_setting_set "$app" adminusername "$admin"
-ynh_app_setting_set "$app" is_public "$is_public"
-
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set $app adminusername $admin
+ynh_app_setting_set $app is_public $is_public
 
 #=================================================
 # STANDARD MODIFICATIONS
-#=================================================
-
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
@@ -68,27 +62,25 @@ ynh_install_app_dependencies $pkg_dependencies
 # CREATE A MYSQL DATABASE
 #================================================
 
-# Generate random password
-dbpass=$(ynh_string_random)
-dbname=$app
-dbuser=$app
-
-# Initialize database and store mysql password for upgrade
-ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
-ynh_app_setting_set "$app" mysqlpwd "$dbpass"
+db_name=$(ynh_sanitize_dbid $app)
+ynh_app_setting_set $app db_name $db_name
+ynh_mysql_setup_db $db_name $db_name
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
+ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
-mkdir -p "$final_path"/sessions/
+
+mkdir -p $final_path/sessions/
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 
+# Create a dedicated nginx config
 ynh_add_nginx_config
 
 #=================================================
@@ -96,39 +88,39 @@ ynh_add_nginx_config
 #=================================================
 
 # Create a system user
-ynh_system_user_create "$app"
+ynh_system_user_create $app
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
 
+# Create a dedicated php-fpm config
 ynh_add_fpm_config
 
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# Create config.php
+# CREATE CONFIG.PHP
 #=================================================
 
 # Retrieve admin email
-email=$(ynh_user_get_info "$admin" mail)
+email=$(ynh_user_get_info $admin mail)
 
 # Copy and edit config.php
 config_php="${final_path}/config.php"
 
 cp ../conf/config.php "$config_php"
-ynh_replace_string "yuno_dbpdw"  "$dbpass" "$config_php"
-ynh_replace_string "yuno_dbuser" "$dbuser" "$config_php"
-ynh_replace_string "yuno_admin"  "$admin"  "$config_php"
-ynh_replace_string "yuno_email"  "$email"  "$config_php"
-ynh_replace_string "yuno_domain" "$domain" "$config_php"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "$config_php"
+ynh_replace_string "__DB_NAME__" $db_name "$config_php"
+ynh_replace_string "__USER__"    $admin   "$config_php"
+ynh_replace_string "__EMAIL__"   $email   "$config_php"
+ynh_replace_string "__DOMAIN__"  $domain  "$config_php"
 
 #=================================================
-# Database initialization
+# DATABASE INITIALIZATION
 #=================================================
 
-# Init database
-ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/Sql/mysql.sql"
+ynh_mysql_connect_as "$db_name" "$db_pwd" "$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -136,10 +128,10 @@ ynh_mysql_connect_as "$dbuser" "$dbpass" "$dbname" < "${final_path}/app/Schema/S
 # SECURE FILES AND DIRECTORIES
 #================================================
 
-# Set permissions to kanboard and data directory
-chown -R root:root "$final_path"
-chown -R "$app" "$final_path"/{data,plugins,sessions}
-chmod -R 700 "$final_path"/sessions
+# Set permissions to app files
+chown -R root: $final_path
+chown -R $app $final_path/{data,plugins,sessions}
+chmod -R 700 $final_path/sessions
 
 #=================================================
 # SETUP FAIL2BAN
@@ -163,21 +155,26 @@ else
 fi
 
 # Make app public or private
-if [[ "$is_public" -eq 1 ]];
+if [ $is_public -eq 1 ]
 then
-	ynh_app_setting_set "$app" unprotected_uris "/"
+	ynh_app_setting_set $app unprotected_uris "/"
 	ynh_replace_string "define('LDAP_AUTH'.*$"        "define('LDAP_AUTH', true);"        "$config_php"
 	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
 	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
 	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
 else
-	ynh_app_setting_set "$app" unprotected_uris "/jsonrpc.php"
+	ynh_app_setting_set $app unprotected_uris "/jsonrpc.php"
 fi
 
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum "$config_php"
+
 #=================================================
-# RELOAD NGINX & PHP5-FPM
+# RELOAD NGINX
 #=================================================
 
-# Reload services
-service php5-fpm restart
-service nginx reload
+systemctl reload nginx
+
+#=================================================
+#=================================================
+
