@@ -170,17 +170,8 @@ chmod -R 700 $final_path/sessions
 # SETUP FAIL2BAN
 #=================================================
 
-if [[ "$path_url" == "/" ]]
-then
-	# ynh panel is only comptable with non-root installation
-	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
-	ynh_store_file_checksum "$finalnginxconf"
-else
-	ynh_replace_string "^#sub_path_only"      ""   "$finalnginxconf"
-	ynh_store_file_checksum "$finalnginxconf"
-fi
 #=================================================
 # SETUP SSOWAT
 #=================================================

@@ -146,17 +146,6 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 # SETUP SSOWAT
 #=================================================
 
-if [[ "$path_url" == "/" ]]
-then
-	# ynh panel is only comptable with non-root installation
-	ynh_replace_string "	include conf.d/"  "	#include conf.d/"  "$finalnginxconf"
-
-	ynh_store_file_checksum "$finalnginxconf"
-else
-	ynh_replace_string "^#sub_path_only"      ""   "$finalnginxconf"
-	ynh_store_file_checksum "$finalnginxconf"
-fi
-
 # Make app public or private
 if [ $is_public -eq 1 ]
 then
