@@ -33,6 +33,7 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
+ynh_print_info "Validating installation parameters..."
 
 # Check destination directory
 final_path=/var/www/$app
@@ -47,6 +48,7 @@ ynh_webpath_register "$app" "$domain" "$path_url"
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
+ynh_print_info "Storing installation settings..."
 
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app final_path $final_path
@@ -58,12 +60,14 @@ ynh_app_setting_set $app is_public $is_public
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_print_info "Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #================================================
+ynh_print_info "Creating a MySQL database..."
 
 db_name=$(ynh_sanitize_dbid $app)
 ynh_app_setting_set $app db_name $db_name
@@ -72,6 +76,7 @@ ynh_mysql_setup_db $db_name $db_name
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_print_info "Setting up source files..."
 
 ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -82,6 +87,7 @@ mkdir -p $final_path/sessions/
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_print_info "Configuring nginx web server..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -89,6 +95,7 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_print_info "Configuring system user..."
 
 # Create a system user
 ynh_system_user_create $app
@@ -96,6 +103,7 @@ ynh_system_user_create $app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
+ynh_print_info "Configuring php-fpm..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -105,6 +113,7 @@ ynh_add_fpm_config
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
+ynh_print_info "Configuring kanboard..."
 
 # Retrieve admin email
 email=$(ynh_user_get_info $admin mail)
@@ -122,6 +131,7 @@ ynh_replace_string "__DOMAIN__"  $domain  "$config_php"
 #=================================================
 # DATABASE INITIALIZATION
 #=================================================
+ynh_print_info "Initializing database..."
 
 ynh_mysql_connect_as "$db_name" "$db_pwd" "$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
 
@@ -139,12 +149,14 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
+ynh_print_info "Configuring fail2ban..."
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_print_info "Configuring SSOwat..."
 
 # Make app public or private
 if [ $is_public -eq 1 ]
@@ -164,9 +176,12 @@ ynh_store_file_checksum "$config_php"
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_print_info "Reloading nginx web server..."
 
 systemctl reload nginx
 
 #=================================================
+# END OF SCRIPT
 #=================================================
 
+ynh_print_info "Installation of $app completed"

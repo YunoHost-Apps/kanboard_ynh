@@ -15,6 +15,7 @@ source _getopts_fix.sh
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_print_info "Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -28,6 +29,7 @@ db_name=$(ynh_app_setting_get $app db_name)
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+ynh_print_info "Ensuring downward compatibility..."
 
 # Fix is_public as a boolean value
 if [ "$is_public" = "Yes" ]; then
@@ -53,6 +55,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_print_info "Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -85,6 +88,7 @@ mkdir -p $final_path/sessions/
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_print_info "Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -92,6 +96,7 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_print_info "Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create $app
@@ -99,6 +104,7 @@ ynh_system_user_create $app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
+ynh_print_info "Upgrading php-fpm configuration..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -106,6 +112,7 @@ ynh_add_fpm_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
+ynh_print_info "Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
@@ -114,6 +121,7 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
+ynh_print_info "Reconfiguring kanboard..."
 
 # Retrieve admin email
 email=$(ynh_user_get_info $admin mail)
@@ -134,6 +142,7 @@ ynh_replace_string "__DOMAIN__"  $domain  "$config_php"
 #=================================================
 # UPGRADE KANBOARD
 #=================================================
+ynh_print_info "Upgrading kanboard..."
 
 (
 	cd "$final_path"
@@ -157,12 +166,14 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
+ynh_print_info "Upgrading fail2ban configuration..."
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_print_info "Upgrading SSOwat configuration..."
 
 # Make app public or private
 if [ $is_public -eq 1 ]
@@ -182,9 +193,12 @@ ynh_store_file_checksum "$config_php"
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_print_info "Reloading nginx web server..."
 
 systemctl reload nginx
 
 #=================================================
+# END OF SCRIPT
 #=================================================
 
+ynh_print_info "Upgrade of $app completed"
