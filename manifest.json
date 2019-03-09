@@ -5,15 +5,15 @@
   "description": {
     "en": "Kanboard is a simple visual task board web application"
   },
-  "version": "1.2.8~ynh1",
+  "version": "1.2.8~ynh2",
   "url": "https://kanboard.net/",
   "license": "AGPL-3.0",
-  "requirements": {
-		"yunohost": ">= 2.7.0"
-  },
   "maintainer": {
     "name": "YunoHost Contributors",
     "email": "apps@yunohost.org"
+  },
+  "requirements": {
+    "yunohost": ">= 3.2.0"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
@@ -26,43 +26,43 @@
   "multi_instance": true,
   "services": [
     "nginx",
-    "php5-fpm",
+    "php7.0-fpm",
     "mysql"
   ],
   "arguments": {
     "install": [
       {
         "name": "domain",
+        "type": "domain",
         "ask": {
           "en": "Choose a domain for Kanboard"
         },
-        "example": "domain.org",
-        "type": "domain"
+        "example": "domain.org"
       },
       {
         "name": "path",
+        "type": "path",
         "ask": {
           "en": "Choose a path for Kanboard"
         },
-        "type": "path",
         "example": "/kanboard",
         "default": "/kanboard"
       },
       {
         "name": "admin",
+        "type": "user",
         "ask": {
           "en": "Choose the admin user for Kanboard"
         },
-        "type": "user",
         "example": "johndoe"
       },
       {
         "name": "is_public",
+        "type": "boolean",
         "ask": {
           "en": "Is it a public site ?"
         },
-        "type": "boolean",
-        "default": "0"
+        "default": false
       }
     ]
   }

@@ -2,3 +2,5 @@ SOURCE_URL=https://github.com/kanboard/kanboard/archive/v1.2.8.tar.gz
 SOURCE_SUM=70fe5c2202f3ee98687ef6d898a88676dd1ce47b8234950901a9ac2b3d31a328
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=

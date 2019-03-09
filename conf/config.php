@@ -34,7 +34,7 @@ define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
 define('MAIL_CONFIGURATION', true);
 
 // E-mail address for the "From" header (notifications)
-define('MAIL_FROM', 'yuno_email');
+define('MAIL_FROM', '__EMAIL__');
 
 // Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
 define('MAIL_TRANSPORT', 'mail');
@@ -58,16 +58,16 @@ define('DB_RUN_MIGRATIONS', false);
 define('DB_DRIVER', 'mysql');
 
 // Mysql/Postgres username
-define('DB_USERNAME', 'yuno_dbuser');
+define('DB_USERNAME', '__DB_NAME__');
 
 // Mysql/Postgres password
-define('DB_PASSWORD', 'yuno_dbpdw');
+define('DB_PASSWORD', '__DB_PWD__');
 
 // Mysql/Postgres hostname
 define('DB_HOSTNAME', 'localhost');
 
 // Mysql/Postgres database name
-define('DB_NAME', 'yuno_dbuser');
+define('DB_NAME', '__DB_NAME__');
 
 // Mysql/Postgres custom port (null = default port)
 define('DB_PORT', null);
@@ -180,10 +180,10 @@ define('REVERSE_PROXY_AUTH', true);
 define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
 
 // Username of the admin, by default blank
-define('REVERSE_PROXY_DEFAULT_ADMIN', 'yuno_admin');
+define('REVERSE_PROXY_DEFAULT_ADMIN', '__USER__');
 
 // Default domain to use for setting the email address
-define('REVERSE_PROXY_DEFAULT_DOMAIN', 'yuno_domain');
+define('REVERSE_PROXY_DEFAULT_DOMAIN', '__DOMAIN__');
 
 // Enable/disable remember me authentication
 define('REMEMBER_ME_AUTH', false);
