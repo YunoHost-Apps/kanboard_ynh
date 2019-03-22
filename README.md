@@ -1,49 +1,47 @@
-Kanboard for Yunohost
-=====================
+# Kanboard for Yunohost
 
+[![Integration level](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard)  
+[![Install Kanboard with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=kanboard)
+
+> *This package allow you to install Kanboard quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
+
+## Overview
 Kanboard is a simple visual task board web application.
-Official website: <http://kanboard.net>
 
-Requirements
-------------
+**Shipped version:** 1.2.8
 
-Functionnal instance of [Yunohost](https://yunohost.org/#/)
+## Screenshots
 
-Installation
-------------
+![](https://kanboard.org/assets/img/board.png)
 
-From yunohost admin panel:
+## Demo
 
-1. Use yunohost admin panel and enter the repository url
-![2015-02-19 16_58_52-yunohost admin](https://cloud.githubusercontent.com/assets/6364564/6270409/1597e646-b85a-11e4-97af-b3b5b2a6b286.png)
-2. Configure the app
-![2015-02-19 16_59_28-yunohost admin](https://cloud.githubusercontent.com/assets/6364564/6270411/19f9a54e-b85a-11e4-83da-eb813c0457f7.png)
-3. Click install
+* [YunoHost demo](https://demo.yunohost.org/dokuwiki/)
 
-From command line:
+## Configuration
 
-`sudo yunohost app install -l kanboard https://github.com/YunoHost-Apps/kanboard_ynh`
+## Documentation
 
+ * Official documentation: https://docs.kanboard.org/en/latest/
+ * YunoHost documentation: If specific documentation is needed, feel free to contribute.
 
-Upgrade
--------
-From command line:
+## YunoHost specific features
 
-`sudo yunohost app upgrade -u https://github.com/YunoHost-Apps/kanboard_ynh kanboard`
+#### Multi-users support
 
-Infos
------
-Kanboard v1.2.0
+#### Supported architectures
 
-Yunohost forum thread:  <https://forum.yunohost.org/t/kanboard-package/78>
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Official%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/kanboard%20%28Official%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/kanboard/)
+* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/kanboard%20%28Official%29.svg)](https://ci-stretch.nohost.me/ci/apps/kanboard/)
 
-Kanboard and SSOwat
--------------------
-Kanboard use SSOwat for user authentification (it means it use the user that the web server (nginx) sent him throught SSOwat), but can't list all user of the system.
-If you wish to add a user, just log in with that user into Kanboard so the software knows him and displays it.
+## Limitations
 
-How to connect as external (non-SSOwat) users
--------------------
+## Additional information
+
+### How to connect as external (non-SSOwat) users
+
 You have to edit this file `/var/www/kanboard/config.php`, find the line `define('REVERSE_PROXY_AUTH', true);` and change it from `true` to `false`.
 **Warning** this disables the possibility to connect with SSOwat users. You will *only* be able to connect with Kanboard users created inside of Kanboard.
 Then you can connect.
@@ -52,27 +50,23 @@ Then you can connect.
 
 This is due to a Kanboard limitation.
 
-Developer infos
+## Links
+
+ * Report a bug: https://github.com/YunoHost-Apps/kanboard_ynh/issues
+ * Kanboard website: http://kanboard.ne
+ * YunoHost website: https://yunohost.org/
+
+---
+
+Developers info
 ----------------
 
-Please do your pull request to the dev branch.
+**Only if you want to use a testing branch for coding, instead of merging directly into master.**
+Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing).
 
-Update package version in `scripts/_common.sh`
-
-Then do a manual diff between `conf/config.php` and `config.default.php` [from upstream Kanboard project](https://github.com/kanboard/kanboard/blob/master/config.default.php) to see if there are new config options
-
-Update readme with the new version
-
-Test it
-
-Test or upgrade to dev version:
-
+To try the testing branch, please proceed like that.
 ```
-su - admin
-git clone -b dev https://github.com/YunoHost-Apps/kanboard_ynh
-# to install
-sudo yunohost app install -l Kanboard /home/admin/kanboard_ynh
-# to upgrade
-sudo yunohost app upgrade -f /home/admin/kanboard_ynh kanboard
-
+sudo yunohost app install https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
+or
+sudo yunohost app upgrade kanboard -u https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 ```
