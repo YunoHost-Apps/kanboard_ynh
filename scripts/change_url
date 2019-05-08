@@ -79,7 +79,7 @@ fi
 #=================================================
 # SPECIFIC MODIFICATIONS
 #=================================================
-ynh_print_info "Applying Kanboard specific modifications..."
+ynh_script_progression --message="Applying Kanboard specific modifications..." --weight=2
 
 if [ $change_domain -eq 1 ]
 then
