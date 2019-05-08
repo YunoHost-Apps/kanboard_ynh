@@ -77,6 +77,16 @@ then
 fi
 
 #=================================================
+# SPECIFIC MODIFICATIONS
+#=================================================
+ynh_print_info "Applying Kanboard specific modifications..."
+
+if [ $change_domain -eq 1 ]
+then
+	# Change domain in Kanboard configuration
+	ynh_replace_string --match_string="'${old_domain}'" --replace_string="'${new_domain}'" --target_file="${final_path}/config.php"
+fi
+#=================================================
 # GENERIC FINALISATION
 #=================================================
 # RELOAD NGINX
