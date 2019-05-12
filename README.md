@@ -32,9 +32,9 @@ Kanboard is a simple visual task board web application.
 
 #### Supported architectures
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Official%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/kanboard%20%28Official%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/kanboard/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/kanboard%20%28Official%29.svg)](https://ci-stretch.nohost.me/ci/apps/kanboard/)
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/kanboard/)
+* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/kanboard/)
 
 ## Limitations
 
@@ -53,7 +53,8 @@ This is due to a Kanboard limitation.
 ## Links
 
  * Report a bug: https://github.com/YunoHost-Apps/kanboard_ynh/issues
- * Kanboard website: http://kanboard.ne
+ * Kanboard website: https://kanboard.org
+ * Upstream app repository: https://github.com/kanboard/kanboard
  * YunoHost website: https://yunohost.org/
 
 ---
