@@ -8,9 +8,6 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
-# Overload the helper ynh_handle_getopts_args to have fixes from unstable.
-# Needed for ynh_add_fail2ban_config
-source _getopts_fix.sh
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -33,61 +30,57 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_print_info "Validating installation parameters..."
+ynh_script_progression --message="Validating installation parameters..."
 
 # Check destination directory
 final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path "$path_url")
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
 # Register (book) web path
-ynh_webpath_register "$app" "$domain" "$path_url"
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_print_info "Storing installation settings..."
+ynh_script_progression --message="Storing installation settings..."
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app final_path $final_path
-ynh_app_setting_set $app adminusername $admin
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=adminusername --value=$admin
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_print_info "Installing dependencies..."
+ynh_script_progression --message="Installing dependencies..." --weight=14
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #================================================
-ynh_print_info "Creating a MySQL database..."
+ynh_script_progression --message="Creating a MySQL database..." --weight=2
 
-db_name=$(ynh_sanitize_dbid $app)
-ynh_app_setting_set $app db_name $db_name
-ynh_mysql_setup_db $db_name $db_name
+db_name=$(ynh_sanitize_dbid --db_name=$app)
+ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+ynh_mysql_setup_db --db_user=$db_name --db_name=$db_name
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_print_info "Setting up source files..."
+ynh_script_progression --message="Setting up source files..." --weight=2
 
-ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path"
+ynh_setup_source --dest_dir="$final_path"
 
 mkdir -p $final_path/sessions/
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info "Configuring nginx web server..."
+ynh_script_progression --message="Configuring nginx web server..." --weight=2
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -95,15 +88,15 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info "Configuring system user..."
+ynh_script_progression --message="Configuring system user..." --weight=2
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create --username=$app
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_print_info "Configuring php-fpm..."
+ynh_script_progression --message="Configuring php-fpm..." --weight=2
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -113,27 +106,27 @@ ynh_add_fpm_config
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_print_info "Configuring kanboard..."
+ynh_script_progression --message="Configuring kanboard..."
 
 # Retrieve admin email
-email=$(ynh_user_get_info $admin mail)
+email=$(ynh_user_get_info --username=$admin --key=mail)
 
 # Copy and edit config.php
 config_php="${final_path}/config.php"
 
 cp ../conf/config.php "$config_php"
-ynh_replace_string "__DB_PWD__" "$db_pwd" "$config_php"
-ynh_replace_string "__DB_NAME__" $db_name "$config_php"
-ynh_replace_string "__USER__"    $admin   "$config_php"
-ynh_replace_string "__EMAIL__"   $email   "$config_php"
-ynh_replace_string "__DOMAIN__"  $domain  "$config_php"
+ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config_php"
+ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$config_php"
+ynh_replace_string --match_string="__USER__"    --replace_string=$admin   --target_file="$config_php"
+ynh_replace_string --match_string="__EMAIL__"   --replace_string=$email   --target_file="$config_php"
+ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --target_file="$config_php"
 
 #=================================================
 # DATABASE INITIALIZATION
 #=================================================
-ynh_print_info "Initializing database..."
+ynh_script_progression --message="Initializing database..." --weight=7
 
-ynh_mysql_connect_as "$db_name" "$db_pwd" "$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
+ynh_mysql_connect_as --user="$db_name" --password="$db_pwd" --database="$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -149,39 +142,39 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_print_info "Configuring fail2ban..."
+ynh_script_progression --message="Configuring fail2ban..." --weight=10
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info "Configuring SSOwat..."
+ynh_script_progression --message="Configuring SSOwat..." --weight=2
 
 # Make app public or private
 if [ $is_public -eq 1 ]
 then
-	ynh_app_setting_set $app unprotected_uris "/"
-	ynh_replace_string "define('LDAP_AUTH'.*$"        "define('LDAP_AUTH', true);"        "$config_php"
-	ynh_replace_string "define('HIDE_LOGIN_FORM'.*$"  "define('HIDE_LOGIN_FORM', false);" "$config_php"
-	ynh_replace_string "define('REMEMBER_ME_AUTH'.*$" "define('REMEMBER_ME_AUTH', true);" "$config_php"
-	ynh_replace_string "define('DISABLE_LOGOUT'.*$"   "define('DISABLE_LOGOUT', false);"  "$config_php"
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$config_php"
+	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$config_php"
+	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$config_php"
+	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$config_php"
 else
-	ynh_app_setting_set $app unprotected_uris "/jsonrpc.php"
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$config_php"
+ynh_store_file_checksum --file="$config_php"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info "Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
-systemctl reload nginx
+ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info "Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed" --last
