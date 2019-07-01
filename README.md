@@ -9,7 +9,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Kanboard is a simple visual task board web application.
 
-**Shipped version:** 1.2.9
+**Shipped version:** 1.2.10
 
 ## Screenshots
 
