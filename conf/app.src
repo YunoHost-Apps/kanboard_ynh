@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/kanboard/kanboard/archive/v1.2.9.tar.gz
-SOURCE_SUM=6d17ac8f047540e386db4d593b264cee909208ce09dd413e6d426dd53f9c5301
+SOURCE_URL=https://github.com/kanboard/kanboard/archive/v1.2.10.tar.gz
+SOURCE_SUM=4368f0d5902a4831642103fdab90d2a61b6987ce77b046e637883168e4ad0bcb
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
