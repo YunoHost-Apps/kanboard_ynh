@@ -4,4 +4,4 @@
 # COMMON VARIABLES
 #=================================================
 
-pkg_dependencies="php-gd php-zip php-dom php-mbstring"
+pkg_dependencies="php-gd php-zip php7.0-dom php-mbstring"
