@@ -114,14 +114,7 @@ ynh_system_user_create --username=$app
 ynh_script_progression --message="Upgrading php-fpm configuration..."
 
 # Create a dedicated php-fpm config
-ynh_add_fpm_config
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=6
-
-ynh_install_app_dependencies $pkg_dependencies
+ynh_add_fpm_config --phpversion="$YNH_PHP_VERSION" --package="$extra_php_dependencies"
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -154,9 +147,9 @@ ynh_script_progression --message="Upgrading kanboard..." --weight=2
 (
 	cd "$final_path"
 	# Launch database migration
-	php cli db:migrate --no-interaction --verbose
+	php$YNH_PHP_VERSION cli db:migrate --no-interaction --verbose
 	# Launch plugins migration
-	php cli plugin:upgrade --no-interaction --verbose
+	php$YNH_PHP_VERSION cli plugin:upgrade --no-interaction --verbose
 )
 
 #=================================================

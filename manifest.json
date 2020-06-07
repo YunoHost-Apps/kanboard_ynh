@@ -3,9 +3,9 @@
   "id": "kanboard",
   "packaging_format": 1,
   "description": {
-    "en": "Kanboard is a simple visual task board web application"
+    "en": "Free and open source Kanban project management software"
   },
-  "version": "1.2.12~ynh1",
+  "version": "1.2.14~ynh1",
   "url": "https://kanboard.net/",
   "license": "AGPL-3.0",
   "maintainer": {
@@ -13,7 +13,7 @@
     "email": "apps@yunohost.org"
   },
   "requirements": {
-    "yunohost": ">= 3.5.0"
+    "yunohost": ">= 3.8.1"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
