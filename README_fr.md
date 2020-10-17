@@ -25,7 +25,7 @@ Kanboard est un gestionnaire de tâches visuel qui permet de gérer facilement d
 
 ## Documentation
 
- * Documentation officielle : https://docs.kanboard.org/en/latest/
+ * Documentation officielle : https://docs.kanboard.org/fr/latest/
  * Documentation YunoHost : https://yunohost.org/#/app_kanboard_fr
 
 ## Caractéristiques spécifiques YunoHost
