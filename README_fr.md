@@ -32,8 +32,8 @@ Kanboard est un gestionnaire de tâches visuel qui permet de gérer facilement d
 
 #### Support multi-utilisateur
 
-* L'authentification LDAP et HTTP est-elle prise en charge ?
-* L'application peut-elle être utilisée par plusieurs utilisateurs ?
+* L'authentification LDAP et HTTP est-elle prise en charge ? **Non**
+* L'application peut-elle être utilisée par plusieurs utilisateurs ? **Oui**
 
 #### Architectures supportées
 
