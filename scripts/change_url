@@ -77,6 +77,17 @@ then
 fi
 
 #=================================================
+# SETUP FAIL2BAN
+#=================================================
+ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
+
+# Remove the config file with $old_domain
+ynh_remove_fail2ban_config
+
+# Add config file with $new_domain
+ynh_add_fail2ban_config --logpath="/var/log/nginx/${new_domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+
+#=================================================
 # SPECIFIC MODIFICATIONS
 #=================================================
 ynh_script_progression --message="Applying Kanboard specific modifications..." --weight=2
