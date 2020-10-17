@@ -9,7 +9,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Kanboard is a simple visual task board web application.
 
-**Shipped version:** 1.2.14
+**Shipped version:** 1.2.16
 
 ## Screenshots
 
@@ -32,9 +32,8 @@ Kanboard is a simple visual task board web application.
 
 #### Supported architectures
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/kanboard/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/kanboard/)
 
 ## Limitations
 
@@ -59,10 +58,8 @@ This is due to a Kanboard limitation.
 
 ---
 
-Developers info
-----------------
+## Developers info
 
-**Only if you want to use a testing branch for coding, instead of merging directly into master.**
 Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.

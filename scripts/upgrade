@@ -22,6 +22,7 @@ admin=$(ynh_app_setting_get --app=$app --key=adminusername)
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # CHECK VERSION
@@ -58,7 +59,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=5
+ynh_script_progression --message="Backing up Kanboard before upgrading (may take a while)..." --weight=5
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -95,9 +96,9 @@ mkdir -p $final_path/sessions/
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..." --weight=2
+ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
@@ -111,9 +112,9 @@ ynh_system_user_create --username=$app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading PHP-FPM configuration..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config --phpversion="$YNH_PHP_VERSION" --package="$extra_php_dependencies"
 
 #=================================================
@@ -121,7 +122,7 @@ ynh_add_fpm_config --phpversion="$YNH_PHP_VERSION" --package="$extra_php_depende
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_script_progression --message="Reconfiguring kanboard..." --weight=2
+ynh_script_progression --message="Reconfiguring Kanboard..." --weight=2
 
 # Retrieve admin email
 email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -142,7 +143,7 @@ ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --targ
 #=================================================
 # UPGRADE KANBOARD
 #=================================================
-ynh_script_progression --message="Upgrading kanboard..." --weight=2
+ynh_script_progression --message="Upgrading Kanboard..." --weight=2
 
 (
 	cd "$final_path"
@@ -166,7 +167,7 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Reconfiguring fail2ban..." --weight=7
+ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
@@ -193,7 +194,7 @@ ynh_store_file_checksum --file="$config_php"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -201,4 +202,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Installation of Kanboard completed" --last

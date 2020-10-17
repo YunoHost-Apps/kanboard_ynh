@@ -75,7 +75,7 @@ mkdir -p $final_path/sessions/
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..." --weight=2
+ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -91,17 +91,18 @@ ynh_system_user_create --username=$app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring php-fpm..." --weight=16
+ynh_script_progression --message="Configuring PHP-FPM..." --weight=16
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config --phpversion=$YNH_PHP_VERSION --package="$extra_php_dependencies"
+phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # SPECIFIC SETUP
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_script_progression --message="Configuring kanboard..."
+ynh_script_progression --message="Configuring Kanboard..."
 
 # Retrieve admin email
 email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -142,7 +143,7 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Configuring fail2ban..." --weight=10
+ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
@@ -169,7 +170,7 @@ ynh_store_file_checksum --file="$config_php"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -177,4 +178,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Installation of Kanboard completed" --last
