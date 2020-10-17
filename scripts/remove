@@ -72,6 +72,14 @@ ynh_script_progression --message="Removing Fail2Ban configuration..." --weight=7
 ynh_remove_fail2ban_config
 
 #=================================================
+# REMOVE THE CRON FILE
+#=================================================
+ynh_script_progression --message="Removing the cron file..." --weight=2
+
+# Remove a cron file
+ynh_secure_remove --file="/etc/cron.d/$app"
+
+#=================================================
 # REMOVE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Removing the dedicated system user..." --weight=2

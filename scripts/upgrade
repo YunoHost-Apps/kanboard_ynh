@@ -172,6 +172,16 @@ ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
+# SETUP CRON
+#=================================================
+ynh_script_progression --message="Setuping a cron..."
+
+cp ../conf/cron_kanboard /etc/cron.d/$app
+ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="/etc/cron.d/$app"
+ynh_replace_string --match_string="__PHPVERSION__" --replace_string="$phpversion" --target_file="/etc/cron.d/$app"
+
+#=================================================
 # SETUP SSOWAT
 #=================================================
 ynh_script_progression --message="Upgrading SSOwat configuration..." --weight=2
