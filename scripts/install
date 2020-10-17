@@ -50,8 +50,6 @@ ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
-
-#=================================================
 # CREATE A MYSQL DATABASE
 #================================================
 ynh_script_progression --message="Creating a MySQL database..." --weight=2
@@ -145,6 +143,14 @@ chmod -R 700 $final_path/sessions
 ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+
+#=================================================
+# SETUP CRON
+#=================================================
+ynh_script_progression --message="Setuping a cron..."
+
+cp ../conf/cron_kandboard /etc/cron.d/$app
+ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
 
 #=================================================
 # SETUP SSOWAT
