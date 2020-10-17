@@ -3,8 +3,8 @@
   "id": "kanboard",
   "packaging_format": 1,
   "description": {
-    "en": "Free and open source Kanban project management software",
-    "fr": "Logiciel de gestion de projet Kanban gratuit et open source"
+    "en": "Kanban project management software",
+    "fr": "Logiciel de gestion de projet Kanban"
   },
   "version": "1.2.16~ynh1",
   "url": "https://kanboard.net/",

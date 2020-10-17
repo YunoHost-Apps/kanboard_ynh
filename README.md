@@ -24,7 +24,7 @@ Kanboard is a simple visual task board web application.
 ## Documentation
 
  * Official documentation: https://docs.kanboard.org/en/latest/
- * YunoHost documentation: If specific documentation is needed, feel free to contribute.
+ * YunoHost documentation: https://yunohost.org/#/app_kanboard
 
 ## YunoHost specific features
 
