@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..." --weight=1
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -22,6 +22,7 @@ admin=$(ynh_app_setting_get --app=$app --key=adminusername)
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # CHECK VERSION
@@ -32,7 +33,7 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 # Fix is_public as a boolean value
 if [ "$is_public" = "Yes" ]; then
@@ -58,7 +59,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=5
+ynh_script_progression --message="Backing up Kanboard before upgrading (may take a while)..." --weight=5
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -95,15 +96,15 @@ mkdir -p $final_path/sessions/
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..." --weight=2
+ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app
@@ -111,24 +112,17 @@ ynh_system_user_create --username=$app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
 
-# Create a dedicated php-fpm config
-ynh_add_fpm_config
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=6
-
-ynh_install_app_dependencies $pkg_dependencies
+# Create a dedicated PHP-FPM config
+ynh_add_fpm_config --package="$extra_php_dependencies"
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_script_progression --message="Reconfiguring kanboard..." --weight=2
+ynh_script_progression --message="Reconfiguring Kanboard..." --weight=2
 
 # Retrieve admin email
 email=$(ynh_user_get_info --username=$admin --key=mail)
@@ -149,14 +143,14 @@ ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --targ
 #=================================================
 # UPGRADE KANBOARD
 #=================================================
-ynh_script_progression --message="Upgrading kanboard..." --weight=2
+ynh_script_progression --message="Upgrading Kanboard..." --weight=2
 
 (
 	cd "$final_path"
 	# Launch database migration
-	php cli db:migrate --no-interaction --verbose
+	php$YNH_PHP_VERSION cli db:migrate --no-interaction --verbose
 	# Launch plugins migration
-	php cli plugin:upgrade --no-interaction --verbose
+	php$YNH_PHP_VERSION cli plugin:upgrade --no-interaction --verbose
 )
 
 #=================================================
@@ -173,9 +167,19 @@ chmod -R 700 $final_path/sessions
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Reconfiguring fail2ban..." --weight=7
+ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
 
 ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+
+#=================================================
+# SETUP CRON
+#=================================================
+ynh_script_progression --message="Setuping a cron..."
+
+cp ../conf/cron_kanboard /etc/cron.d/$app
+ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="/etc/cron.d/$app"
+ynh_replace_string --match_string="__PHPVERSION__" --replace_string="$phpversion" --target_file="/etc/cron.d/$app"
 
 #=================================================
 # SETUP SSOWAT
@@ -200,7 +204,7 @@ ynh_store_file_checksum --file="$config_php"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -208,4 +212,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Installation of Kanboard completed" --last

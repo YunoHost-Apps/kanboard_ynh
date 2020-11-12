@@ -3,17 +3,18 @@
   "id": "kanboard",
   "packaging_format": 1,
   "description": {
-    "en": "Kanboard is a simple visual task board web application"
+    "en": "Kanban project management software",
+    "fr": "Logiciel de gestion de projet Kanban"
   },
-  "version": "1.2.12~ynh1",
+  "version": "1.2.16~ynh1",
   "url": "https://kanboard.net/",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "maintainer": {
     "name": "YunoHost Contributors",
     "email": "apps@yunohost.org"
   },
   "requirements": {
-    "yunohost": ">= 3.5.0"
+    "yunohost": ">= 3.8.1"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
@@ -35,7 +36,8 @@
         "name": "domain",
         "type": "domain",
         "ask": {
-          "en": "Choose a domain for Kanboard"
+          "en": "Choose a domain name for Kanboard",
+          "fr": "Choisissez un nom de domaine pour Kanboard"
         },
         "example": "domain.org"
       },
@@ -43,7 +45,8 @@
         "name": "path",
         "type": "path",
         "ask": {
-          "en": "Choose a path for Kanboard"
+          "en": "Choose a path for Kanboard",
+          "fr": "Choisissez un chemin pour Kanboard"
         },
         "example": "/kanboard",
         "default": "/kanboard"
@@ -52,7 +55,8 @@
         "name": "admin",
         "type": "user",
         "ask": {
-          "en": "Choose the admin user for Kanboard"
+          "en": "Choose the admin user",
+          "fr": "Choisissez l'administrateur"
         },
         "example": "johndoe"
       },
@@ -60,7 +64,8 @@
         "name": "is_public",
         "type": "boolean",
         "ask": {
-          "en": "Is it a public site ?"
+          "en": "Is it a public application?",
+          "fr": "Est-ce une application publique ?"
         },
         "default": false
       }
