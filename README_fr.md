@@ -46,7 +46,7 @@ Kanboard est un gestionnaire de tâches visuel qui permet de gérer facilement d
 
 ### Comment se connecter en tant qu'utilisateurs externes (non SSOwat)
 
-Vous devez éditer ce fichier `/var/www/kanboard/config.php`, trouver la ligne `define('REVERSE_PROXY_AUTH', true);`et la changer de `true` à `false`.
+Vous devez éditer ce fichier `/var/www/kanboard/config.php`, trouver la ligne `define('REVERSE_PROXY_AUTH', true);` et la changer de `true` à `false`.
 **Attention** cela désactive la possibilité de se connecter avec les utilisateurs SSOwat. Vous ne pourrez *que* vous connecter avec les utilisateurs Kanboard créés à l'intérieur de Kanboard.
 Ensuite, vous pouvez vous connecter.
 
@@ -70,6 +70,6 @@ Merci de faire vos pull request sur la [branche testing](https://github.com/Yuno
 Pour essayer la branche testing, procédez comme suit.
 ```
 sudo yunohost app install https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
-or
+ou
 sudo yunohost app upgrade kanboard -u https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 ```
