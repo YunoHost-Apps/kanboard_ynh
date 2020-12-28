@@ -11,7 +11,7 @@ Si vous n'avez pas YunoHost, consultez [le guide](https://yunohost.org/#/install
 ## Vue d'ensemble
 Kanboard est un gestionnaire de tâches visuel qui permet de gérer facilement des petits projets de manière collaborative. L'outil est particulièrement adapté aux personnes qui utilisent la méthode Kanban. On peut voir Kanboard comme une alternative (simplifiée) au logiciel propriétaire Trello. Kanboard est un logiciel minimaliste, il se concentre uniquement sur les fonctionnalités réellement nécessaires. L'interface utilisateur est simple et clair. L'outil est prévu pour fonctionner sur une petite machine tel qu'un Raspberry Pi ou un serveur virtuel privé (VPS). Il n'y a aucune dépendance externe, le glisser-déposer des tâches utilise les nouvelles API de HTML5.
 
-**Version incluse :**  1.2.16
+**Version incluse :**  1.2.17
 
 ## Captures d'écran
 
