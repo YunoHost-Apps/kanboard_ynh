@@ -105,6 +105,7 @@ ynh_systemd_action --action=restart --service_name=fail2ban
 ynh_script_progression --message="Restoring the cron file..." --weight=2
 
 ynh_restore_file --origin_path="/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # GENERIC FINALIZATION

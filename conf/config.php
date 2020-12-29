@@ -36,6 +36,9 @@ define('MAIL_CONFIGURATION', true);
 // E-mail address for the "From" header (notifications)
 define('MAIL_FROM', '__EMAIL__');
 
+// E-mail address used for the "Bcc" header to send a copy of all notifications
+define('MAIL_BCC', '');
+
 // Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
 define('MAIL_TRANSPORT', 'mail');
 
