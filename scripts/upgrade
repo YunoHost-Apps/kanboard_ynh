@@ -22,7 +22,9 @@ admin=$(ynh_app_setting_get --app=$app --key=adminusername)
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+email=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK VERSION
@@ -117,34 +119,24 @@ ynh_add_fpm_config --package="$extra_php_dependencies"
 #=================================================
 ynh_script_progression --message="Reconfiguring Kanboard..." --weight=2
 
-# Retrieve admin email
-email=$(ynh_user_get_info --username=$admin --key=mail)
-
 # Copy and edit config.php
-config_php="${final_path}/config.php"
+config_php="$final_path/config.php"
 
 ynh_backup_if_checksum_is_different --file="$config_php"
 
-cp ../conf/config.php "$config_php"
-db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config_php"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$config_php"
-ynh_replace_string --match_string="__USER__"    --replace_string=$admin   --target_file="$config_php"
-ynh_replace_string --match_string="__EMAIL__"   --replace_string=$email   --target_file="$config_php"
-ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --target_file="$config_php"
+ynh_add_config --template="../conf/config.php" --destination="$config_php"
 
 #=================================================
 # UPGRADE KANBOARD
 #=================================================
 ynh_script_progression --message="Upgrading Kanboard..." --weight=2
 
-(
-	cd "$final_path"
+pushd $final_path
 	# Launch database migration
-	php$YNH_PHP_VERSION cli db:migrate --no-interaction --verbose
+	php$phpversion cli db:migrate --no-interaction --verbose
 	# Launch plugins migration
-	php$YNH_PHP_VERSION cli plugin:upgrade --no-interaction --verbose
-)
+	php$phpversion cli plugin:upgrade --no-interaction --verbose
+popd
 
 #=================================================
 # GENERIC FINALIZATION
@@ -169,10 +161,8 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 #=================================================
 ynh_script_progression --message="Setuping a cron..."
 
-cp ../conf/cron_kanboard /etc/cron.d/$app
-ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="/etc/cron.d/$app"
-ynh_replace_string --match_string="__PHPVERSION__" --replace_string="$phpversion" --target_file="/etc/cron.d/$app"
+ynh_add_config --template="../conf/cron_kanboard" --destination="$/etc/cron.d/$app"
+
 chmod 644 "/etc/cron.d/$app"
 
 #=================================================
