@@ -10,8 +10,8 @@
   "url": "https://kanboard.net/",
   "license": "MIT",
   "maintainer": {
-    "name": "",
-    "email": ""
+    "name": "YunoHost Contributors",
+    "email": "apps@yunohost.org"
   },
   "requirements": {
     "yunohost": ">= 3.8.1"
