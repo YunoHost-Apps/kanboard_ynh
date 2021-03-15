@@ -173,7 +173,7 @@ ynh_script_progression --message="Upgrading SSOwat configuration..." --weight=2
 # Make app public or private
 if [ $is_public -eq 1 ]
 then
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+	ynh_permission_update --permission="main" --add="visitors"
 	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$config_php"
 	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$config_php"
 	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$config_php"
