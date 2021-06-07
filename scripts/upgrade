@@ -71,6 +71,14 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
+#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -81,10 +89,16 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$final_path" --keep="$final_path/config.php"
 fi
 
 mkdir -p $final_path/sessions/
+
+chmod 750 "$final_path"
+chown -R $app $final_path/{data,plugins,sessions}
+chmod -R 700 $final_path/sessions
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -95,34 +109,12 @@ ynh_script_progression --message="Upgrading NGINX web server configuration..." -
 ynh_add_nginx_config
 
 #=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
-
-#=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
 
 # Create a dedicated PHP-FPM config
 ynh_add_fpm_config --package="$extra_php_dependencies"
-
-#=================================================
-# SPECIFIC UPGRADE
-#=================================================
-# CREATE CONFIG.PHP
-#=================================================
-ynh_script_progression --message="Reconfiguring Kanboard..." --weight=2
-
-# Copy and edit config.php
-config_php="$final_path/config.php"
-
-ynh_backup_if_checksum_is_different --file="$config_php"
-
-ynh_add_config --template="../conf/config.php" --destination="$config_php"
 
 #=================================================
 # UPGRADE KANBOARD
@@ -135,17 +127,6 @@ pushd $final_path
 	# Launch plugins migration
 	php$phpversion cli plugin:upgrade --no-interaction --verbose
 popd
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-
-# Set permissions to app files
-chown -R root: $final_path
-chown -R $app $final_path/{data,plugins,sessions}
-chmod -R 700 $final_path/sessions
 
 #=================================================
 # SETUP FAIL2BAN

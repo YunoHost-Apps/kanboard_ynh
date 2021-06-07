@@ -59,6 +59,14 @@ ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_mysql_setup_db --db_user=$db_name --db_name=$db_name
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..." --weight=2
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=2
@@ -69,6 +77,12 @@ ynh_setup_source --dest_dir="$final_path"
 
 mkdir -p $final_path/sessions/
 
+chmod 750 "$final_path"
+chown -R $app $final_path/{data,plugins,sessions}
+chmod -R 700 $final_path/sessions
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -76,14 +90,6 @@ ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..." --weight=2
-
-# Create a system user
-ynh_system_user_create --username=$app
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -101,12 +107,10 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Configuring Kanboard..."
 
-cp ../conf/config.php "$config_php"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config_php"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$config_php"
-ynh_replace_string --match_string="__USER__"    --replace_string=$admin   --target_file="$config_php"
-ynh_replace_string --match_string="__EMAIL__"   --replace_string=$email   --target_file="$config_php"
-ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --target_file="$config_php"
+ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
+
+chmod 400 "$final_path/config.php"
+chown $app "$final_path/config.php"
 
 #=================================================
 # DATABASE INITIALIZATION
@@ -119,17 +123,6 @@ pushd $final_path
 	# Launch database migration
 	php$phpversion cli db:migrate --no-interaction --verbose
 popd
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#================================================
-
-# Set permissions to app files
-chown -R root: $final_path
-chown -R $app $final_path/{data,plugins,sessions}
-chmod -R 700 $final_path/sessions
 
 #=================================================
 # SETUP FAIL2BAN

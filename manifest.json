@@ -6,7 +6,7 @@
     "en": "Kanban project management software",
     "fr": "Logiciel de gestion de projet Kanban"
   },
-  "version": "1.2.18~ynh2",
+  "version": "1.2.19~ynh1",
   "url": "https://kanboard.net/",
   "license": "MIT",
   "maintainer": {
@@ -14,7 +14,7 @@
     "email": ""
   },
   "requirements": {
-    "yunohost": ">= 4.1.7"
+    "yunohost": ">= 4.2.0"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
