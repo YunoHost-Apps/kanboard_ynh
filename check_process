@@ -12,11 +12,11 @@
 		setup_private=1
 		setup_public=1
 		upgrade=1
-		upgrade=1	from_commit=f159f7a9bdbe470ec026edf09a6eebf10f23425e
+		upgrade=1	from_commit=c20bdd69644de72736cdc4438a36faab9ab24c72
 		backup_restore=1
 		multi_instance=1
 		change_url=1
 ;;; Upgrade options
-	; commit=f159f7a9bdbe470ec026edf09a6eebf10f23425e
-		name=Create check_process
+	; commit=c20bdd69644de72736cdc4438a36faab9ab24c72
+		name=Merge pull request #114 from YunoHost-Apps/testing 
 		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&is_public=Yes&
