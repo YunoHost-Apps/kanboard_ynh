@@ -161,9 +161,6 @@ else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config_php"
-
 #=================================================
 # RELOAD NGINX
 #=================================================
