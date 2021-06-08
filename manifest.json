@@ -7,7 +7,15 @@
     "fr": "Logiciel de gestion de projet Kanban"
   },
   "version": "1.2.19~ynh1",
-  "url": "https://kanboard.net/",
+  "url": "https://kanboard.net",
+  "upstream": {
+      "license": "MIT",
+      "website": "https://kanboard.net",
+      "demo": "https://demo.yunohost.org/kanboard/",
+      "admindoc": "https://docs.kanboard.org/en/latest/",
+      "userdoc": "https://yunohost.org/#/app_kanboard",
+      "code": "https://github.com/kanboard/kanboard"
+  },
   "license": "MIT",
   "maintainer": {
     "name": "",
