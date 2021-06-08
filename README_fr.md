@@ -1,44 +1,27 @@
 # Kanboard pour YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)  
+[![Niveau d'intégration](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)  
 [![Installer Kanboard avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
-*[Read this readme in english.](./README.md)* 
+*[Read this readme in english.](./README.md)*
+*[Lire ce readme en français.](./README_fr.md)*
 
-> *Ce package vous permet d'installer Kanboard rapidement et simplement sur un serveur YunoHost.  
-Si vous n'avez pas YunoHost, consultez [le guide](https://yunohost.org/#/install) pour apprendre comment l'installer.*
+> *Ce package vous permet d'installer Kanboard rapidement et simplement sur un serveur YunoHost.
+Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
 
 ## Vue d'ensemble
-Kanboard est un gestionnaire de tâches visuel qui permet de gérer facilement des petits projets de manière collaborative. L'outil est particulièrement adapté aux personnes qui utilisent la méthode Kanban. On peut voir Kanboard comme une alternative (simplifiée) au logiciel propriétaire Trello. Kanboard est un logiciel minimaliste, il se concentre uniquement sur les fonctionnalités réellement nécessaires. L'interface utilisateur est simple et clair. L'outil est prévu pour fonctionner sur une petite machine tel qu'un Raspberry Pi ou un serveur virtuel privé (VPS). Il n'y a aucune dépendance externe, le glisser-déposer des tâches utilise les nouvelles API de HTML5.
 
-**Version incluse :**  1.2.18
+Logiciel de gestion de projet Kanban
+
+**Version incluse :** 1.2.19~ynh1
+
+**Démo :** https://demo.yunohost.org/kanboard/
 
 ## Captures d'écran
 
-![](https://kanboard.org/assets/img/board.png)
+![](./doc/screenshots/board.png)
 
-## Démo
-
-* [Démo YunoHost](https://demo.yunohost.org/kanboard/)
-
-## Configuration
-
-## Documentation
-
- * Documentation officielle : https://docs.kanboard.org/fr/latest/
- * Documentation YunoHost : https://yunohost.org/#/app_kanboard_fr
-
-## Caractéristiques spécifiques YunoHost
-
-#### Support multi-utilisateur
-
-* L'authentification LDAP et HTTP est-elle prise en charge ? **Non**
-* L'application peut-elle être utilisée par plusieurs utilisateurs ? **Oui**
-
-#### Architectures supportées
-
-* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/kanboard%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/kanboard/)
+## Avertissements / informations importantes
 
 ## Limitations
 
@@ -54,14 +37,14 @@ Ensuite, vous pouvez vous connecter.
 
 Cela est dû à une limitation de Kanboard.
 
-## Liens
+## Documentations et ressources
 
- * Signaler un bug : https://github.com/YunoHost-Apps/kanboard_ynh/issues
- * Site de l'application : https://kanboard.org
- * Dépôt de l'application principale : https://github.com/kanboard/kanboard
- * Site web YunoHost : https://yunohost.org/
-
----
+* Site officiel de l'app : https://kanboard.net
+* Documentation officielle utilisateur : https://yunohost.org/#/app_kanboard
+* Documentation officielle de l'admin : https://docs.kanboard.org/en/latest/
+* Dépôt de code officiel de l'app : https://github.com/kanboard/kanboard
+* Documentation YunoHost pour cette app : https://yunohost.org/app_kanboard
+* Signaler un bug : https://github.com/YunoHost-Apps/kanboard_ynh/issues
 
 ## Informations pour les développeurs
 
@@ -73,3 +56,5 @@ sudo yunohost app install https://github.com/YunoHost-Apps/kanboard_ynh/tree/tes
 ou
 sudo yunohost app upgrade kanboard -u https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 ```
+
+**Plus d'infos sur le packaging d'applications :** https://yunohost.org/packaging_apps

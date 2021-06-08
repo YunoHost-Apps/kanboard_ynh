@@ -23,6 +23,7 @@ domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
+email=$(ynh_user_get_info --username=$admin --key=mail)
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -45,7 +46,6 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=adminusername --value=$admin
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -59,6 +59,14 @@ ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_mysql_setup_db --db_user=$db_name --db_name=$db_name
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..." --weight=2
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=2
@@ -69,6 +77,12 @@ ynh_setup_source --dest_dir="$final_path"
 
 mkdir -p $final_path/sessions/
 
+chmod 750 "$final_path"
+chown -R $app $final_path/{data,plugins,sessions}
+chmod -R 700 $final_path/sessions
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -76,14 +90,6 @@ ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..." --weight=2
-
-# Create a system user
-ynh_system_user_create --username=$app
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -101,18 +107,16 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Configuring Kanboard..."
 
-# Retrieve admin email
-email=$(ynh_user_get_info --username=$admin --key=mail)
+cp ../conf/config.php "$final_path/config.php"
 
-# Copy and edit config.php
-config_php="${final_path}/config.php"
+ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$final_path/config.php"
+ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$final_path/config.php"
+ynh_replace_string --match_string="__ADMIN__" --replace_string=$admin --target_file="$final_path/config.php"
+ynh_replace_string --match_string="__EMAIL__" --replace_string=$email --target_file="$final_path/config.php"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string=$domain --target_file="$final_path/config.php"
 
-cp ../conf/config.php "$config_php"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config_php"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$config_php"
-ynh_replace_string --match_string="__USER__"    --replace_string=$admin   --target_file="$config_php"
-ynh_replace_string --match_string="__EMAIL__"   --replace_string=$email   --target_file="$config_php"
-ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --target_file="$config_php"
+chmod 400 "$final_path/config.php"
+chown $app "$final_path/config.php"
 
 #=================================================
 # DATABASE INITIALIZATION
@@ -120,22 +124,11 @@ ynh_replace_string --match_string="__DOMAIN__"  --replace_string=$domain  --targ
 ynh_script_progression --message="Initializing database..." --weight=7
 
 ynh_mysql_connect_as --user="$db_name" --password="$db_pwd" --database="$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
-(
-	cd "$final_path"
+
+pushd $final_path
 	# Launch database migration
-	php$YNH_PHP_VERSION cli db:migrate --no-interaction --verbose
-)
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#================================================
-
-# Set permissions to app files
-chown -R root: $final_path
-chown -R $app $final_path/{data,plugins,sessions}
-chmod -R 700 $final_path/sessions
+	php$phpversion cli db:migrate --no-interaction --verbose
+popd
 
 #=================================================
 # SETUP FAIL2BAN
@@ -147,12 +140,10 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 #=================================================
 # SETUP CRON
 #=================================================
-ynh_script_progression --message="Setuping a cron..."
+ynh_script_progression --message="Setuping a cron..." --weight=1
 
-cp ../conf/cron_kanboard /etc/cron.d/$app
-ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="/etc/cron.d/$app"
-ynh_replace_string --match_string="__PHPVERSION__" --replace_string="$phpversion" --target_file="/etc/cron.d/$app"
+ynh_add_config --template="../conf/cron_kanboard" --destination="/etc/cron.d/$app"
+
 chmod 644 "/etc/cron.d/$app"
 
 #=================================================
@@ -163,22 +154,22 @@ ynh_script_progression --message="Configuring SSOwat..." --weight=2
 # Make app public or private
 if [ $is_public -eq 1 ]
 then
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$config_php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$config_php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$config_php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$config_php"
+	ynh_permission_update --permission="main" --add="visitors"
+	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$final_path/config.php"
 else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config_php"
+ynh_store_file_checksum --file="$final_path/config.php"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
