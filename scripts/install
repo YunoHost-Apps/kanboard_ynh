@@ -142,7 +142,7 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 #=================================================
 ynh_script_progression --message="Setuping a cron..." --weight=1
 
-ynh_add_config --template="../conf/cron_kanboard" --destination="$/etc/cron.d/$app"
+ynh_add_config --template="../conf/cron_kanboard" --destination="/etc/cron.d/$app"
 
 chmod 644 "/etc/cron.d/$app"
 
