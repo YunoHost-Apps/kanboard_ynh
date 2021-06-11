@@ -6,15 +6,23 @@
     "en": "Kanban project management software",
     "fr": "Logiciel de gestion de projet Kanban"
   },
-  "version": "1.2.18~ynh2",
-  "url": "https://kanboard.net/",
+  "version": "1.2.20~ynh1",
+  "url": "https://kanboard.net",
+  "upstream": {
+      "license": "MIT",
+      "website": "https://kanboard.net",
+      "demo": "https://demo.yunohost.org/kanboard/",
+      "admindoc": "https://docs.kanboard.org/en/latest/",
+      "userdoc": "https://yunohost.org/#/app_kanboard",
+      "code": "https://github.com/kanboard/kanboard"
+  },
   "license": "MIT",
   "maintainer": {
     "name": "",
     "email": ""
   },
   "requirements": {
-    "yunohost": ">= 3.8.1"
+    "yunohost": ">= 4.2.4"
   },
   "previous_maintainers": [{
     "name": "mbugeia",
@@ -27,7 +35,7 @@
   "multi_instance": true,
   "services": [
     "nginx",
-    "php7.0-fpm",
+    "php7.3-fpm",
     "mysql"
   ],
   "arguments": {
@@ -35,38 +43,22 @@
       {
         "name": "domain",
         "type": "domain",
-        "ask": {
-          "en": "Choose a domain name for Kanboard",
-          "fr": "Choisissez un nom de domaine pour Kanboard"
-        },
         "example": "domain.org"
       },
       {
         "name": "path",
         "type": "path",
-        "ask": {
-          "en": "Choose a path for Kanboard",
-          "fr": "Choisissez un chemin pour Kanboard"
-        },
         "example": "/kanboard",
         "default": "/kanboard"
       },
       {
         "name": "admin",
         "type": "user",
-        "ask": {
-          "en": "Choose the admin user",
-          "fr": "Choisissez l'administrateur"
-        },
         "example": "johndoe"
       },
       {
         "name": "is_public",
         "type": "boolean",
-        "ask": {
-          "en": "Is it a public application?",
-          "fr": "Est-ce une application publique ?"
-        },
         "default": false
       }
     ]
