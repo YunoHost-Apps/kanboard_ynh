@@ -107,13 +107,8 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Configuring Kanboard..."
 
-cp ../conf/config.php "$final_path/config.php"
-
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$final_path/config.php"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string=$db_name --target_file="$final_path/config.php"
-ynh_replace_string --match_string="__ADMIN__" --replace_string=$admin --target_file="$final_path/config.php"
-ynh_replace_string --match_string="__EMAIL__" --replace_string=$email --target_file="$final_path/config.php"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string=$domain --target_file="$final_path/config.php"
+dir="__DIR__"
+ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
 
 chmod 400 "$final_path/config.php"
 chown $app "$final_path/config.php"
