@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Logiciel de gestion de projet Kanban
 
-**Version incluse :** 1.2.20~ynh4
+**Version incluse :** 1.2.21~ynh1
 
 **Démo :** https://demo.yunohost.org/kanboard/
 
@@ -40,7 +40,6 @@ Cela est dû à une limitation de Kanboard.
 ## Documentations et ressources
 
 * Site officiel de l'app : https://kanboard.net
-* Documentation officielle utilisateur : https://yunohost.org/#/app_kanboard
 * Documentation officielle de l'admin : https://docs.kanboard.org/en/latest/
 * Dépôt de code officiel de l'app : https://github.com/kanboard/kanboard
 * Documentation YunoHost pour cette app : https://yunohost.org/app_kanboard
