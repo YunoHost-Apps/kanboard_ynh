@@ -17,7 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Kanban project management software
 
-**Shipped version:** 1.2.20~ynh4
+**Shipped version:** 1.2.21~ynh1
 
 **Demo:** https://demo.yunohost.org/kanboard/
 
@@ -44,7 +44,6 @@ This is due to a Kanboard limitation.
 ## Documentation and resources
 
 * Official app website: https://kanboard.net
-* Official user documentation: https://yunohost.org/#/app_kanboard
 * Official admin documentation: https://docs.kanboard.org/en/latest/
 * Upstream app code repository: https://github.com/kanboard/kanboard
 * YunoHost documentation for this app: https://yunohost.org/app_kanboard
