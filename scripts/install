@@ -165,6 +165,8 @@ else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
+ynh_permission_create --permission "ics" --url "/controller=ICalendarController" --allowed "visitors" --label "ICS Public access"
+
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$final_path/config.php"
 
