@@ -1,0 +1,1 @@
+Kanboard est un logiciel de gestion de projet de type Kanban. 
