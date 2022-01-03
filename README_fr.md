@@ -11,7 +11,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 ## Vue d'ensemble
 
-Logiciel de gestion de projet Kanban
+Kanboard est un logiciel de gestion de projet de type Kanban. 
 
 **Version incluse :** 1.2.21~ynh3
 
