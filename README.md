@@ -15,7 +15,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 ## Overview
 
-Kanban project management software
+Kanboard is project management software that focuses on the Kanban methodology.
 
 **Shipped version:** 1.2.21~ynh3
 
