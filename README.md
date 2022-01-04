@@ -44,6 +44,7 @@ This is due to a Kanboard limitation.
 ## Documentation and resources
 
 * Official app website: https://kanboard.net
+* Official user documentation: https://docs.kanboard.org/en/latest/user_guide/index.html
 * Official admin documentation: https://docs.kanboard.org/en/latest/
 * Upstream app code repository: https://github.com/kanboard/kanboard
 * YunoHost documentation for this app: https://yunohost.org/app_kanboard

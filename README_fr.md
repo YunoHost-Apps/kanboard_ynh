@@ -40,6 +40,7 @@ Cela est dû à une limitation de Kanboard.
 ## Documentations et ressources
 
 * Site officiel de l'app : https://kanboard.net
+* Documentation officielle utilisateur : https://docs.kanboard.org/en/latest/user_guide/index.html
 * Documentation officielle de l'admin : https://docs.kanboard.org/en/latest/
 * Dépôt de code officiel de l'app : https://github.com/kanboard/kanboard
 * Documentation YunoHost pour cette app : https://yunohost.org/app_kanboard
