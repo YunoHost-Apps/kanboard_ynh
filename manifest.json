@@ -13,6 +13,7 @@
       "website": "https://kanboard.net",
       "demo": "https://demo.yunohost.org/kanboard/",
       "admindoc": "https://docs.kanboard.org/en/latest/",
+      "userdoc": "https://docs.kanboard.org/en/latest/user_guide/index.html",
       "code": "https://github.com/kanboard/kanboard"
   },
   "license": "MIT",
