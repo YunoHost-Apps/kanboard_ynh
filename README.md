@@ -17,7 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Kanban project management software
 
-**Shipped version:** 1.2.21~ynh3
+**Shipped version:** 1.2.22~ynh1
 
 **Demo:** https://demo.yunohost.org/kanboard/
 
