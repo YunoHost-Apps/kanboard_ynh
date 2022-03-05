@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Logiciel de gestion de projet Kanban
 
-**Version incluse :** 1.2.21~ynh3
+**Version incluse :** 1.2.22~ynh1
 
 **Démo :** https://demo.yunohost.org/kanboard/
 
