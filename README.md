@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Kanboard for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![Working status](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)  
 [![Install Kanboard with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -23,7 +23,7 @@ Kanban project management software
 
 ## Screenshots
 
-![](./doc/screenshots/board.png)
+![Screenshot of Kanboard](./doc/screenshots/board.png)
 
 ## Disclaimers / important information
 
@@ -43,21 +43,22 @@ This is due to a Kanboard limitation.
 
 ## Documentation and resources
 
-* Official app website: https://kanboard.net
-* Official admin documentation: https://docs.kanboard.org/en/latest/
-* Upstream app code repository: https://github.com/kanboard/kanboard
-* YunoHost documentation for this app: https://yunohost.org/app_kanboard
-* Report a bug: https://github.com/YunoHost-Apps/kanboard_ynh/issues
+* Official app website: <https://kanboard.net>
+* Official admin documentation: <https://docs.kanboard.org/en/latest/>
+* Upstream app code repository: <https://github.com/kanboard/kanboard>
+* YunoHost documentation for this app: <https://yunohost.org/app_kanboard>
+* Report a bug: <https://github.com/YunoHost-Apps/kanboard_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade kanboard -u https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
