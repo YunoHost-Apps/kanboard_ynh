@@ -158,10 +158,10 @@ ynh_script_progression --message="Upgrading SSOwat configuration..." --weight=2
 if [ $is_public -eq 1 ]
 then
 	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$final_path/data/config.php"
+	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/data/config.php"
+	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/data/config.php"
+	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$final_path/data/config.php"
 else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
