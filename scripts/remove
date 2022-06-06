@@ -42,7 +42,7 @@ ynh_mysql_remove_db --db_user=$db_user --db_name=$db_name
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Removing Kanboard main directory..."
+ynh_script_progression --message="Removing the app main directory..."
 
 # Remove the app directory securely
 ynh_secure_remove --file="$final_path"

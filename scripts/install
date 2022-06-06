@@ -119,7 +119,7 @@ ynh_add_nginx_config
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_script_progression --message="Configuring Kanboard..."
+ynh_script_progression --message="Configuring the app..."
 
 dir="__DIR__"
 ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
@@ -158,7 +158,7 @@ chmod 644 "/etc/cron.d/$app"
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..." --weight=2
+ynh_script_progression --message="Configuring permissions..." --weight=2
 
 # Make app public or private
 if [ $is_public -eq 1 ]
@@ -169,7 +169,8 @@ then
 	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
 	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/config.php"
 else
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
+	ynh_permission_update --permission="main" --url="/jsonrpc.php" --add="visitors"
+	#ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
 # Calculate and store the config file checksum into the app settings
