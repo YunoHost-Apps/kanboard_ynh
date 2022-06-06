@@ -91,7 +91,7 @@ ynh_setup_source --dest_dir="$final_path"
 mkdir -p $final_path/sessions/
 
 chmod 750 "$final_path"
-#chown -R $app $final_path/{data,plugins,sessions}
+chown -R $app $final_path/{data,plugins,sessions}
 chmod -R 700 $final_path/sessions
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
@@ -121,10 +121,10 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 ynh_script_progression --message="Configuring Kanboard..."
 
 dir="__DIR__"
-ynh_add_config --template="../conf/config.php" --destination="$final_path/data/config.php"
+ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
 
-chmod 400 "$final_path/data/config.php"
-chown $app "$final_path/data/config.php"
+chmod 400 "$final_path/config.php"
+chown $app "$final_path/config.php"
 
 #=================================================
 # DATABASE INITIALIZATION
@@ -163,16 +163,16 @@ ynh_script_progression --message="Configuring SSOwat..." --weight=2
 if [ $is_public -eq 1 ]
 then
 	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$" --replace_string="define('LDAP_AUTH', true);" --target_file="$final_path/data/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$" --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/data/config.php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/data/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/data/config.php"
+	ynh_replace_string --match_string="define('LDAP_AUTH'.*$" --replace_string="define('LDAP_AUTH', true);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$" --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/config.php"
 else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$final_path/data/config.php"
+ynh_store_file_checksum --file="$final_path/config.php"
 
 #=================================================
 # RELOAD NGINX
