@@ -19,10 +19,9 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 admin=$(ynh_app_setting_get --app=$app --key=admin)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+phpversion=$YNH_PHP_VERSION
 
 #=================================================
 # CHECK VERSION
@@ -99,6 +98,14 @@ chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
 #=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
+
+# Create a dedicated PHP-FPM config
+ynh_add_fpm_config
+
+#=================================================
 # NGINX CONFIGURATION
 #=================================================
 ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
@@ -112,14 +119,6 @@ ynh_add_nginx_config
 ynh_script_progression --message="Upgrading dependencies..." --weight=3
 
 ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
-
-# Create a dedicated PHP-FPM config
-ynh_add_fpm_config
 
 #=================================================
 # UPGRADE KANBOARD
@@ -148,23 +147,6 @@ ynh_script_progression --message="Setuping a cron..." --weight=2
 ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
 chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..." --weight=2
-
-# Make app public or private
-if [ $is_public -eq 1 ]
-then
-	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$" --replace_string="define('LDAP_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$" --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/config.php"
-else
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
-fi
 
 #=================================================
 # RELOAD NGINX
