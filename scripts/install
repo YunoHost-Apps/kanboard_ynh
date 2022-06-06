@@ -121,10 +121,10 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 ynh_script_progression --message="Configuring Kanboard..."
 
 dir="__DIR__"
-ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
+ynh_add_config --template="../conf/config.php" --destination="$final_path/data/config.php"
 
-chmod 400 "$final_path/config.php"
-chown $app "$final_path/config.php"
+chmod 400 "$final_path/data/config.php"
+chown $app "$final_path/data/config.php"
 
 #=================================================
 # DATABASE INITIALIZATION

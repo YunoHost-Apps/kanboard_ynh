@@ -43,7 +43,7 @@ define('MAIL_BCC', '');
 define('MAIL_TRANSPORT', 'mail');
 
 // SMTP configuration to use when the "smtp" transport is chosen
-define('MAIL_SMTP_HOSTNAME', '');
+define('MAIL_SMTP_HOSTNAME', 'localhost');
 define('MAIL_SMTP_PORT', 25);
 define('MAIL_SMTP_USERNAME', '');
 define('MAIL_SMTP_PASSWORD', '');
