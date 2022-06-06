@@ -1,24 +1,32 @@
 <?php
 
+/*******************************************************************/
+/* Rename this file to config.php if you want to change the values */
+/*                                                                 */
+/* Make sure all paths are absolute by using __DIR__ where needed  */
+/*******************************************************************/
+
 // Data folder (must be writeable by the web server user and absolute)
 define('DATA_DIR', __DIR__.DIRECTORY_SEPARATOR.'data');
 
 // Enable/Disable debug
 define('DEBUG', false);
 
-// Available log drivers: syslog, stderr, stdout or file
-define('LOG_DRIVER', 'file');
+// Available log drivers: syslog, stderr, stdout, system or file
+define('LOG_DRIVER', 'system');
 
 // Log filename if the log driver is "file"
 define('LOG_FILE', DATA_DIR.DIRECTORY_SEPARATOR.'debug.log');
 
 // Plugins directory
-define('PLUGINS_DIR', 'plugins');
+define('PLUGINS_DIR', __DIR__.DIRECTORY_SEPARATOR.'plugins');
 
 // Plugins directory URL
-define('PLUGIN_API_URL', 'https://kanboard.net/plugins.json');
+define('PLUGIN_API_URL', 'https://kanboard.org/plugins.json');
 
-// Enable/Disable plugin installer
+// Enable/Disable plugin installer (Disabled by default for security reasons)
+// There is no code review or any approval process to submit a plugin.
+// This is up to the Kanboard instance owner to validate if a plugin is legit.
 define('PLUGIN_INSTALLER', true);
 
 // Available cache drivers are "file" and "memory"
@@ -33,7 +41,7 @@ define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
 // Enable/disable email configuration from the user interface
 define('MAIL_CONFIGURATION', true);
 
-// E-mail address for the "From" header (notifications)
+// E-mail address used for the "From" header (notifications)
 define('MAIL_FROM', '__EMAIL__');
 
 // E-mail address used for the "Bcc" header to send a copy of all notifications
@@ -84,14 +92,17 @@ define('DB_SSL_CERT', null);
 // Mysql SSL CA
 define('DB_SSL_CA', null);
 
+// Mysql SSL server verification, set to false if you don't want the Mysql driver to validate the certificate CN
+define('DB_VERIFY_SERVER_CERT', null);
+
+// Timeout value for PDO attribute
+define('DB_TIMEOUT', null);
+
 // Enable LDAP authentication (false by default)
 define('LDAP_AUTH', false);
 
-// LDAP server hostname
-define('LDAP_SERVER', 'localhost');
-
-// LDAP server port (389 by default)
-define('LDAP_PORT', 389);
+// LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
+define('LDAP_SERVER', 'ldap://hostname:389');
 
 // By default, require certificate to be verified for ldaps:// style URL. Set to false to skip the verification
 define('LDAP_SSL_VERIFY', true);
@@ -146,8 +157,12 @@ define('LDAP_USER_ATTRIBUTE_PHOTO', '');
 // Put an empty string to disable language sync
 define('LDAP_USER_ATTRIBUTE_LANGUAGE', '');
 
-// Allow automatic LDAP user creation
+// Automatically create a user profile when a user authenticates via LDAP.
+// If set to false, only LDAP users can log in for whom a Kanboard profile already exists.
 define('LDAP_USER_CREATION', true);
+
+// Set new user as Manager
+define('LDAP_USER_DEFAULT_ROLE_MANAGER', false);
 
 // LDAP DN for administrators
 // Example: CN=Kanboard-Admins,CN=Users,DC=kanboard,DC=local
@@ -173,8 +188,15 @@ define('LDAP_GROUP_FILTER', '');
 // Example for OpenLDAP: (&(objectClass=posixGroup)(memberUid=%s))
 define('LDAP_GROUP_USER_FILTER', '');
 
+// LDAP attribute for the user in the group filter
+// 'username' or 'dn'
+define('LDAP_GROUP_USER_ATTRIBUTE', 'username');
+
 // LDAP attribute for the group name
 define('LDAP_GROUP_ATTRIBUTE_NAME', 'cn');
+
+// Enable/Disable groups synchronization when external authentication is used.
+define('LDAP_GROUP_SYNC', true);
 
 // Enable/disable the reverse proxy authentication
 define('REVERSE_PROXY_AUTH', true);
@@ -184,6 +206,9 @@ define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
 
 // Username of the admin, by default blank
 define('REVERSE_PROXY_DEFAULT_ADMIN', '__ADMIN__');
+
+// Header name to use for the username
+define('REVERSE_PROXY_EMAIL_HEADER', 'REMOTE_EMAIL');
 
 // Default domain to use for setting the email address
 define('REVERSE_PROXY_DEFAULT_DOMAIN', '__DOMAIN__');
@@ -224,6 +249,9 @@ define('BRUTEFORCE_LOCKDOWN_DURATION', 15);
 // Session duration in second (0 = until the browser is closed)
 // See http://php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
 define('SESSION_DURATION', 0);
+
+// Session handler: db or php
+define('SESSION_HANDLER', 'db');
 
 // HTTP client proxy
 define('HTTP_PROXY_HOSTNAME', '');
