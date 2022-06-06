@@ -7,7 +7,7 @@ define('DATA_DIR', __DIR__.DIRECTORY_SEPARATOR.'data');
 define('DEBUG', false);
 
 // Available log drivers: syslog, stderr, stdout or file
-define('LOG_DRIVER', '');
+define('LOG_DRIVER', 'file');
 
 // Log filename if the log driver is "file"
 define('LOG_FILE', DATA_DIR.DIRECTORY_SEPARATOR.'debug.log');
