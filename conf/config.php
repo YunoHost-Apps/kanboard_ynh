@@ -61,7 +61,7 @@ define('DB_RUN_MIGRATIONS', false);
 define('DB_DRIVER', 'mysql');
 
 // Mysql/Postgres username
-define('DB_USERNAME', '__DB_NAME__');
+define('DB_USERNAME', '__DB_USER__');
 
 // Mysql/Postgres password
 define('DB_PASSWORD', '__DB_PWD__');
