@@ -204,7 +204,7 @@ define('MARKDOWN_ESCAPE_HTML', true);
 define('API_AUTHENTICATION_HEADER', '');
 
 // Enable/disable url rewrite
-define('ENABLE_URL_REWRITE', false);
+define('ENABLE_URL_REWRITE', true);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
 define('HIDE_LOGIN_FORM', true);
