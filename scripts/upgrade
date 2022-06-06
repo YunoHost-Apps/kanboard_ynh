@@ -97,6 +97,14 @@ chmod -R 700 $final_path/sessions
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Upgrading dependencies..." --weight=3
+
+ynh_install_app_dependencies $pkg_dependencies
+
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
@@ -112,13 +120,6 @@ ynh_script_progression --message="Upgrading NGINX web server configuration..." -
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=3
-
-ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # UPGRADE KANBOARD
