@@ -73,7 +73,7 @@ fi
 
 # Create a permission if needed
 if ! ynh_permission_exists --permission="ics"; then
-	ynh_permission_create --permission "ics" --url "/controller=ICalendarController" --allowed "visitors" --label "ICS Public access"
+	ynh_permission_create --permission="ics" --url="/?controller=ICalendarController" --allowed="visitors" --label="ICS Public access"
 fi
 
 #=================================================
