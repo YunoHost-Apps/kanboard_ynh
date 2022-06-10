@@ -13,6 +13,11 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
+ynh_clean_setup () {
+	### Remove this function if there's nothing to clean before calling the remove script.
+	true
+}
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
 #=================================================
@@ -21,16 +26,17 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
+admin=$YNH_APP_ARG_ADMIN
 email=$(ynh_user_get_info --username=$admin --key=mail)
+phpversion=$YNH_PHP_VERSION
 
 app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..."
+ynh_script_progression --message="Validating installation parameters..." --weight=1
 
 # Check destination directory
 final_path=/var/www/$app
@@ -42,10 +48,10 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..."
+ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=adminusername --value=$admin
+ynh_app_setting_set --app=$app --key=admin --value=$admin
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -62,8 +68,9 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_script_progression --message="Creating a MySQL database..." --weight=2
 
 db_name=$(ynh_sanitize_dbid --db_name=$app)
+db_user=$db_name
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-ynh_mysql_setup_db --db_user=$db_name --db_name=$db_name
+ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name
 
 #=================================================
 # CREATE DEDICATED USER
@@ -91,14 +98,6 @@ chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
 #=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring NGINX web server..." --weight=2
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
-
-#=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression --message="Configuring PHP-FPM..." --weight=16
@@ -108,11 +107,19 @@ ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring NGINX web server..." --weight=2
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
+
+#=================================================
 # SPECIFIC SETUP
 #=================================================
 # CREATE CONFIG.PHP
 #=================================================
-ynh_script_progression --message="Configuring Kanboard..."
+ynh_script_progression --message="Configuring the app..."
 
 dir="__DIR__"
 ynh_add_config --template="../conf/config.php" --destination="$final_path/config.php"
@@ -125,7 +132,7 @@ chown $app "$final_path/config.php"
 #=================================================
 ynh_script_progression --message="Initializing database..." --weight=7
 
-ynh_mysql_connect_as --user="$db_name" --password="$db_pwd" --database="$db_name" < "${final_path}/app/Schema/Sql/mysql.sql"
+ynh_mysql_connect_as --user="$db_user" --password="$db_pwd" --database="$db_name" < "$final_path/app/Schema/Sql/mysql.sql"
 
 pushd $final_path
 	# Launch database migration
@@ -144,23 +151,23 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 #=================================================
 ynh_script_progression --message="Setuping a cron..." --weight=1
 
-ynh_add_config --template="../conf/cron_kanboard" --destination="/etc/cron.d/$app"
-
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..." --weight=2
+ynh_script_progression --message="Configuring permissions..." --weight=2
 
 # Make app public or private
 if [ $is_public -eq 1 ]
 then
 	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('LDAP_AUTH'.*$" --replace_string="define('LDAP_AUTH', true);" --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$" --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
 	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$final_path/config.php"
+	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/config.php"
 else
 	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
@@ -179,4 +186,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of Kanboard completed" --last
+ynh_script_progression --message="Installation of $app completed" --last

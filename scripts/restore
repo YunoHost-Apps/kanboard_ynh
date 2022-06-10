@@ -26,6 +26,7 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_user=$db_name
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
@@ -33,16 +34,11 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Validating restoration parameters..." --weight=2
 
-test ! -d $final_path || ynh_die --message="There is already a directory: $final_path "
+test ! -d $final_path \
+	|| ynh_die --message="There is already a directory: $final_path "
 
 #=================================================
 # STANDARD RESTORATION STEPS
-#=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
@@ -54,7 +50,7 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring Kanboard main directory..." --weight=5
+ynh_script_progression --message="Restoring the app main directory..." --weight=5
 
 ynh_restore_file --origin_path="$final_path"
 
@@ -66,13 +62,16 @@ chown -R $app $final_path/{data,plugins,sessions}
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Reconfiguring PHP-FPM..." --weight=6
+ynh_script_progression --message="Restoring the PHP-FPM configuration..." --weight=5
 
-# Restore the file first, so it can have a backup if different
 ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
 
-# Recreate a dedicated PHP-FPM config
-ynh_add_fpm_config
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Restoring the NGINX web server configuration..." --weight=1
+
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -82,8 +81,8 @@ ynh_add_fpm_config
 ynh_script_progression --message="Restoring the MySQL database..." --weight=3
 
 db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-ynh_mysql_setup_db --db_user=$db_name --db_name=$db_name --db_pwd=$db_pwd
-ynh_mysql_connect_as --user=$db_name --password=$db_pwd --database=$db_name < ./db.sql
+ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name --db_pwd=$db_pwd
+ynh_mysql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
 
 #=================================================
 # RESTORE FAIL2BAN CONFIGURATION
@@ -108,6 +107,7 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_script_progression --message="Restoring the cron file..." --weight=2
 
 ynh_restore_file --origin_path="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
 
 #=================================================
@@ -124,4 +124,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for Kanboard" --last
+ynh_script_progression --message="Restoration completed for $app" --last

@@ -15,9 +15,18 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 ## Overview
 
-Kanban project management software
+Kanboard is a free and open source Kanban project management software.
 
-**Shipped version:** 1.2.21~ynh4
+### Features
+
+- Visualize your work
+- Limit your work in progress to focus on your goal
+- Drag and drop tasks to manage your project
+- Self-hosted
+- Super simple installation
+
+
+**Shipped version:** 1.2.22~ynh1
 
 **Demo:** https://demo.yunohost.org/kanboard/
 
