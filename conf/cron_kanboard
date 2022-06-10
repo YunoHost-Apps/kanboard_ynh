@@ -1,2 +1,0 @@
-# Execute the daily cronjob at 8am
-0 8 * * * __APP__ cd "__FINALPATH__" && PHP__PHPVERSION__ ./cli cronjob >/dev/null 2>&1
