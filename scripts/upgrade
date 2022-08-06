@@ -19,12 +19,9 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 admin=$(ynh_app_setting_get --app=$app --key=adminusername)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-email=$(ynh_user_get_info --username=$admin --key=mail)
+phpversion=$YNH_PHP_VERSION
 
 #=================================================
 # CHECK VERSION
@@ -35,7 +32,7 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up Kanboard before upgrading (may take a while)..." --weight=5
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=5
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -70,6 +67,11 @@ if ynh_legacy_permissions_exists; then
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
+# Create a permission if needed
+if ! ynh_permission_exists --permission="ics"; then
+	ynh_permission_create --permission="ics" --url="/?controller=ICalendarController" --allowed="visitors" --label="ICS Public access"
+fi
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -89,7 +91,7 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path" --keep="$final_path/config.php"
+	ynh_setup_source --dest_dir="$final_path" --keep="$final_path/data $final_path/config.php"
 fi
 
 mkdir -p $final_path/sessions/
@@ -100,13 +102,6 @@ chmod -R 700 $final_path/sessions
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -124,9 +119,17 @@ ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
 ynh_add_fpm_config
 
 #=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
+#=================================================
 # UPGRADE KANBOARD
 #=================================================
-ynh_script_progression --message="Upgrading Kanboard..." --weight=2
+ynh_script_progression --message="Upgrading the app..." --weight=2
 
 pushd $final_path
 	# Launch database migration
@@ -145,28 +148,11 @@ ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex
 #=================================================
 # SETUP CRON
 #=================================================
-ynh_script_progression --message="Setuping a cron..."
+ynh_script_progression --message="Setuping a cron..." --weight=2
 
-ynh_add_config --template="../conf/cron_kanboard" --destination="/etc/cron.d/$app"
-
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..." --weight=2
-
-# Make app public or private
-if [ $is_public -eq 1 ]
-then
-	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$"        --replace_string="define('LDAP_AUTH', true);"        --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$"  --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$"   --replace_string="define('DISABLE_LOGOUT', false);"  --target_file="$final_path/config.php"
-else
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
-fi
 
 #=================================================
 # RELOAD NGINX
@@ -179,4 +165,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of Kanboard completed" --last
+ynh_script_progression --message="Installation of $app completed" --last
