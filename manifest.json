@@ -1,63 +1,66 @@
 {
-  "name": "Kanboard",
-  "id": "kanboard",
-  "packaging_format": 1,
-  "description": {
-    "en": "Kanban project management software",
-    "fr": "Logiciel de gestion de projet Kanban"
-  },
-  "version": "1.2.22~ynh1",
-  "url": "https://kanboard.net",
-  "upstream": {
-      "license": "MIT",
-      "website": "https://kanboard.net",
-      "demo": "https://demo.yunohost.org/kanboard/",
-      "admindoc": "https://docs.kanboard.org/en/latest/",
-      "code": "https://github.com/kanboard/kanboard"
-  },
-  "license": "MIT",
-  "maintainer": {
-    "name": "",
-    "email": ""
-  },
-  "requirements": {
-    "yunohost": ">= 4.3.0"
-  },
-  "previous_maintainers": [{
-    "name": "mbugeia",
-    "email": "maxime@max.privy.place"
-  },
-  {
-    "name": "jibec",
-    "email": "jean-baptiste@holcroft.fr"
-  }],
-  "multi_instance": true,
-  "services": [
-    "nginx",
-    "php8.0-fpm",
-    "mysql"
-  ],
-  "arguments": {
-    "install": [
-      {
-        "name": "domain",
-        "type": "domain"
-      },
-      {
-        "name": "path",
-        "type": "path",
-        "example": "/kanboard",
-        "default": "/kanboard"
-      },
-      {
-        "name": "admin",
-        "type": "user"
-      },
-      {
-        "name": "is_public",
-        "type": "boolean",
-        "default": false
-      }
-    ]
-  }
+    "name": "Kanboard",
+    "id": "kanboard",
+    "packaging_format": 1,
+    "description": {
+        "en": "Kanban project management software",
+        "fr": "Logiciel de gestion de projet Kanban"
+    },
+    "version": "1.2.22~ynh1",
+    "url": "https://kanboard.net",
+    "upstream": {
+        "license": "MIT",
+        "website": "https://kanboard.net",
+        "demo": "https://demo.yunohost.org/kanboard/",
+        "admindoc": "https://docs.kanboard.org/en/latest/",
+        "code": "https://github.com/kanboard/kanboard",
+        "cpe": "cpe:2.3:a:kanboard:kanboard"
+    },
+    "license": "MIT",
+    "maintainer": {
+        "name": "",
+        "email": ""
+    },
+    "requirements": {
+        "yunohost": ">= 4.3.0"
+    },
+    "previous_maintainers": [
+        {
+            "name": "mbugeia",
+            "email": "maxime@max.privy.place"
+        },
+        {
+            "name": "jibec",
+            "email": "jean-baptiste@holcroft.fr"
+        }
+    ],
+    "multi_instance": true,
+    "services": [
+        "nginx",
+        "php8.0-fpm",
+        "mysql"
+    ],
+    "arguments": {
+        "install": [
+            {
+                "name": "domain",
+                "type": "domain"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "example": "/kanboard",
+                "default": "/kanboard"
+            },
+            {
+                "name": "admin",
+                "type": "user"
+            },
+            {
+                "name": "is_public",
+                "type": "boolean",
+                "default": false
+            }
+        ]
+    }
 }
