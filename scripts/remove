@@ -24,14 +24,6 @@ db_user=$db_name
 #=================================================
 # STANDARD REMOVE
 #=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Removing dependencies..." --weight=9
-
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
-
-#=================================================
 # REMOVE THE MYSQL DATABASE
 #=================================================
 ynh_script_progression --message="Removing the MySQL database..." --weight=4
