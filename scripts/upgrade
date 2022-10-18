@@ -12,13 +12,13 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
+ynh_script_progression --message="Loading settings..." --weight=1
 
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=adminusername)
+admin=$(ynh_app_setting_get --app=$app --key=admin)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 phpversion=$YNH_PHP_VERSION
@@ -37,12 +37,14 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# restore it if the upgrade fails
+	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
+#=================================================
+# STANDARD UPGRADE STEPS
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -58,6 +60,13 @@ fi
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+# If admin doesn't exist, create it
+if [ -z "$admin" ]; then
+	admin=$(ynh_app_setting_get --app=$app --key=adminusername)
+	ynh_app_setting_set --app=$app --key=admin --value=$admin
+	ynh_app_setting_delete --app=$app --key=adminusername
 fi
 
 # Cleaning legacy permissions
@@ -81,8 +90,6 @@ ynh_script_progression --message="Making sure dedicated system user exists..." -
 ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
@@ -91,7 +98,7 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path" --keep="data config.php"
+	ynh_setup_source --dest_dir="$final_path" --keep="data/ config.php"
 fi
 
 mkdir -p $final_path/sessions/
@@ -101,7 +108,6 @@ chown -R $app $final_path/{data,plugins,sessions}
 chmod -R 700 $final_path/sessions
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
-
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -127,6 +133,8 @@ ynh_script_progression --message="Upgrading NGINX web server configuration..." -
 ynh_add_nginx_config
 
 #=================================================
+# SPECIFIC UPGRADE
+#=================================================
 # UPGRADE KANBOARD
 #=================================================
 ynh_script_progression --message="Upgrading the app..." --weight=2
@@ -139,13 +147,6 @@ pushd $final_path
 popd
 
 #=================================================
-# SETUP FAIL2BAN
-#=================================================
-ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
-
-ynh_add_fail2ban_config --logpath="/var/log/nginx/$domain-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
-
-#=================================================
 # SETUP CRON
 #=================================================
 ynh_script_progression --message="Setuping a cron..." --weight=2
@@ -153,6 +154,16 @@ ynh_script_progression --message="Setuping a cron..." --weight=2
 ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
 chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# UPGRADE FAIL2BAN
+#=================================================
+ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
+
+# Create a dedicated Fail2Ban config
+ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # RELOAD NGINX
@@ -165,4 +176,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Upgrade of $app completed" --last

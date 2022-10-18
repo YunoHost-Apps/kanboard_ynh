@@ -24,7 +24,7 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
+ynh_script_progression --message="Loading settings..." --weight=1
 
 # Needed for helper "ynh_add_nginx_config"
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
@@ -94,6 +94,8 @@ then
 fi
 
 #=================================================
+# SPECIFIC MODIFICATIONS
+#=================================================
 # SETUP FAIL2BAN
 #=================================================
 ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
@@ -105,9 +107,9 @@ ynh_remove_fail2ban_config
 ynh_add_fail2ban_config --logpath="/var/log/nginx/${new_domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
-# SPECIFIC MODIFICATIONS
+# UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Applying Kanboard specific modifications..." --weight=2
+ynh_script_progression --message="Updating a configuration file..." --weight=2
 
 if [ $change_domain -eq 1 ]
 then
