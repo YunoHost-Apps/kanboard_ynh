@@ -2,8 +2,8 @@
 	; Manifest
 		domain="domain.tld"
 		path="/path"
-		admin="john"
 		is_public=1
+		admin="john"
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1
@@ -12,8 +12,10 @@
 		setup_private=1
 		setup_public=1
 		upgrade=1
-		#1.2.21~ynh3
+		# 1.2.21~ynh3
 		upgrade=1	from_commit=b667e4d5fd9cc860f706ad7e4e41208cf1d04f2a
+		# 1.2.22~ynh2
+		upgrade=1	from_commit=781f62a9e41ee6b4fbdad7383cb31f8ae4432c66
 		backup_restore=1
 		multi_instance=1
 		change_url=1
