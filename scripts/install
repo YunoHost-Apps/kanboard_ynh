@@ -31,6 +31,9 @@ admin=$YNH_APP_ARG_ADMIN
 app=$YNH_APP_INSTANCE_NAME
 
 email=$(ynh_user_get_info --username=$admin --key=mail)
+fpm_footprint="low"
+fpm_free_footprint=0
+fpm_usage="low"
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -50,6 +53,9 @@ ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=admin --value=$admin
+ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
+ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
+ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -101,7 +107,7 @@ chown -R $app:www-data "$final_path"
 ynh_script_progression --message="Configuring PHP-FPM..." --weight=16
 
 # Create a dedicated PHP-FPM config
-ynh_add_fpm_config
+ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
@@ -164,15 +170,7 @@ ynh_script_progression --message="Configuring permissions..." --weight=2
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
-	# Everyone can access the app.
-	# The "main" permission is automatically created before the install script.
 	ynh_permission_update --permission="main" --add="visitors"
-	ynh_replace_string --match_string="define('LDAP_AUTH'.*$" --replace_string="define('LDAP_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('HIDE_LOGIN_FORM'.*$" --replace_string="define('HIDE_LOGIN_FORM', false);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('REMEMBER_ME_AUTH'.*$" --replace_string="define('REMEMBER_ME_AUTH', true);" --target_file="$final_path/config.php"
-	ynh_replace_string --match_string="define('DISABLE_LOGOUT'.*$" --replace_string="define('DISABLE_LOGOUT', false);" --target_file="$final_path/config.php"
-else
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/jsonrpc.php"
 fi
 
 ynh_permission_create --permission="ics" --url="/?controller=ICalendarController" --allowed="visitors" --label="ICS Public access"

@@ -1,7 +1,3 @@
-## Limitations
-
-## Additional information
-
 ### How to connect as external (non-SSOwat) users
 
 You have to edit this file `/var/www/kanboard/config.php`, find the line `define('REVERSE_PROXY_AUTH', true);` and change it from `true` to `false`.
