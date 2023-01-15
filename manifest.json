@@ -6,7 +6,7 @@
         "en": "Kanban project management software",
         "fr": "Logiciel de gestion de projet Kanban"
     },
-    "version": "1.2.24~ynh1",
+    "version": "1.2.26~ynh1",
     "url": "https://kanboard.net",
     "upstream": {
         "license": "MIT",

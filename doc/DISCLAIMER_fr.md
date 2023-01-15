@@ -1,7 +1,3 @@
-## Limitations
-
-## Informations additionnelles
-
 ### Comment se connecter en tant qu'utilisateurs externes (non SSOwat)
 
 Vous devez éditer ce fichier `/var/www/kanboard/config.php`, trouver la ligne `define('REVERSE_PROXY_AUTH', true);` et la changer de `true` à `false`.
