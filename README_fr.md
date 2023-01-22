@@ -5,15 +5,15 @@ It shall NOT be edited by hand.
 
 # Kanboard pour YunoHost
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)  
+[![Niveau d’intégration](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)
 [![Installer Kanboard avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
 *[Read this readme in english.](./README.md)*
 
-> *Ce package vous permet d'installer Kanboard rapidement et simplement sur un serveur YunoHost.
-Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
+> *Ce package vous permet d’installer Kanboard rapidement et simplement sur un serveur YunoHost.
+Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l’installer et en profiter.*
 
-## Vue d'ensemble
+## Vue d’ensemble
 
 Kanboard est un logiciel de gestion de projet Kanban gratuit et open source.
 
@@ -24,13 +24,13 @@ Kanboard est un logiciel de gestion de projet Kanban gratuit et open source.
 - Glisser et déposez des tâches pour gérer votre projet
 
 
-**Version incluse :** 1.2.26~ynh1
+**Version incluse :** 1.2.26~ynh2
 
 **Démo :** https://demo.yunohost.org/kanboard/
 
-## Captures d'écran
+## Captures d’écran
 
-![Capture d'écran de Kanboard](./doc/screenshots/board.png)
+![Capture d’écran de Kanboard](./doc/screenshots/board.png)
 
 ## Avertissements / informations importantes
 
@@ -46,9 +46,9 @@ Cela est dû à une limitation de Kanboard.
 
 ## Documentations et ressources
 
-* Site officiel de l'app : <https://kanboard.net>
-* Documentation officielle de l'admin : <https://docs.kanboard.org/en/latest/>
-* Dépôt de code officiel de l'app : <https://github.com/kanboard/kanboard>
+* Site officiel de l’app : <https://kanboard.net>
+* Documentation officielle de l’admin : <https://docs.kanboard.org/en/latest/>
+* Dépôt de code officiel de l’app : <https://github.com/kanboard/kanboard>
 * Documentation YunoHost pour cette app : <https://yunohost.org/app_kanboard>
 * Signaler un bug : <https://github.com/YunoHost-Apps/kanboard_ynh/issues>
 
@@ -64,4 +64,4 @@ ou
 sudo yunohost app upgrade kanboard -u https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
 ```
 
-**Plus d'infos sur le packaging d'applications :** <https://yunohost.org/packaging_apps>
+**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
