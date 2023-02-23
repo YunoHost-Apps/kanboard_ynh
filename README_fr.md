@@ -6,6 +6,7 @@ It shall NOT be edited by hand.
 # Kanboard pour YunoHost
 
 [![Niveau d’intégration](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)
+
 [![Installer Kanboard avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
 *[Read this readme in english.](./README.md)*
