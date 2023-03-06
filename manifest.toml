@@ -49,6 +49,10 @@ ram.runtime = "50M"
     [resources.permissions]
     main.url = "/"
 
+    ics.url = "/?controller=ICalendarController"
+    ics.show_tile = false
+    ics.allowed = "visitors"
+
     [resources.apt]
     packages = "mariadb-server php8.0-fpm php8.0-opcache php8.0-curl php8.0-gd php8.0-zip php8.0-xml php8.0-mbstring php8.0-mysql php8.0-ldap"
 
