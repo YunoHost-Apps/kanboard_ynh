@@ -10,42 +10,10 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading settings..." --weight=1
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-phpversion=$YNH_PHP_VERSION
-
-fpm_footprint=$(ynh_app_setting_get --app=$app --key=fpm_footprint)
-fpm_free_footprint=$(ynh_app_setting_get --app=$app --key=fpm_free_footprint)
-fpm_usage=$(ynh_app_setting_get --app=$app --key=fpm_usage)
-
-#=================================================
 # CHECK VERSION
 #=================================================
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=5
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -55,61 +23,22 @@ ynh_abort_if_errors
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 # If fpm_footprint doesn't exist, create it
-if [ -z "$fpm_footprint" ]; then
+if [ -z "${fpm_footprint:-}" ]; then
     fpm_footprint=low
     ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
 fi
 
 # If fpm_free_footprint doesn't exist, create it
-if [ -z "$fpm_free_footprint" ]; then
+if [ -z "${fpm_free_footprint:-}" ]; then
     fpm_free_footprint=0
     ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
 fi
 
 # If fpm_usage doesn't exist, create it
-if [ -z "$fpm_usage" ]; then
+if [ -z "${fpm_usage:-}" ]; then
     fpm_usage=low
     ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 fi
-
-# If db_name doesn't exist, create it
-if [ -z "$db_name" ]; then
-	db_name=$(ynh_sanitize_dbid --db_name=$app)
-	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-fi
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-# If admin doesn't exist, create it
-if [ -z "$admin" ]; then
-	admin=$(ynh_app_setting_get --app=$app --key=adminusername)
-	ynh_app_setting_set --app=$app --key=admin --value=$admin
-	ynh_app_setting_delete --app=$app --key=adminusername
-fi
-
-# Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
-
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-# Create a permission if needed
-if ! ynh_permission_exists --permission="ics"; then
-	ynh_permission_create --permission="ics" --url="/?controller=ICalendarController" --allowed="visitors" --label="ICS Public access"
-fi
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -120,23 +49,15 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path" --keep="data/ config.php"
+	ynh_setup_source --dest_dir="$install_dir" --keep="data/ config.php"
 fi
 
-mkdir -p $final_path/sessions/
+mkdir -p $install_dir/sessions/
 
-chmod 750 "$final_path"
-chown -R $app $final_path/{data,plugins,sessions}
-chmod -R 700 $final_path/sessions
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=3
-
-ynh_install_app_dependencies $pkg_dependencies
+chown -R $app $install_dir/{data,plugins,sessions}
+chmod -R 700 $install_dir/sessions
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -145,7 +66,7 @@ ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
 
 # Create a dedicated PHP-FPM config
 ynh_add_fpm_config --phpversion=$phpversion --usage=$fpm_usage --footprint=$fpm_footprint
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # NGINX CONFIGURATION
@@ -162,7 +83,7 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Upgrading the app..." --weight=2
 
-pushd $final_path
+pushd $install_dir
 	# Launch database migration
 	php$phpversion cli db:migrate --no-interaction --verbose
 	# Launch plugins migration
@@ -187,13 +108,6 @@ ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
 
 # Create a dedicated Fail2Ban config
 ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
-
-ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

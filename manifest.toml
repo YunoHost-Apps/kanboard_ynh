@@ -1,0 +1,60 @@
+packaging_format = 2
+
+id = "kanboard"
+name = "Kanboard"
+description.en = "Kanban project management software"
+description.fr = "Logiciel de gestion de projet Kanban"
+
+version = "1.2.27~ynh1"
+
+maintainers = []
+
+[upstream]
+license = "MIT"
+website = "https://kanboard.net"
+demo = "https://demo.yunohost.org/kanboard/"
+admindoc = "https://docs.kanboard.org/en/latest/"
+code = "https://github.com/kanboard/kanboard"
+
+[integration]
+yunohost = ">= 11.1.13"
+architectures = "all"
+multi_instance = true
+ldap = false
+sso = false
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/kanboard"
+
+    [install.init_main_permission]
+    type = "group"
+    default = false
+
+    [install.admin]
+    type = "user"
+
+[resources]
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.permissions]
+    main.url = "/"
+
+    ics.url = "/?controller=ICalendarController"
+    ics.show_tile = false
+    ics.allowed = "visitors"
+
+    [resources.apt]
+    packages = "mariadb-server php8.0-fpm php8.0-opcache php8.0-curl php8.0-gd php8.0-zip php8.0-xml php8.0-mbstring php8.0-mysql php8.0-ldap"
+
+    [resources.database]
+    type = "mysql"
