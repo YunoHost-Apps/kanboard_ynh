@@ -42,6 +42,13 @@ ram.runtime = "50M"
     type = "user"
 
 [resources]
+
+    [resources.sources]
+
+        [resources.sources.main]
+        url = "https://github.com/kanboard/kanboard/archive/refs/tags/v1.2.27.tar.gz"
+        sha256 = "e452bc6113407a0c6f230f532b53e6170a8542bc7a495ea631543cc7c02c64b3"
+
     [resources.system_user]
 
     [resources.install_dir]

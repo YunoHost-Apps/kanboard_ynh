@@ -1,7 +1,0 @@
-SOURCE_URL=https://github.com/kanboard/kanboard/archive/refs/tags/v1.2.27.tar.gz
-SOURCE_SUM=e452bc6113407a0c6f230f532b53e6170a8542bc7a495ea631543cc7c02c64b3
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=
-SOURCE_EXTRACT=true
