@@ -5,7 +5,7 @@ name = "Kanboard"
 description.en = "Kanban project management software"
 description.fr = "Logiciel de gestion de projet Kanban"
 
-version = "1.2.27~ynh3"
+version = "1.2.27~ynh4"
 
 maintainers = []
 
