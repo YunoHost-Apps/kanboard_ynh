@@ -17,7 +17,7 @@ admindoc = "https://docs.kanboard.org/en/latest/"
 code = "https://github.com/kanboard/kanboard"
 
 [integration]
-yunohost = ">= 11.1.13"
+yunohost = ">= 11.1.14"
 architectures = "all"
 multi_instance = true
 ldap = false
