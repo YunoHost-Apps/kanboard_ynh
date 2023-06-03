@@ -55,7 +55,6 @@ ram.runtime = "50M"
 
     [resources.permissions]
     main.url = "/"
-
     ics.url = "/?controller=ICalendarController"
     ics.show_tile = false
     ics.allowed = "visitors"
