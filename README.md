@@ -36,7 +36,7 @@ Kanboard is a free and open source Kanban project management software.
 ## Documentation and resources
 
 * Official app website: <https://kanboard.net>
-* Official admin documentation: <https://docs.kanboard.org/en/latest/>
+* Official admin documentation: <https://docs.kanboard.org/>
 * Upstream app code repository: <https://github.com/kanboard/kanboard>
 * Report a bug: <https://github.com/YunoHost-Apps/kanboard_ynh/issues>
 
