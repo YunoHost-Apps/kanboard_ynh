@@ -48,7 +48,7 @@ define('MAIL_FROM', '__APP__@__DOMAIN__');
 define('MAIL_BCC', '');
 
 // Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
-define('MAIL_TRANSPORT', 'mail');
+define('MAIL_TRANSPORT', 'smtp');
 
 // SMTP configuration to use when the "smtp" transport is chosen
 define('MAIL_SMTP_HOSTNAME', 'localhost');
