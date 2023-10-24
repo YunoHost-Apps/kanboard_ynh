@@ -82,6 +82,7 @@ chmod 644 "/etc/cron.d/$app"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..." --weight=1
 
+dir="__DIR__"
 ynh_add_config --template="../conf/config.php" --destination="$install_dir/config.php"
 
 chmod 400 "$install_dir/config.php"
