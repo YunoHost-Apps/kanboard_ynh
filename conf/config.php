@@ -205,7 +205,7 @@ define('LDAP_GROUP_ATTRIBUTE_NAME', 'cn');
 define('LDAP_GROUP_SYNC', true);
 
 // Enable/disable the reverse proxy authentication
-define('REVERSE_PROXY_AUTH', true);
+define('REVERSE_PROXY_AUTH', false);
 
 // Header name to use for the username
 define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
