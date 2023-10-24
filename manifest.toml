@@ -13,8 +13,9 @@ maintainers = []
 license = "MIT"
 website = "https://kanboard.net"
 demo = "https://demo.yunohost.org/kanboard/"
-admindoc = "https://docs.kanboard.org/en/latest/"
+admindoc = "https://docs.kanboard.org/"
 code = "https://github.com/kanboard/kanboard"
+fund = "https://kanboard.org/#donations"
 
 [integration]
 yunohost = ">= 11.2"
