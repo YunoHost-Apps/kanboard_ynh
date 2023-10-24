@@ -49,7 +49,7 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir" --keep="data/ config.php"
+	ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 fi
 
 mkdir -p $install_dir/sessions/
@@ -70,6 +70,23 @@ ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 # Create a dedicated NGINX config
 ynh_add_nginx_config
 
+# Create a dedicated Fail2Ban config
+ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
+
+#=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..." --weight=1
+
+ynh_add_config --template="../conf/config.php" --destination="$install_dir/config.php"
+
+chmod 400 "$install_dir/config.php"
+chown $app "$install_dir/config.php"
+
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
@@ -83,25 +100,6 @@ pushd $install_dir
 	# Launch plugins migration
 	php$phpversion cli plugin:upgrade --no-interaction --verbose
 popd
-
-#=================================================
-# SETUP CRON
-#=================================================
-ynh_script_progression --message="Setuping a cron..." --weight=2
-
-ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
-chown root: "/etc/cron.d/$app"
-chmod 644 "/etc/cron.d/$app"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# UPGRADE FAIL2BAN
-#=================================================
-ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=7
-
-# Create a dedicated Fail2Ban config
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # END OF SCRIPT

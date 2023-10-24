@@ -36,7 +36,7 @@ ynh_setup_source --dest_dir="$install_dir"
 
 mkdir -p $install_dir/sessions/
 
-chown -R $app $install_dir/{data,plugins,sessions}
+chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
@@ -59,7 +59,6 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Adding a configuration file..." --weight=1
 
-dir="__DIR__"
 ynh_add_config --template="../conf/config.php" --destination="$install_dir/config.php"
 
 chmod 400 "$install_dir/config.php"
