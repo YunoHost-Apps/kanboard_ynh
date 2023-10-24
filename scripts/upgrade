@@ -54,7 +54,7 @@ fi
 
 mkdir -p $install_dir/sessions/
 
-chown -R $app $install_dir/{data,plugins,sessions}
+chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
@@ -65,7 +65,7 @@ chown -R $app:www-data "$install_dir"
 ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
 
 # Create a dedicated PHP-FPM config
-ynh_add_fpm_config --phpversion=$phpversion --usage=$fpm_usage --footprint=$fpm_footprint
+ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
