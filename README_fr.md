@@ -36,7 +36,7 @@ Kanboard est un logiciel de gestion de projet Kanban gratuit et open source.
 ## Documentations et ressources
 
 * Site officiel de l’app : <https://kanboard.net>
-* Documentation officielle de l’admin : <https://docs.kanboard.org/en/latest/>
+* Documentation officielle de l’admin : <https://docs.kanboard.org/>
 * Dépôt de code officiel de l’app : <https://github.com/kanboard/kanboard>
 * Signaler un bug : <https://github.com/YunoHost-Apps/kanboard_ynh/issues>
 

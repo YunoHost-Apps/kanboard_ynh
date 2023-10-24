@@ -13,7 +13,6 @@ source /usr/share/yunohost/helpers
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-email=$(ynh_user_get_info --username=$admin --key=mail)
 fpm_footprint="low"
 fpm_free_footprint=0
 fpm_usage="low"
@@ -52,6 +51,13 @@ ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 # Create a dedicated NGINX config
 ynh_add_nginx_config
 
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
+
+# Create a dedicated Fail2Ban config
+ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+
 #=================================================
 # SPECIFIC SETUP
 #=================================================
@@ -75,25 +81,6 @@ pushd $install_dir
 	# Launch database migration
 	php$phpversion cli db:migrate --no-interaction --verbose
 popd
-
-#=================================================
-# SETUP CRON
-#=================================================
-ynh_script_progression --message="Setuping a cron..." --weight=1
-
-ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
-chown root: "/etc/cron.d/$app"
-chmod 644 "/etc/cron.d/$app"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP FAIL2BAN
-#=================================================
-ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
-
-# Create a dedicated Fail2Ban config
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
 
 #=================================================
 # END OF SCRIPT
