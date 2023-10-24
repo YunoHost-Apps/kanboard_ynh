@@ -42,7 +42,7 @@ define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
 define('MAIL_CONFIGURATION', true);
 
 // E-mail address used for the "From" header (notifications)
-define('MAIL_FROM', '__APP__@__DOMAIN__');
+define('MAIL_FROM', 'noreply@__DOMAIN__');
 
 // E-mail address used for the "Bcc" header to send a copy of all notifications
 define('MAIL_BCC', '');
