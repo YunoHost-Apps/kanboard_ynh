@@ -53,16 +53,9 @@ define('MAIL_TRANSPORT', 'mail');
 // SMTP configuration to use when the "smtp" transport is chosen
 define('MAIL_SMTP_HOSTNAME', 'localhost');
 define('MAIL_SMTP_PORT', 25);
-<<<<<<< Updated upstream
 define('MAIL_SMTP_USERNAME', '');
 define('MAIL_SMTP_PASSWORD', '');
 define('MAIL_SMTP_ENCRYPTION', null); // Valid values are "null", "ssl" or "tls"
-=======
-define('MAIL_SMTP_USERNAME', '__APP__');
-define('MAIL_SMTP_PASSWORD', '__MAIL_PWD__');
-define('MAIL_SMTP_HELO_NAME', null); // valid: null (default), or FQDN
-define('MAIL_SMTP_ENCRYPTION', null); // Valid values are null (not a string "null"), "ssl" or "tls"
->>>>>>> Stashed changes
 
 // Sendmail command to use when the transport is "sendmail"
 define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
