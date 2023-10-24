@@ -88,7 +88,7 @@ pushd $install_dir
 	# Launch database migration
 	php$phpversion cli db:migrate --no-interaction --verbose
 	# Launch plugins migration
-	php$phpversion cli plugin:upgrade --no-interaction --verbose
+	#php$phpversion cli plugin:upgrade --no-interaction --verbose
 popd
 
 #=================================================
