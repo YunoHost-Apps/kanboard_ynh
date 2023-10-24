@@ -42,19 +42,19 @@ define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
 define('MAIL_CONFIGURATION', true);
 
 // E-mail address used for the "From" header (notifications)
-define('MAIL_FROM', '__EMAIL__');
+define('MAIL_FROM', 'noreply@__DOMAIN__');
 
 // E-mail address used for the "Bcc" header to send a copy of all notifications
 define('MAIL_BCC', '');
 
 // Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
-define('MAIL_TRANSPORT', 'mail');
+define('MAIL_TRANSPORT', 'smtp');
 
 // SMTP configuration to use when the "smtp" transport is chosen
 define('MAIL_SMTP_HOSTNAME', 'localhost');
 define('MAIL_SMTP_PORT', 25);
-define('MAIL_SMTP_USERNAME', '');
-define('MAIL_SMTP_PASSWORD', '');
+define('MAIL_SMTP_USERNAME', '__APP__');
+define('MAIL_SMTP_PASSWORD', '__MAIL_PWD__');
 define('MAIL_SMTP_ENCRYPTION', null); // Valid values are "null", "ssl" or "tls"
 
 // Sendmail command to use when the transport is "sendmail"
@@ -65,22 +65,22 @@ define('MAIL_SENDMAIL_COMMAND', '/usr/sbin/sendmail -bs');
 // Do not run the migrations from multiple processes at the same time (example: web page + background worker)
 define('DB_RUN_MIGRATIONS', false);
 
-// Database driver: sqlite, mysql or postgres (sqlite by default)
+// Database driver: sqlite, mysql, postgres, odbc, dblib, or mssql (sqlite by default)
 define('DB_DRIVER', 'mysql');
 
-// Mysql/Postgres username
+// Database username
 define('DB_USERNAME', '__DB_USER__');
 
-// Mysql/Postgres password
+// Database password
 define('DB_PASSWORD', '__DB_PWD__');
 
-// Mysql/Postgres hostname
+// Database hostname
 define('DB_HOSTNAME', 'localhost');
 
-// Mysql/Postgres database name
+// Database database name
 define('DB_NAME', '__DB_NAME__');
 
-// Mysql/Postgres custom port (null = default port)
+// Database custom port (null = default port)
 define('DB_PORT', null);
 
 // Mysql SSL key
@@ -98,11 +98,17 @@ define('DB_VERIFY_SERVER_CERT', null);
 // Timeout value for PDO attribute
 define('DB_TIMEOUT', null);
 
+// ODBC DSN (default: kanboard)
+define('DB_ODBC_DSN', 'kanboard');
+
 // Enable LDAP authentication (false by default)
 define('LDAP_AUTH', false);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
+
+// LDAP server port (389 by default)
+define('LDAP_PORT', 389);
 
 // By default, require certificate to be verified for ldaps:// style URL. Set to false to skip the verification
 define('LDAP_SSL_VERIFY', true);
@@ -135,7 +141,7 @@ define('LDAP_USER_BASE_DN', 'ou=users,dc=yunohost,dc=org');
 define('LDAP_USER_FILTER', 'uid=%s');
 
 // LDAP attribute for username
-// Example for ActiveDirectory: 'samaccountname'
+// Example for ActiveDirectory: 'sAMAccountName'
 // Example for OpenLDAP: 'uid'
 define('LDAP_USER_ATTRIBUTE_USERNAME', 'uid');
 
@@ -207,8 +213,11 @@ define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
 // Username of the admin, by default blank
 define('REVERSE_PROXY_DEFAULT_ADMIN', '__ADMIN__');
 
-// Header name to use for the username
+// Header name to use for the user email
 define('REVERSE_PROXY_EMAIL_HEADER', 'REMOTE_EMAIL');
+
+// Header name to use for the user full name
+define('REVERSE_PROXY_FULLNAME_HEADER', 'REMOTE_NAME');
 
 // Default domain to use for setting the email address
 define('REVERSE_PROXY_DEFAULT_DOMAIN', '__DOMAIN__');

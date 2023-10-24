@@ -5,7 +5,7 @@ name = "Kanboard"
 description.en = "Kanban project management software"
 description.fr = "Logiciel de gestion de projet Kanban"
 
-version = "1.2.33~ynh2"
+version = "1.2.33~ynh3"
 
 maintainers = []
 
@@ -13,8 +13,9 @@ maintainers = []
 license = "MIT"
 website = "https://kanboard.net"
 demo = "https://demo.yunohost.org/kanboard/"
-admindoc = "https://docs.kanboard.org/en/latest/"
+admindoc = "https://docs.kanboard.org/"
 code = "https://github.com/kanboard/kanboard"
+fund = "https://kanboard.org/#donations"
 
 [integration]
 yunohost = ">= 11.2"
@@ -36,7 +37,7 @@ ram.runtime = "50M"
 
     [install.init_main_permission]
     type = "group"
-    default = false
+    default = "visitors"
 
     [install.admin]
     type = "user"
@@ -51,7 +52,8 @@ ram.runtime = "50M"
         autoupdate.strategy = "latest_github_tag"
 
     [resources.system_user]
-
+    allow_email = true
+    
     [resources.install_dir]
 
     [resources.permissions]
