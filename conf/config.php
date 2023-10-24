@@ -42,19 +42,19 @@ define('FILES_DIR', __DATA_DIR__/files);
 define('MAIL_CONFIGURATION', true);
 
 // E-mail address used for the "From" header (notifications)
-define('MAIL_FROM', '__EMAIL__');
+define('MAIL_FROM', 'noreply@__DOMAIN__');
 
 // E-mail address used for the "Bcc" header to send a copy of all notifications
 define('MAIL_BCC', '');
 
 // Mail transport available: "smtp", "sendmail", "mail" (PHP mail function), "postmark", "mailgun", "sendgrid"
-define('MAIL_TRANSPORT', 'mail');
+define('MAIL_TRANSPORT', 'smtp');
 
 // SMTP configuration to use when the "smtp" transport is chosen
 define('MAIL_SMTP_HOSTNAME', 'localhost');
 define('MAIL_SMTP_PORT', 25);
-define('MAIL_SMTP_USERNAME', '');
-define('MAIL_SMTP_PASSWORD', '');
+define('MAIL_SMTP_USERNAME', '__APP__');
+define('MAIL_SMTP_PASSWORD', '__MAIL_PWD__');
 define('MAIL_SMTP_ENCRYPTION', null); // Valid values are "null", "ssl" or "tls"
 
 // Sendmail command to use when the transport is "sendmail"
