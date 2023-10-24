@@ -51,12 +51,12 @@ ram.runtime = "50M"
         autoupdate.strategy = "latest_github_tag"
 
     [resources.system_user]
-
+    allow_email = true
+    
     [resources.install_dir]
 
     [resources.permissions]
     main.url = "/"
-    #main.auth_header = false
     ics.url = "/?controller=ICalendarController"
     ics.show_tile = false
     ics.allowed = "visitors"
