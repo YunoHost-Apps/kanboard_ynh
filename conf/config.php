@@ -105,7 +105,7 @@ define('DB_ODBC_DSN', 'kanboard');
 define('LDAP_AUTH', false);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
-define('LDAP_SERVER', '');
+define('LDAP_SERVER', 'ldap://127.0.0.1:389');
 
 // LDAP server port (389 by default)
 define('LDAP_PORT', 389);
