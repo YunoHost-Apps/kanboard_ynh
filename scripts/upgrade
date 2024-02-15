@@ -49,12 +49,12 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=3
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir" --keep="data/ config.php"
+	ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 fi
 
 mkdir -p $install_dir/sessions/
 
-chown -R $app $install_dir/{data,plugins,sessions}
+chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
@@ -78,6 +78,17 @@ chown root: "/etc/cron.d/$app"
 chmod 644 "/etc/cron.d/$app"
 
 #=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..." --weight=1
+
+dir="__DIR__"
+ynh_add_config --template="../conf/config.php" --destination="$install_dir/config.php"
+
+chmod 400 "$install_dir/config.php"
+chown $app "$install_dir/config.php"
+
+#=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # UPGRADE KANBOARD
@@ -87,8 +98,6 @@ ynh_script_progression --message="Upgrading the app..." --weight=2
 pushd $install_dir
 	# Launch database migration
 	php$phpversion cli db:migrate --no-interaction --verbose
-	# Launch plugins migration
-	#php$phpversion cli plugin:upgrade --no-interaction --verbose
 popd
 
 #=================================================
