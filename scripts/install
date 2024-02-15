@@ -35,7 +35,7 @@ ynh_setup_source --dest_dir="$install_dir"
 
 mkdir -p $install_dir/sessions/
 
-chown -R $app $install_dir/{data,plugins,sessions}
+chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"

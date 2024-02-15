@@ -7,7 +7,7 @@
 /*******************************************************************/
 
 // Data folder (must be writeable by the web server user and absolute)
-define('DATA_DIR', __DIR__.DIRECTORY_SEPARATOR.'data');
+define('DATA_DIR', '__DATA_DIR__/');
 
 // Enable/Disable debug
 define('DEBUG', false);
@@ -16,10 +16,10 @@ define('DEBUG', false);
 define('LOG_DRIVER', 'system');
 
 // Log filename if the log driver is "file"
-define('LOG_FILE', DATA_DIR.DIRECTORY_SEPARATOR.'debug.log');
+define('LOG_FILE',  '__DATA_DIR__/debug.log');
 
 // Plugins directory
-define('PLUGINS_DIR', __DIR__.DIRECTORY_SEPARATOR.'plugins');
+define('PLUGINS_DIR', '__INSTALL_DIR__/plugins');
 
 // Plugins directory URL
 define('PLUGIN_API_URL', 'https://kanboard.org/plugins.json');
@@ -33,10 +33,10 @@ define('PLUGIN_INSTALLER', true);
 define('CACHE_DRIVER', 'memory');
 
 // Cache folder to use if cache driver is "file" (must be writeable by the web server user)
-define('CACHE_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'cache');
+define('CACHE_DIR', '__DATA_DIR__/cache');
 
 // Folder for uploaded files (must be writeable by the web server user)
-define('FILES_DIR', DATA_DIR.DIRECTORY_SEPARATOR.'files');
+define('FILES_DIR', '__DATA_DIR__/files');
 
 // Enable/disable email configuration from the user interface
 define('MAIL_CONFIGURATION', true);

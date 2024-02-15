@@ -59,6 +59,9 @@ ram.runtime = "50M"
     
     [resources.install_dir]
 
+    [resources.data_dir]
+    subdirs = ["cache", "files"]
+
     [resources.permissions]
     main.url = "/"
     ics.url = "/?controller=ICalendarController"
