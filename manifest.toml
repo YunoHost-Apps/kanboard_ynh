@@ -5,7 +5,7 @@ name = "Kanboard"
 description.en = "Kanban project management software"
 description.fr = "Logiciel de gestion de projet Kanban"
 
-version = "1.2.34~ynh2"
+version = "1.2.35~ynh1"
 
 maintainers = []
 
@@ -50,9 +50,9 @@ ram.runtime = "50M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/kanboard/kanboard/archive/refs/tags/v1.2.34.tar.gz"
-        sha256 = "587bc1c2da27b953569d61d4673b557f470f65f624caa30621daa36d481273f0"
-        autoupdate.strategy = "latest_github_tag"
+        url = "https://github.com/kanboard/kanboard/archive/refs/tags/v1.2.35.tar.gz"
+        sha256 = "9b6118ba4e3b3dd17f5313a963be09b7f9c323ad0c78bde3d9a394c6afb30b7e"
+        autoupdate.strategy = "latest_github_release"
 
     [resources.system_user]
     allow_email = true
