@@ -9,7 +9,7 @@ It shall NOT be edited by hand.
 
 [![Install Kanboard with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
-*[Read this README is other languages.](./ALL_README.md)*
+*[Read this README in other languages.](./ALL_README.md)*
 
 > *This package allows you to install Kanboard quickly and simply on a YunoHost server.*  
 > *If you don't have YunoHost, please consult [the guide](https://yunohost.org/install) to learn how to install it.*
@@ -25,7 +25,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**Shipped version:** 1.2.35~ynh3
+**Shipped version:** 1.2.37~ynh1
 
 **Demo:** <https://demo.yunohost.org/kanboard/>
 
