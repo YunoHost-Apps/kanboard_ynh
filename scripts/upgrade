@@ -10,12 +10,6 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -43,14 +37,10 @@ fi
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Upgrading source files..." --weight=3
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..." --weight=3
-
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
-fi
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 
 mkdir -p $install_dir/sessions/
 
@@ -82,11 +72,11 @@ chmod 644 "/etc/cron.d/$app"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..." --weight=1
 
-dir="__DIR__"
-ynh_add_config --template="../conf/config.php" --destination="$install_dir/config.php"
+#dir="__DIR__"
+#ynh_add_config --template="config.php" --destination="$install_dir/config.php"
 
-chmod 400 "$install_dir/config.php"
-chown $app "$install_dir/config.php"
+#chmod 400 "$install_dir/config.php"
+#chown $app "$install_dir/config.php"
 
 #=================================================
 # SPECIFIC UPGRADE
