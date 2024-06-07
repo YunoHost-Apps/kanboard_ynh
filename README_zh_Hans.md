@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Kanboard
+# YunoHost 上的 Kanboard
 
 [![集成程度](https://dash.yunohost.org/integration/kanboard.svg)](https://dash.yunohost.org/appci/app/kanboard) ![工作状态](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)
 
@@ -25,7 +25,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**分发版本：** 1.2.36~ynh1
+**分发版本：** 1.2.37~ynh1
 
 **演示：** <https://demo.yunohost.org/kanboard/>
 
