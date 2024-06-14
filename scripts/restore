@@ -17,12 +17,7 @@ ynh_script_progression --message="Restoring the app main directory..." --weight=
 
 ynh_restore_file --origin_path="$install_dir"
 
-mkdir -p $install_dir/sessions/
-
-chown -R $app $install_dir/{data,plugins,sessions}
-chmod -R 700 $install_dir/sessions
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
+chown -R "$app:www-data" "$install_dir"
 
 #=================================================
 # RESTORE THE DATA DIRECTORY
