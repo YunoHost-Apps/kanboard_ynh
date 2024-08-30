@@ -18,7 +18,8 @@ code = "https://github.com/kanboard/kanboard"
 fund = "https://kanboard.org/#donations"
 
 [integration]
-yunohost = ">= 11.2.27"
+yunohost = ">= 11.2.18"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
 
@@ -58,6 +59,7 @@ ram.runtime = "50M"
     allow_email = true
     
     [resources.install_dir]
+    group = "www-data:r-x"
 
     [resources.data_dir]
     subdirs = ["cache", "files"]
