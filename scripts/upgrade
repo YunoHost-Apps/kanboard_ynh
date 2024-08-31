@@ -1,72 +1,54 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
+
+ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Upgrading source files..." --weight=3
+ynh_script_progression "Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 
 mkdir -p $install_dir/sessions/
 
 chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=5
+ynh_script_progression "Upgrading PHP-FPM configuration..."
 
-# Create a dedicated PHP-FPM config
-ynh_add_fpm_config
+ynh_config_add_phpfpm
 
-# Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
-# Create a dedicated Fail2Ban config
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+ynh_config_add_fail2ban --logpath="/var/log/nginx/${domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$"
 
-ynh_add_config --template="cron" --destination="/etc/cron.d/$app"
-chown root: "/etc/cron.d/$app"
-chmod 644 "/etc/cron.d/$app"
+ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding a configuration file..." --weight=1
+ynh_script_progression "Adding $app's configuration..."
 
 #dir="__DIR__"
-#ynh_add_config --template="config.php" --destination="$install_dir/config.php"
+#ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 
-#chmod 400 "$install_dir/config.php"
-#chown $app "$install_dir/config.php"
-
-#=================================================
-# SPECIFIC UPGRADE
 #=================================================
 # UPGRADE KANBOARD
 #=================================================
-ynh_script_progression --message="Upgrading the app..." --weight=2
+ynh_script_progression "Upgrading the app..."
 
 pushd $install_dir
-	# Launch database migration
-	php$phpversion cli db:migrate --no-interaction --verbose
+	php$php_version cli db:migrate --no-interaction --verbose
 popd
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression "Upgrade of $app completed"

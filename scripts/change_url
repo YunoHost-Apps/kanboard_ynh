@@ -1,49 +1,38 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC STARTING
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# STANDARD MODIFICATIONS
-#=================================================
 # MODIFY URL IN NGINX CONF
 #=================================================
-ynh_script_progression --message="Updating NGINX web server configuration..." --weight=2
+ynh_script_progression "Updating NGINX web server configuration..."
 
-ynh_change_url_nginx_config
+ynh_config_change_url_nginx
 
 #=================================================
 # SPECIFIC MODIFICATIONS
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
+ynh_script_progression "Configuring Fail2Ban..."
 
-# Remove the config file with $old_domain
-ynh_remove_fail2ban_config
+ynh_config_remove_fail2ban
 
-# Add config file with $new_domain
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${new_domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$" --max_retry=5
+ynh_config_add_fail2ban --logpath="/var/log/nginx/${new_domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$"
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..." --weight=2
+ynh_script_progression "Updating configuration..."
 
 if [ $change_domain -eq 1 ]
 then
-	# Change domain in Kanboard configuration
-	ynh_replace_string --match_string="'${old_domain}'" --replace_string="'${new_domain}'" --target_file="${install_dir}/config.php"
+	ynh_replace --match="'${old_domain}'" --replace="'${new_domain}'" --file="${install_dir}/config.php"
 fi
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Change of URL completed for $app" --last
+ynh_script_progression "Change of URL completed for $app"
