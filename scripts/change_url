@@ -17,10 +17,8 @@ ynh_config_change_url_nginx
 #=================================================
 ynh_script_progression "Configuring Fail2Ban..."
 
-# Remove the config file with $old_domain
 ynh_config_remove_fail2ban
 
-# Add config file with $new_domain
 ynh_config_add_fail2ban --logpath="/var/log/nginx/${new_domain}-error.log" --failregex="^.*authentication failure\" while reading response header from upstream, client: <HOST>,.*$"
 
 #=================================================
@@ -30,7 +28,6 @@ ynh_script_progression "Updating configuration..."
 
 if [ $change_domain -eq 1 ]
 then
-	# Change domain in Kanboard configuration
 	ynh_replace --match="'${old_domain}'" --replace="'${new_domain}'" --file="${install_dir}/config.php"
 fi
 
