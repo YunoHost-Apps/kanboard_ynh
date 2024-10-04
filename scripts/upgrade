@@ -13,9 +13,9 @@ ynh_script_progression "Upgrading source files..."
 ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 
 mkdir -p $install_dir/sessions/
-
-chown -R $app $install_dir/{plugins,sessions}
 chmod -R 700 $install_dir/sessions
+
+chown -R "$app:www-data" "$install_dir"
 
 #=================================================
 # PHP-FPM CONFIGURATION
