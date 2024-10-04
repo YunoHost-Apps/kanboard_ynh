@@ -1,2 +1,2 @@
 # Execute the daily cronjob at 8am
-0 8 * * * __APP__ /usr/bin/php__PHPVERSION__ __INSTALL_DIR__/cli cronjob > /dev/null
+0 8 * * * __APP__ /usr/bin/php__PHP_VERSION__ __INSTALL_DIR__/cli cronjob > /dev/null

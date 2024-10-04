@@ -54,3 +54,4 @@ Thumbs.db
 ################
 #config.php
 #data/files
+*.sw[op]
