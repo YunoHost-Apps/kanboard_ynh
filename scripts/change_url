@@ -11,8 +11,6 @@ ynh_script_progression "Updating NGINX web server configuration..."
 ynh_config_change_url_nginx
 
 #=================================================
-# SPECIFIC MODIFICATIONS
-#=================================================
 # SETUP FAIL2BAN
 #=================================================
 ynh_script_progression "Configuring Fail2Ban..."
