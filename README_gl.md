@@ -5,7 +5,9 @@ NON debe editarse manualmente.
 
 # Kanboard para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/kanboard.svg)](https://ci-apps.yunohost.org/ci/apps/kanboard/) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/kanboard.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/kanboard.maintain.svg)
+[![Nivel de integración](https://apps.yunohost.org/badge/integration/kanboard)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
+![Estado de funcionamento](https://apps.yunohost.org/badge/state/kanboard)
+![Estado de mantemento](https://apps.yunohost.org/badge/maintained/kanboard)
 
 [![Instalar Kanboard con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=kanboard)
 
@@ -25,7 +27,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**Versión proporcionada:** 1.2.42~ynh1
+**Versión proporcionada:** 1.2.42~ynh2
 
 **Demo:** <https://demo.yunohost.org/kanboard/>
 
