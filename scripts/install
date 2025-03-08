@@ -1,5 +1,7 @@
 #!/bin/bash
-
+install_dir="/var/www/kanboard"
+app="kanboard"
+php_version="8.3"
 source _common.sh
 source /usr/share/yunohost/helpers
 
