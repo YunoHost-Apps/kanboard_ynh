@@ -9,7 +9,6 @@ source /usr/share/yunohost/helpers
 ynh_script_progression "Ensuring downward compatibility..."
 
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
-ynh_app_setting_set_default --key=php_default_charset] --value=UTF-8
 ynh_app_setting_set_default --key=php_session.save_path] --value=/var/www/$app/sessions
 
 #=================================================
