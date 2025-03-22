@@ -27,7 +27,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**Dostarczona wersja:** 1.2.43~ynh2
+**Dostarczona wersja:** 1.2.44~ynh1
 
 **Demo:** <https://demo.yunohost.org/kanboard/>
 
