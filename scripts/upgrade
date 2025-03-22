@@ -3,7 +3,14 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression "Ensuring downward compatibility..."
+
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
+ynh_app_setting_set_default --key=php_default_charset] --value=UTF-8
+ynh_app_setting_set_default --key=php_session.save_path] --value=/var/www/$app/sessions
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -15,7 +22,6 @@ ynh_setup_source --dest_dir="$install_dir" --keep="config.php"
 mkdir -p $install_dir/sessions/
 
 chmod -R 700 $install_dir/sessions
-chown -R "$app:www-data" "$install_dir"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATIONS
