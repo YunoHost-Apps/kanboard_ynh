@@ -8,7 +8,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_app_setting_set --key=php_upload_max_filesize --value=100M
-ynh_app_setting_set --key=php_session.save_path] --value=/var/www/$app/sessions
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
