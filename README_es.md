@@ -3,7 +3,7 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Kanboard para Yunohost
+# Kanboard para YunoHost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/kanboard)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
 ![Estado funcional](https://apps.yunohost.org/badge/state/kanboard)
