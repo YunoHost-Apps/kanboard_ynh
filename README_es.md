@@ -3,7 +3,7 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Kanboard para Yunohost
+# Kanboard para YunoHost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/kanboard)](https://ci-apps.yunohost.org/ci/apps/kanboard/)
 ![Estado funcional](https://apps.yunohost.org/badge/state/kanboard)
@@ -27,7 +27,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**Versión actual:** 1.2.44~ynh1
+**Versión actual:** 1.2.44~ynh2
 
 **Demo:** <https://demo.yunohost.org/kanboard/>
 

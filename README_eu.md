@@ -27,7 +27,7 @@ Kanboard is a free and open source Kanban project management software.
 - Drag and drop tasks to manage your project
 
 
-**Paketatutako bertsioa:** 1.2.44~ynh1
+**Paketatutako bertsioa:** 1.2.44~ynh2
 
 **Demoa:** <https://demo.yunohost.org/kanboard/>
 
@@ -47,7 +47,7 @@ Kanboard is a free and open source Kanban project management software.
 
 Bidali `pull request`a [`testing` abarrera](https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing).
 
-`testing` abarra probatzeko, ondorengoa egin:
+`testing` abarra probatzeko, honakoa egin:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/kanboard_ynh/tree/testing --debug
