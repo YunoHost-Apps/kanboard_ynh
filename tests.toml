@@ -2,8 +2,6 @@ test_format = 1.0
 
 [default]
 
-    exclude = ["install.root", "install.subdir", "install.nourl", "backup_restore","change_url", "install.multi"]
-
     # -------------------------------
     # Default args to use for install
     # -------------------------------
