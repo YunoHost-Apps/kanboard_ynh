@@ -48,7 +48,7 @@ ynh_script_progression "Initializing database..."
 ynh_mysql_db_shell < "$install_dir/app/Schema/Sql/mysql.sql"
 
 pushd $install_dir
-	php$php_version cli db:migrate --no-interaction --verbose
+    php$php_version cli db:migrate --no-interaction --verbose
 popd
 
 #=================================================
