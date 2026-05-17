@@ -291,7 +291,10 @@ define('DASHBOARD_MAX_PROJECTS', 10);
 define('TRUSTED_PROXY_HEADERS', '');
 
 // Comma separated list of trusted proxy IP networks (CIDR), for example: "192.168.0.0/16,10.0.0.0/8,::1/128"
-define('TRUSTED_PROXY_NETWORKS', '127.0.0.1');
+define('TRUSTED_PROXY_NETWORKS', '127.0.0.1/32,::1/128');
 
 // Allow private network access when fetching metadata for external links
 define('EXTERNAL_LINK_ALLOW_PRIVATE_NETWORKS', false);
+
+// Allow private network access for webhook notifications
+define('WEBHOOK_ALLOW_PRIVATE_NETWORKS', false);
