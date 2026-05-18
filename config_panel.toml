@@ -1,0 +1,39 @@
+version = "1.0"
+
+[main]
+name.en = "Kanboard configuration"
+name.fr = "Configuration de Kanboard"
+
+    [main.config]
+    name.en = "Configuration Options"
+    name.fr = "Options de configuration"
+
+        [main.config.ldap_auth]
+        ask.en = "Ldap enabled"
+        ask.fr = "Activer Ldap"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        default = "true"
+        bind = ":__INSTALL_DIR__/config.php
+
+        [main.config.hide_login_form]
+        ask.en = "Hide Login Form"
+        ask.fr = "Cacher le formulaire de login"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        default = "false"
+        bind = ":__INSTALL_DIR__/config.php
+
+        [main.config.disable_logout]
+        ask.en = "Hide logout"
+        ask.fr = "Cacher le bouton de logout"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        default = "false"
+        bind = ":__INSTALL_DIR__/config.php
+
+
+        
