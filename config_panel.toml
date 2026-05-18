@@ -15,7 +15,7 @@ name.fr = "Configuration de Kanboard"
         yes = "true"
         no = "false"
         default = "true"
-        bind = ":__INSTALL_DIR__/config.php
+        bind = ":__INSTALL_DIR__/config.php"
 
         [main.config.hide_login_form]
         ask.en = "Hide Login Form"
@@ -24,7 +24,7 @@ name.fr = "Configuration de Kanboard"
         yes = "true"
         no = "false"
         default = "false"
-        bind = ":__INSTALL_DIR__/config.php
+        bind = ":__INSTALL_DIR__/config.php"
 
         [main.config.disable_logout]
         ask.en = "Hide logout"
@@ -33,7 +33,7 @@ name.fr = "Configuration de Kanboard"
         yes = "true"
         no = "false"
         default = "false"
-        bind = ":__INSTALL_DIR__/config.php
+        bind = ":__INSTALL_DIR__/config.php"
 
 
         
