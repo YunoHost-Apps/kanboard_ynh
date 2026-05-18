@@ -12,27 +12,21 @@ name.fr = "Configuration de Kanboard"
         ask.en = "Ldap enabled"
         ask.fr = "Activer Ldap"
         type = "boolean"
-        yes = "true"
-        no = "false"
-        default = "true"
+        default = true
         bind = ":__INSTALL_DIR__/config.php"
 
         [main.config.hide_login_form]
         ask.en = "Hide Login Form"
         ask.fr = "Cacher le formulaire de login"
         type = "boolean"
-        yes = "true"
-        no = "false"
-        default = "false"
+        default = false
         bind = ":__INSTALL_DIR__/config.php"
 
         [main.config.disable_logout]
         ask.en = "Hide logout"
         ask.fr = "Cacher le bouton de logout"
         type = "boolean"
-        yes = "true"
-        no = "false"
-        default = "false"
+        default = false
         bind = ":__INSTALL_DIR__/config.php"
 
 
