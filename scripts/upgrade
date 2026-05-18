@@ -9,9 +9,9 @@ ynh_script_progression "Ensuring downward compatibility..."
 
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
 
-ynh_app_setting_set_default --key=ldap_auth --value="true"
-ynh_app_setting_set_default --key=hide_login_form --value="false"
-ynh_app_setting_set_default --key=disable_logout --value="false"
+ynh_app_setting_set_default --key=ldap_auth --value=true
+ynh_app_setting_set_default --key=hide_login_form --value=false
+ynh_app_setting_set_default --key=disable_logout --value=false
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
