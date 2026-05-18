@@ -100,7 +100,7 @@ define('DB_TIMEOUT', null);
 define('DB_ODBC_DSN', 'kanboard');
 
 // Enable LDAP authentication (false by default)
-define('LDAP_AUTH', false);
+define('LDAP_AUTH', __LDAP_AUTH__);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
@@ -239,10 +239,10 @@ define('API_AUTHENTICATION_HEADER', '');
 define('ENABLE_URL_REWRITE', true);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
-define('HIDE_LOGIN_FORM', true);
+define('HIDE_LOGIN_FORM', __HIDE_LOGIN_FORM__);
 
 // Disabling logout (useful for external SSO authentication)
-define('DISABLE_LOGOUT', true);
+define('DISABLE_LOGOUT', __DISABLE_LOGOUT__);
 
 // Enable captcha after 3 authentication failure
 define('BRUTEFORCE_CAPTCHA', 3);
