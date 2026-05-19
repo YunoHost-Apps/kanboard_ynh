@@ -100,7 +100,8 @@ define('DB_TIMEOUT', null);
 define('DB_ODBC_DSN', 'kanboard');
 
 // Enable LDAP authentication (false by default)
-define('LDAP_AUTH', __LDAP_AUTH__);
+$ldap_auth = __LDAP_AUTH__ //use simple variable that YNH config panel can edit
+define('LDAP_AUTH', $ldap_auth);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
@@ -239,10 +240,12 @@ define('API_AUTHENTICATION_HEADER', '');
 define('ENABLE_URL_REWRITE', true);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
-define('HIDE_LOGIN_FORM', __HIDE_LOGIN_FORM__);
+$hide_login_form = __HIDE_LOGIN_FORM__ //use simple variable that YNH config panel can edit
+define('HIDE_LOGIN_FORM', $hide_login_form);
 
 // Disabling logout (useful for external SSO authentication)
-define('DISABLE_LOGOUT', __DISABLE_LOGOUT__);
+$disable_logout = __DISABLE_LOGOUT__ //use simple variable that YNH config panel can edit
+define('DISABLE_LOGOUT', $disable_logout);
 
 // Enable captcha after 3 authentication failure
 define('BRUTEFORCE_CAPTCHA', 3);
