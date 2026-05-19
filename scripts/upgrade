@@ -14,9 +14,9 @@ ynh_app_setting_set_default --key=hide_login_form --value=false
 ynh_app_setting_set_default --key=disable_logout --value=false
 
 # Load settings for config.php template
-$ldap_auth=$(ynh_app_setting_get --key=ldap_auth)
-$hide_login_form=$(ynh_app_setting_get --key=hide_login_form)
-$disable_logout=$(ynh_app_setting_get --key=disable_logout)
+ldap_auth=$(ynh_app_setting_get --key=ldap_auth)
+hide_login_form=$(ynh_app_setting_get --key=hide_login_form)
+disable_logout=$(ynh_app_setting_get --key=disable_logout)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
