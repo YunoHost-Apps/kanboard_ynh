@@ -36,10 +36,10 @@ ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
-#ynh_script_progression "Adding $app's configuration..."
+ynh_script_progression "Adding $app's configuration..."
 
-#dir="__DIR__"
-#ynh_config_add --template="config.php" --destination="$install_dir/config.php"
+dir="__DIR__"
+ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 
 #=================================================
 # UPGRADE KANBOARD
