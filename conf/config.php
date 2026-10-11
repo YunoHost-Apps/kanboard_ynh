@@ -206,16 +206,16 @@ define('LDAP_GROUP_SYNC', true);
 define('REVERSE_PROXY_AUTH', true);
 
 // Header name to use for the username
-define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
+define('REVERSE_PROXY_USER_HEADER', 'HTTP_YNH_USER');
 
 // Username of the admin, by default blank
 define('REVERSE_PROXY_DEFAULT_ADMIN', '__ADMIN__');
 
 // Header name to use for the user email
-define('REVERSE_PROXY_EMAIL_HEADER', 'REMOTE_EMAIL');
+define('REVERSE_PROXY_EMAIL_HEADER', 'HTTP_YNH_USER_EMAIL');
 
 // Header name to use for the user full name
-define('REVERSE_PROXY_FULLNAME_HEADER', 'REMOTE_NAME');
+define('REVERSE_PROXY_FULLNAME_HEADER', 'HTTP_YNH_USER_FULLNAME');
 
 // Default domain to use for setting the email address
 define('REVERSE_PROXY_DEFAULT_DOMAIN', '__DOMAIN__');
