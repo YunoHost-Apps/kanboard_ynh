@@ -100,7 +100,7 @@ define('DB_TIMEOUT', null);
 define('DB_ODBC_DSN', 'kanboard');
 
 // Enable LDAP authentication (false by default)
-define('LDAP_AUTH', false);
+define('LDAP_AUTH', true);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
