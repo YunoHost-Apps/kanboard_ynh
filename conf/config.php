@@ -203,7 +203,7 @@ define('LDAP_GROUP_ATTRIBUTE_NAME', 'cn');
 define('LDAP_GROUP_SYNC', true);
 
 // Enable/disable the reverse proxy authentication
-define('REVERSE_PROXY_AUTH', true);
+define('REVERSE_PROXY_AUTH', false);
 
 // Header name to use for the username
 define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
@@ -239,10 +239,10 @@ define('API_AUTHENTICATION_HEADER', '');
 define('ENABLE_URL_REWRITE', true);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
-define('HIDE_LOGIN_FORM', true);
+define('HIDE_LOGIN_FORM', false);
 
 // Disabling logout (useful for external SSO authentication)
-define('DISABLE_LOGOUT', true);
+define('DISABLE_LOGOUT', false);
 
 // Enable captcha after 3 authentication failure
 define('BRUTEFORCE_CAPTCHA', 3);
