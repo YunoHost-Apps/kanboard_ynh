@@ -18,7 +18,7 @@ code = "https://github.com/kanboard/kanboard"
 fund = "https://kanboard.org/#donations"
 
 [integration]
-yunohost = ">= 12.1.40"
+yunohost = ">= 12.1.39"
 helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
@@ -51,7 +51,7 @@ ram.runtime = "50M"
 
         [resources.sources.main]
         url = "https://github.com/kanboard/kanboard/archive/refs/tags/v1.2.57.tar.gz"
-        sha256 = "0af576021bd4ebb417cef6d187a3d10dd0d807bd668bb9dcfc6f8b40c6896e31"
+        sha256 = "4f0e6d07ddf17361d2ccfa0d3910a18c3e8334816744cf1b220bff4a181fa5f4"
         autoupdate.strategy = "latest_github_release"
 
     [resources.system_user]
@@ -70,7 +70,7 @@ ram.runtime = "50M"
     ics.allowed = "visitors"
 
     [resources.apt]
-    packages = "mariadb-server, php8.5-ctype, php8.5-dom, php8.5-curl, php8.5-gd, php8.5-zip, php8.5-xml, php8.5-simplexml, php8.5-mbstring, php8.5-mysql, php8.5-ldap"
+    packages = "mariadb-server, php8.4-opcache, php8.4-curl, php8.4-gd, php8.4-zip, php8.4-xml, php8.4-mbstring, php8.4-mysql, php8.4-ldap"
 
     [resources.database]
     type = "mysql"
