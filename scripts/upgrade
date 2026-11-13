@@ -9,6 +9,13 @@ ynh_script_progression "Ensuring downward compatibility..."
 
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
 
+if ynh_app_upgrading_from_version_before 1.2.57~ynh3 && ynh_permission_exists --permission=visitors; then
+    # Previous versions were granting permission to visitors by default, but from 1.2.57~ynh3 which fixes SSO
+    # config broken since after 1.2.48~ynh1, visitors are sent by default to a blank page, so we'd rather
+    # send them to SSO login page by default. This then remains tweakable with custom config.
+    ynh_permission_delete --permission=visitors
+fi
+
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -38,7 +45,6 @@ ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 #=================================================
 ynh_script_progression "Adding $app's configuration..."
 
-dir="__DIR__"
 ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 
 #=================================================

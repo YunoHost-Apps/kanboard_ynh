@@ -37,7 +37,6 @@ ynh_config_add_fail2ban --logpath="/var/log/nginx/${domain}-error.log" --failreg
 #=================================================
 ynh_script_progression "Adding $app's configuration..."
 
-dir="__DIR__"
 ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 
 #=================================================

@@ -3,7 +3,7 @@
 /*******************************************************************/
 /* Rename this file to config.php if you want to change the values */
 /*                                                                 */
-/* Make sure all paths are absolute by using __DIR__ where needed  */
+/* Make sure all paths are absolute                                */
 /*******************************************************************/
 
 // Data folder (must be writeable by the web server user and absolute)
