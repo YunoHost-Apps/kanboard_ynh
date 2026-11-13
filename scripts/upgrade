@@ -7,7 +7,16 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression "Ensuring downward compatibility..."
 
+# If upgrading from 1.2.52~ynh2 or below
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
+ynh_app_setting_set_default --key=ldap_auth --value=false
+ynh_app_setting_set_default --key=hide_login_form --value=false
+ynh_app_setting_set_default --key=disable_logout --value=false
+
+# Load settings for config.php template
+ldap_auth=$(ynh_app_setting_get --key=ldap_auth)
+hide_login_form=$(ynh_app_setting_get --key=hide_login_form)
+disable_logout=$(ynh_app_setting_get --key=disable_logout)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE

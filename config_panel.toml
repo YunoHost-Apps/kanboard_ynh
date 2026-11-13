@@ -1,0 +1,36 @@
+version = "1.0"
+
+[main]
+name.en = "Kanboard configuration"
+name.fr = "Configuration de Kanboard"
+
+    [main.config]
+    name.en = "Configuration options"
+    name.fr = "Options de configuration"
+
+        [main.config.ldap_auth]
+        ask.en = "Enable LDAP"
+        ask.fr = "Activer LDAP"
+        help.en = "LDAP enables to map automatically a Kanboard account for each YunoHost user which can be accessed with their YunoHost credentials (provided they are granted permission to access the app). When disabled, Kanboard uses a separate database of users to which the latter need to register manually."
+        help.fr = "LDAP dote automatiquement chaque utilisateur YunoHost d'un compte Kanboard accessible avec les identifiants du compte YunoHost (pourvu que ce dernier ait la permission d'accéder à Kanboard). Quand LDAP est désactivé, Kanboard utilise une base de données d'utilisateurs séparées et les utilisateurs doivent s'enregistrer manuellement."
+        type = "boolean"
+        default = true
+        bind = "ldap_auth:__INSTALL_DIR__/config.php"
+
+        [main.config.hide_login_form]
+        ask.en = "Hide login form"
+        ask.fr = "Cacher le formulaire de connexion"
+        help.en = "Hide the Kanboard login page is what you want if you've enabled LDAP as YunoHost SSO login will be enough to authenticate users into Kanboard."
+        help.fr = "Cacher la page de connexion de Kanboard est ce que vous voulez si vous avez activé LDAP dans la mesure où la connexion SSO YunoHost suffira pour authentifier les utilisateurs dans Kanboard."
+        type = "boolean"
+        default = false
+        bind = "hide_login_form:__INSTALL_DIR__/config.php"
+
+        [main.config.disable_logout]
+        ask.en = "Hide logout button"
+        ask.fr = "Cacher le bouton de déconnexion"
+        help.en = "This button relates to Kanboard authentication, not YunoHost SSO one."
+        help.fr = "Ce bouton concerne l'authentification de Kanboard, pas celle du SSO YunoHost."
+        type = "boolean"
+        default = false
+        bind = "disable_logout:__INSTALL_DIR__/config.php"
