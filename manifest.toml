@@ -40,7 +40,7 @@ ram.runtime = "50M"
 
     [install.init_main_permission]
     type = "group"
-    default = "visitors"
+    default = "all_users"
 
     [install.admin]
     type = "user"
@@ -70,7 +70,7 @@ ram.runtime = "50M"
     ics.allowed = "visitors"
 
     [resources.apt]
-    packages = "mariadb-server, php8.4-opcache, php8.4-curl, php8.4-gd, php8.4-zip, php8.4-xml, php8.4-mbstring, php8.4-mysql, php8.4-ldap"
+    packages = "mariadb-server, php8.4-opcache, php8.4-curl, php8.4-gd, php8.4-zip, php8.4-xml, php8.4-mbstring, php8.4-mysql, php8.4-ldap, php8.4-cli, php8.4-json"
 
     [resources.database]
     type = "mysql"

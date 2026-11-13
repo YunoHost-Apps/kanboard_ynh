@@ -100,7 +100,7 @@ define('DB_TIMEOUT', null);
 define('DB_ODBC_DSN', 'kanboard');
 
 // Enable LDAP authentication (false by default)
-define('LDAP_AUTH', false);
+define('LDAP_AUTH', true);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
@@ -291,7 +291,7 @@ define('DASHBOARD_MAX_PROJECTS', 10);
 define('TRUSTED_PROXY_HEADERS', '');
 
 // Comma separated list of trusted proxy IP networks (CIDR), for example: "192.168.0.0/16,10.0.0.0/8,::1/128"
-define('TRUSTED_PROXY_NETWORKS', '127.0.0.1');
+define('TRUSTED_PROXY_NETWORKS', '10.10.10.1/32, ::ffff:a0a:a01/128');
 
 // Allow private network access when fetching metadata for external links
 define('EXTERNAL_LINK_ALLOW_PRIVATE_NETWORKS', false);
