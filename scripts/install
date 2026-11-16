@@ -7,6 +7,11 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_app_setting_set --key=php_upload_max_filesize --value=100M
+ynh_app_setting_set --key=auth_mode --value="SSO"
+ldap_auth=true
+reverse_proxy_auth=true
+hide_login_form=true
+disable_logout=true
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
