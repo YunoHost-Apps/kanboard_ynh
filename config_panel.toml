@@ -16,7 +16,7 @@ name.fr = "Configuration de Kanboard"
         type = "select"
         choices = ["SSO", "App"]
         default = "SSO"
-        optional = "false"
+        optional = false
         bind = "null"
 
         [main.config.add_group_reminder]
