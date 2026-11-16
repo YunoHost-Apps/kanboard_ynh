@@ -9,6 +9,16 @@ ynh_script_progression "Ensuring downward compatibility..."
 
 ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
 
+if ynh_app_upgrading_from_version_before 1.2.57~ynh3 && ynh_permission_exists --permission=visitors; then
+    # Previous versions were granting permission to visitors by default, but from 1.2.57~ynh3 which fixes SSO
+    # config broken since after 1.2.48~ynh1, visitors are sent by default to a blank page, so we'd rather
+    # send them to SSO login page by default. This then remains tweakable with custom config.
+    ynh_permission_delete --permission=visitors
+fi
+
+auth_mode=${auth_mode:-"SSO"}
+ynh_app_setting_set_default --key=auth_mode --value="$auth_mode"
+
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -38,7 +48,18 @@ ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 #=================================================
 ynh_script_progression "Adding $app's configuration..."
 
-dir="__DIR__"
+if [ "$auth_mode" = "SSO" ]; then
+    ldap_auth=true
+    reverse_proxy_auth=true
+    hide_login_form=true
+    disable_logout=true
+else
+    ldap_auth=false
+    reverse_proxy_auth=false
+    hide_login_form=false
+    disable_logout=false
+fi
+
 ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 
 #=================================================
@@ -47,7 +68,7 @@ ynh_config_add --template="config.php" --destination="$install_dir/config.php"
 ynh_script_progression "Upgrading the app..."
 
 pushd $install_dir
-	php$php_version cli db:migrate --no-interaction --verbose
+    php$php_version cli db:migrate --no-interaction --verbose
 popd
 
 #=================================================

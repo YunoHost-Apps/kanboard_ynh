@@ -1,0 +1,29 @@
+version = "1.0"
+
+[main]
+name.en = "Kanboard configuration"
+name.fr = "Configuration de Kanboard"
+
+    [main.config]
+    name.en = "Configuration options"
+    name.fr = "Options de configuration"
+
+        [main.config.auth_mode]
+        ask.en = "Authentication mode"
+        ask.fr = "Mode d'authentification"
+        help.en = "**SSO authentication** enables allowed logged-in YunoHost users to access the app without additional authentication screen (do not forget to grant appropriate groups permissions to the app when using this option).\n**App's built-in authentication system** displays the app's login form publicly and accounts management is done from the app itself (YunoHost account credentials will not work on this page)."
+        help.fr = "**L'authentification par SSO** permet aux utilisateurs YunoHost authentifiés et autorisés d'accéder à l'application sans écran d'authentification additionel (n'oubliez pas d'octroyer les permissions du ou des groupes voulus à l'application).\n**Le système d'authentification intégré à l'app** affiche pour sa part publiquement le formulaire d'authentification de l'application. La gestion des comptes se fait alors depuis l'application elle-même (les identifiants de compte YunoHost ne fonctionneront pas sur cette page)."
+        type = "select"
+        choices = ["SSO", "App"]
+        default = "SSO"
+        optional = "false"
+        bind = "null"
+
+        [main.config.add_group_reminder]
+        type = "alert"
+        ask.en = "After saving with SSO authentication mode selected, check in the permission section that access is granted to at least one user or one user group. Else no one will be able to access the app."
+        ask.fr = "Après avoir sauvegardé en ayant sélectionné le mode d'authentification SSO, pensez à vérifier dans la section permissions que l'accès à l'application est accordé à au moins un utilisateur ou groupe d'utilisateurs. Sinon personne ne sera en mesure d'accéder à l'application."
+        style = "info"
+        icon = "key-modern"
+        visible = "auth_mode == 'SSO'"
+
