@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source /usr/share/yunohost/helpers
+
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS
+#=================================================
+app=$(ynh_app_setting_get --key=app)
+install_dir=$(ynh_app_setting_get --key=install_dir)
+
+#=================================================
+# SPECIFIC GETTERS FOR TOML SHORT KEYS
+#=================================================
+get__auth_mode() {
+    auth_mode=$(ynh_app_setting_get --key=auth_mode)
+    echo $auth_mode
+}
+
+#=================================================
+# SPECIFIC SETTERS FOR TOML SHORT KEYS
+#=================================================
+set__auth_mode() {
+
+    case $auth_mode in
+
+      "App")
+        # App built-in account management (app-defined accounts credentials only)
+
+        # Set four related variables to 'false' in config.php
+        ynh_replace --match="^define('LDAP_AUTH', true);$" --replace="define('LDAP_AUTH', false);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('REVERSE_PROXY_AUTH', true);$" --replace="define('REVERSE_PROXY_AUTH', false);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('HIDE_LOGIN_FORM', true);$" --replace="define('HIDE_LOGIN_FORM', false);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('DISABLE_LOGOUT', true);$" --replace="define('DISABLE_LOGOUT', false);" --file="$install_dir/config.php"
+
+        # "visitors" will be the only group allowed with "$app.main" permission
+        jq_key_1="$app.main"
+        jq_key_2="allowed"
+        yunohost user permission list --json | jq --arg k1 "$jq_key_1" --arg k2 "$jq_key_2" '.permissions[$k1][$k2]' | jq --compact-output '.[]' | while read group; do
+            ynh_permission_update --permission="main" --remove="${group//\"}"
+        done
+        ynh_permission_update --permission="main" --add="visitors"
+        ;;
+
+      *)
+        # SSO authentication (YunoHost-defined accounts credentials only)
+
+        # Set four related variables to 'true' in config.php
+        ynh_replace --match="^define('LDAP_AUTH', false);$" --replace="define('LDAP_AUTH', true);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('REVERSE_PROXY_AUTH', false);$" --replace="define('REVERSE_PROXY_AUTH', true);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('HIDE_LOGIN_FORM', false);$" --replace="define('HIDE_LOGIN_FORM', true);" --file="$install_dir/config.php"
+        ynh_replace --match="^define('DISABLE_LOGOUT', false);$" --replace="define('DISABLE_LOGOUT', true);" --file="$install_dir/config.php"
+
+        # Make sure that 'visitors' group is removed from "$app.main" permission
+        # Other permissions will be granted manually as only admin knows which ones are relevant
+        jq_key_1="$app.main"
+        jq_key_2="allowed"
+        is_visitors=$(yunohost user permission list --json | jq --arg k1 "$jq_key_1" --arg k2 "$jq_key_2" '.permissions[$k1][$k2] as $groups | "visitors" | IN($groups[])')
+        if [[ $is_visitors =~ "true" ]]; then
+            ynh_permission_update --permission="main" --remove="visitors"
+        fi
+        ;;
+
+    esac
+    ynh_app_setting_set --key=auth_mode --value="$auth_mode"
+}
+
+#=================================================
+ynh_app_config_run "$1"

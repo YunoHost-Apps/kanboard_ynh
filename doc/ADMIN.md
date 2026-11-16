@@ -1,9 +1,6 @@
-### How to connect as external (non-SSOwat) users
+### Select your preferred authentication mode for this app
+This package configures `sso` authentication mode by default thanks to which authenticated Yunohost users can access this application seamlessly without additional login step.
+Would you prefer to use this application's built-in user management system so that it can be used without a YunoHost account, you can switch to the `built-in` authentication mode in this app's config panel.
+Note that you must choose between one OR the other - mixing users created within this app's and with YunoHost is not a supported feature.
 
-You have to edit this file `__INSTALL_DIR__/config.php`, find the line `define('REVERSE_PROXY_AUTH', true);` and change it from `true` to `false`.
-**Warning** this disables the possibility to connect with SSOwat users. You will *only* be able to connect with Kanboard users created inside of Kanboard.
-Then you can connect.
-
-**NB**: if you don't make that change, you will get the following error message "Access Forbidden".
-
-This is due to a Kanboard limitation.
+When selecting "App" authentication mode for the first time, you must log in using the existing default `admin` account in the app database. The password for this user account is `admin` - make sure to change it immediately!

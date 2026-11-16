@@ -3,7 +3,7 @@
 /*******************************************************************/
 /* Rename this file to config.php if you want to change the values */
 /*                                                                 */
-/* Make sure all paths are absolute by using __DIR__ where needed  */
+/* Make sure all paths are absolute                                */
 /*******************************************************************/
 
 // Data folder (must be writeable by the web server user and absolute)
@@ -100,7 +100,7 @@ define('DB_TIMEOUT', null);
 define('DB_ODBC_DSN', 'kanboard');
 
 // Enable LDAP authentication (false by default)
-define('LDAP_AUTH', false);
+define('LDAP_AUTH', __LDAP_AUTH__);
 
 // LDAP server protocol, hostname and port URL (ldap[s]://hostname:port)
 define('LDAP_SERVER', 'ldap://127.0.0.1:389');
@@ -203,7 +203,7 @@ define('LDAP_GROUP_ATTRIBUTE_NAME', 'cn');
 define('LDAP_GROUP_SYNC', true);
 
 // Enable/disable the reverse proxy authentication
-define('REVERSE_PROXY_AUTH', true);
+define('REVERSE_PROXY_AUTH', __REVERSE_PROXY_AUTH__);
 
 // Header name to use for the username
 define('REVERSE_PROXY_USER_HEADER', 'REMOTE_USER');
@@ -239,10 +239,10 @@ define('API_AUTHENTICATION_HEADER', '');
 define('ENABLE_URL_REWRITE', true);
 
 // Hide login form, useful if all your users use Google/Github/ReverseProxy authentication
-define('HIDE_LOGIN_FORM', true);
+define('HIDE_LOGIN_FORM', __HIDE_LOGIN_FORM__);
 
 // Disabling logout (useful for external SSO authentication)
-define('DISABLE_LOGOUT', true);
+define('DISABLE_LOGOUT', __DISABLE_LOGOUT__);
 
 // Enable captcha after 3 authentication failure
 define('BRUTEFORCE_CAPTCHA', 3);
@@ -291,7 +291,10 @@ define('DASHBOARD_MAX_PROJECTS', 10);
 define('TRUSTED_PROXY_HEADERS', '');
 
 // Comma separated list of trusted proxy IP networks (CIDR), for example: "192.168.0.0/16,10.0.0.0/8,::1/128"
-define('TRUSTED_PROXY_NETWORKS', '127.0.0.1');
+define('TRUSTED_PROXY_NETWORKS', '10.10.10.1/32, ::ffff:a0a:a01/128');
 
 // Allow private network access when fetching metadata for external links
 define('EXTERNAL_LINK_ALLOW_PRIVATE_NETWORKS', false);
+
+// Allow private network access for webhook notifications
+define('WEBHOOK_ALLOW_PRIVATE_NETWORKS', false);
